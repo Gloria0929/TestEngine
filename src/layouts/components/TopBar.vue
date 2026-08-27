@@ -77,6 +77,7 @@ function onUser(cmd: string) {
 }
 
 onMounted(async () => {
+  i18n.global.locale.value = appStore.locale
   projects.value = await fetchProjects({ orgId: '100001' })
   await notification.load()
 })
