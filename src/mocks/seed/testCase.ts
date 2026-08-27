@@ -1,5 +1,5 @@
 // src/mocks/seed/testCase.ts
-import type { TestCase, ModuleNode } from '@/types/models'
+import type { TestCase, ModuleNode, Review } from '@/types/models'
 
 export function createModules(): ModuleNode[] {
   return [
@@ -25,5 +25,12 @@ export function createCases(): TestCase[] {
     { id: 'c-4', projectId: 'p-1', moduleId: 'm-2-1', name: '创建订单-库存不足', precondition: '库存为 0', steps: [{ id: 's-1', description: '提交订单', expected: '提示库存不足' }], level: 'P1', status: 'REVIEW', executor: 'test', tags: ['订单', '边界'], createUser: 'test', updateTime: '2026-08-24 09:00', follow: false },
     { id: 'c-5', projectId: 'p-1', moduleId: 'm-3', name: '支付宝支付成功', precondition: '有订单', steps: [{ id: 's-1', description: '发起支付', expected: '支付成功' }], level: 'P0', status: 'READY', executor: 'test', tags: ['支付'], createUser: 'Administrator', updateTime: '2026-08-23 11:00', follow: true },
     { id: 'c-6', projectId: 'p-1', moduleId: 'm-3', name: '微信支付取消', precondition: '有订单', steps: [{ id: 's-1', description: '取消支付', expected: '返回未支付' }], level: 'P2', status: 'DRAFT', executor: 'dev', tags: ['支付'], createUser: 'dev', updateTime: '2026-08-22 15:00', follow: false },
+  ]
+}
+
+export function createReviews(): Review[] {
+  return [
+    { id: 'rv-1', name: '登录模块用例评审', reviewers: ['test', 'dev'], status: 'PENDING', caseCount: 2, caseIds: ['c-1', 'c-2'], startTime: '2026-08-27 10:00', endTime: '2026-08-28 10:00' },
+    { id: 'rv-2', name: '支付模块用例评审', reviewers: ['Administrator'], status: 'PASSED', caseCount: 2, caseIds: ['c-5', 'c-6'], startTime: '2026-08-20 09:00', endTime: '2026-08-21 09:00' },
   ]
 }

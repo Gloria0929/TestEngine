@@ -42,3 +42,5 @@ export interface Notification {
   id: string; type: string; title: string; content: string
   read: boolean; createTime: string; targetUrl: string
 }
+export interface Review { id: string; name: string; reviewers: string[]; status: 'PENDING' | 'PASSED' | 'REJECTED'; caseCount: number; caseIds: string[]; startTime: string; endTime: string }
+export interface ReviewDetail extends Review { cases: TestCase[] }

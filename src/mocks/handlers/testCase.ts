@@ -1,13 +1,14 @@
 // src/mocks/handlers/testCase.ts
 import { http, HttpResponse } from 'msw'
 import { ok, page, fail } from '../utils'
-import { createModules, createCases } from '../seed/testCase'
+import { createModules, createCases, createReviews } from '../seed/testCase'
 import type { PageQuery } from '@/types'
-import type { TestCase } from '@/types/models'
+import type { TestCase, Review } from '@/types/models'
 
 let modules = createModules()
 let cases = createCases()
 let recycleBin: TestCase[] = []
+let reviews = createReviews()
 
 export const testCaseHandlers = [
   http.get('/api/test-case/modules', () => HttpResponse.json(ok(modules))),
@@ -39,6 +40,38 @@ export const testCaseHandlers = [
   http.delete('/api/test-case/recycle/:id', ({ params }) => {
     recycleBin = recycleBin.filter((c) => c.id !== params.id)
     return HttpResponse.json(ok(null))
+  }),
+  http.get('/api/test-case/reviews', () => HttpResponse.json(ok(reviews))),
+  http.post('/api/test-case/reviews', async ({ request }) => {
+    const body = await request.json() as Partial<Review>
+    const review: Review = {
+      id: 'rv-' + Date.now(),
+      name: body.name ?? '',
+      reviewers: body.reviewers ?? [],
+      status: 'PENDING',
+      caseCount: body.caseIds?.length ?? 0,
+      caseIds: body.caseIds ?? [],
+      startTime: body.startTime ?? '',
+      endTime: body.endTime ?? '',
+    }
+    reviews.unshift(review)
+    return HttpResponse.json(ok(review))
+  }),
+  http.get('/api/test-case/reviews/:id', ({ params }) => {
+    const review = reviews.find((r) => r.id === params.id)
+    if (!review) return HttpResponse.json(ok(null))
+    return HttpResponse.json(ok({ ...review, cases: cases.filter((c) => review.caseIds.includes(c.id)) }))
+  }),
+  http.post('/api/test-case/reviews/:id/result', async ({ params, request }) => {
+    const body = await request.json() as { results: { caseId: string; passed: boolean; comment?: string }[] }
+    const review = reviews.find((r) => r.id === params.id)
+    if (!review) return HttpResponse.json(ok(null))
+    body.results.forEach((r) => {
+      cases = cases.map((c) => (c.id === r.caseId ? { ...c, status: r.passed ? 'READY' : 'DRAFT' } : c))
+    })
+    const updated: Review = { ...review, status: body.results.every((r) => r.passed) ? 'PASSED' : 'REJECTED' }
+    reviews = reviews.map((r) => (r.id === params.id ? updated : r))
+    return HttpResponse.json(ok(updated))
   }),
   http.get('/api/test-case/:id', ({ params }) => HttpResponse.json(ok(cases.find((c) => c.id === params.id) ?? null))),
   http.post('/api/test-case', async ({ request }) => {

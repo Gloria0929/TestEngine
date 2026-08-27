@@ -1,7 +1,7 @@
 // src/api/testCase.ts
 import { request } from '@/utils/request'
 import type { PageQuery, PageResult } from '@/types'
-import type { TestCase, ModuleNode } from '@/types/models'
+import type { TestCase, ModuleNode, Review, ReviewDetail } from '@/types/models'
 
 export function fetchModuleTree(projectId: string): Promise<ModuleNode[]> {
   return request({ url: '/api/test-case/modules', method: 'get', params: { projectId } })
@@ -32,4 +32,16 @@ export function restoreCase(id: string): Promise<null> {
 }
 export function purgeCase(id: string): Promise<null> {
   return request({ url: `/api/test-case/recycle/${id}`, method: 'delete' })
+}
+export function fetchReviews(): Promise<Review[]> {
+  return request({ url: '/api/test-case/reviews', method: 'get' })
+}
+export function createReview(data: Partial<Review>): Promise<Review> {
+  return request({ url: '/api/test-case/reviews', method: 'post', data })
+}
+export function fetchReviewDetail(id: string): Promise<ReviewDetail> {
+  return request({ url: `/api/test-case/reviews/${id}`, method: 'get' })
+}
+export function submitReviewResult(id: string, results: { caseId: string; passed: boolean; comment?: string }[]): Promise<Review> {
+  return request({ url: `/api/test-case/reviews/${id}/result`, method: 'post', data: { results } })
 }
