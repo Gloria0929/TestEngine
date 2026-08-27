@@ -7,6 +7,7 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 import './styles/index.scss'
 import App from './App.vue'
 import router from './router'
+import { bootstrapMock } from './mocks/browser'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -16,4 +17,8 @@ app.use(ElementPlus)
 for (const [key, comp] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, comp)
 }
-app.mount('#app')
+async function bootstrap() {
+  await bootstrapMock()
+  app.mount('#app')
+}
+bootstrap()
