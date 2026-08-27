@@ -8,12 +8,14 @@ import './styles/index.scss'
 import App from './App.vue'
 import router from './router'
 import { bootstrapMock } from './mocks/browser'
+import { i18n } from './locales'
 
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
+app.use(i18n)
 for (const [key, comp] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, comp)
 }

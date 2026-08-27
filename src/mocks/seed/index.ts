@@ -1,2 +1,1 @@
-// src/mocks/seed/index.ts
-export {}
+export * from './user'
