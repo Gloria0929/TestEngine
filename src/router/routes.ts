@@ -19,6 +19,7 @@ export const routes: RouteRecordRaw[] = [
       { path: 'test-case/mindmap', name: 'CaseMindmap', component: () => import('@/views/testCase/mindmap/index.vue'), meta: { permission: 'testCase:view' } },
       { path: 'test-case/review', name: 'CaseReview', component: () => import('@/views/testCase/review/index.vue'), meta: { permission: 'testCase:view' } },
       { path: 'test-case/detail/:id', name: 'CaseDetail', component: () => import('@/views/testCase/detail/index.vue'), meta: { permission: 'testCase:view' } },
+      { path: 'test-case/recycle', name: 'CaseRecycle', component: () => import('@/views/testCase/recycle/index.vue'), meta: { permission: 'testCase:view' } },
       { path: 'test-plan/list', name: 'TestPlanList', component: () => import('@/views/testPlan/list/index.vue'), meta: { permission: 'testPlan:view' } },
       { path: 'test-plan/report/:id', name: 'TestPlanReport', component: () => import('@/views/testPlan/report/index.vue'), meta: { permission: 'testPlan:view' } },
       { path: 'api-test/debug', name: 'ApiDebug', component: () => import('@/views/apiTest/debug/index.vue'), meta: { permission: 'apiTest:view' } },

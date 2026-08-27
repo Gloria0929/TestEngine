@@ -7,6 +7,7 @@ import type { TestCase } from '@/types/models'
 
 let modules = createModules()
 let cases = createCases()
+let recycleBin: TestCase[] = []
 
 export const testCaseHandlers = [
   http.get('/api/test-case/modules', () => HttpResponse.json(ok(modules))),
@@ -29,6 +30,16 @@ export const testCaseHandlers = [
     if (level) list = list.filter((c) => c.level === level)
     return HttpResponse.json(ok(page(list, query)))
   }),
+  http.get('/api/test-case/recycle', () => HttpResponse.json(ok(recycleBin))),
+  http.post('/api/test-case/recycle/:id/restore', ({ params }) => {
+    const it = recycleBin.find((c) => c.id === params.id)
+    if (it) { cases.unshift(it); recycleBin = recycleBin.filter((c) => c.id !== params.id) }
+    return HttpResponse.json(ok(null))
+  }),
+  http.delete('/api/test-case/recycle/:id', ({ params }) => {
+    recycleBin = recycleBin.filter((c) => c.id !== params.id)
+    return HttpResponse.json(ok(null))
+  }),
   http.get('/api/test-case/:id', ({ params }) => HttpResponse.json(ok(cases.find((c) => c.id === params.id) ?? null))),
   http.post('/api/test-case', async ({ request }) => {
     const body = await request.json() as TestCase
@@ -42,6 +53,8 @@ export const testCaseHandlers = [
     return HttpResponse.json(ok(cases.find((c) => c.id === params.id)))
   }),
   http.delete('/api/test-case/:id', ({ params }) => {
+    const it = cases.find((c) => c.id === params.id)
+    if (it) recycleBin.unshift(it)
     cases = cases.filter((c) => c.id !== params.id)
     return HttpResponse.json(ok(null))
   }),

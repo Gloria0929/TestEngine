@@ -24,3 +24,12 @@ export function updateCase(id: string, data: Partial<TestCase>): Promise<TestCas
 export function deleteCase(id: string): Promise<null> {
   return request({ url: `/api/test-case/${id}`, method: 'delete' })
 }
+export function fetchRecycle(): Promise<TestCase[]> {
+  return request({ url: '/api/test-case/recycle', method: 'get' })
+}
+export function restoreCase(id: string): Promise<null> {
+  return request({ url: `/api/test-case/recycle/${id}/restore`, method: 'post' })
+}
+export function purgeCase(id: string): Promise<null> {
+  return request({ url: `/api/test-case/recycle/${id}`, method: 'delete' })
+}
