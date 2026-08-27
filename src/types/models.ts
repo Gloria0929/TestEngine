@@ -44,3 +44,16 @@ export interface Notification {
 }
 export interface Review { id: string; name: string; reviewers: string[]; status: 'PENDING' | 'PASSED' | 'REJECTED'; caseCount: number; caseIds: string[]; startTime: string; endTime: string }
 export interface ReviewDetail extends Review { cases: TestCase[] }
+
+export interface KeyValue { key: string; value: string; enabled: boolean }
+export type BodyType = 'none' | 'form-data' | 'x-www-form-urlencoded' | 'raw'
+export interface DebugRequest {
+  id: string; name: string; method: HttpMethod; url: string
+  protocol: 'HTTP' | 'TCP' | 'SQL' | 'DUBBO'
+  headers: KeyValue[]; query: KeyValue[]; bodyType: BodyType; body: string
+  authType: 'none' | 'basic' | 'bearer' | 'cookie'; auth: Record<string, string>
+}
+export interface ExecuteResponse {
+  status: number; time: number; headers: Record<string, string>
+  body: string; console: string[]
+}
