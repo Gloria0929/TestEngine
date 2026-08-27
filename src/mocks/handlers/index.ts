@@ -1,3 +1,4 @@
 // src/mocks/handlers/index.ts
 import { authHandlers } from './auth'
-export const handlers = [...authHandlers]
+import { projectHandlers } from './project'
+export const handlers = [...authHandlers, ...projectHandlers]
