@@ -1,7 +1,22 @@
 // src/api/workstation.ts
 import { request } from '@/utils/request'
 import type { Notification } from '@/types/models'
+import type { TrendPoint, TodoItem, FollowItem } from '@/mocks/seed/workstation'
 
+export interface OverviewStats { caseCount: number; reviewCount: number; apiCount: number; scenarioCount: number }
+
+export function fetchOverview(params: { projectId: string; range: string }): Promise<OverviewStats> {
+  return request({ url: '/api/workstation/overview', method: 'get', params })
+}
+export function fetchTrend(params: { projectId: string; range: string }): Promise<TrendPoint[]> {
+  return request({ url: '/api/workstation/trend', method: 'get', params })
+}
+export function fetchTodos(params?: { type?: string }): Promise<TodoItem[]> {
+  return request({ url: '/api/workstation/todos', method: 'get', params })
+}
+export function fetchFollows(params?: { type?: string }): Promise<FollowItem[]> {
+  return request({ url: '/api/workstation/follows', method: 'get', params })
+}
 export function fetchNotifications(): Promise<Notification[]> {
   return request({ url: '/api/workstation/notifications', method: 'get' })
 }
