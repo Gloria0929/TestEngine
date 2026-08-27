@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TestEngine 测试平台 · 静态预览</title>
+
+  <!-- Element Plus -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.9.1/dist/index.css" />
+  <!-- Element Plus dark mode css vars -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.9.1/theme-chalk/dark/css-vars.css" />
+
+  <style>
+    :root {
+      --accent: #0d9488;
+      --accent-strong: #0f766e;
+      --accent-soft: #ccfbf1;
+      --accent-soft-2: #f0fdfa;
+
+      --sb-bg: #0f172a;
+      --sb-bg-2: #1e293b;
+      --sb-text: #7c8aa5;
+      --sb-text-hover: #cbd5e1;
+      --sb-text-active: #f1f5f9;
+      --sb-border: #1e293b;
+
+      --app-bg: #f4f5f7;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --border: #e5e7eb;
+      --border-2: #eef0f3;
+      --text-1: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+
+      --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.05);
+      --shadow-md: 0 6px 18px rgba(15,23,42,.06), 0 2px 6px rgba(15,23,42,.04);
+      --radius: 10px;
+      --radius-sm: 8px;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+      --el-color-primary: #0d9488;
+      --el-color-primary-light-3: #43a99e;
+      --el-color-primary-light-5: #6fbfb6;
+      --el-color-primary-light-7: #9cd5ce;
+      --el-color-primary-light-8: #b1dfda;
+      --el-color-primary-light-9: #c6e9e5;
+      --el-color-primary-dark-2: #0a766b;
+    }
+
+    html.dark {
+      --accent: #14b8a6;
+      --accent-strong: #2dd4bf;
+      --accent-soft: #134e4a;
+      --accent-soft-2: #0f2e2c;
+
+      --app-bg: #0b1220;
+      --surface: #111827;
+      --surface-2: #0f172a;
+      --border: #1f2937;
+      --border-2: #263043;
+      --text-1: #f1f5f9;
+      --text-2: #cbd5e1;
+      --text-3: #64748b;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.28);
+      --shadow-md: 0 8px 22px rgba(0,0,0,.35);
+
+      --el-bg-color: #111827;
+      --el-bg-color-overlay: #1f2937;
+      --el-fill-color-blank: #111827;
+      --el-fill-color-light: #1f2937;
+      --el-border-color: #263043;
+      --el-border-color-light: #263043;
+      --el-border-color-lighter: #1f2937;
+      --el-text-color-primary: #f1f5f9;
+      --el-text-color-regular: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--app-bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .mono { font-family: var(--font-mono); }
+    [v-cloak] { display: none; }
+
+    .login-wrap { min-height: 100vh; display: flex; background: var(--surface); }
+    .login-brand {
+      flex: 0 0 44%;
+      background: radial-gradient(1200px 600px at -10% -10%, #134e4a 0%, transparent 55%),
+                  radial-gradient(900px 500px at 110% 110%, #0e2a3a 0%, transparent 55%),
+                  var(--sb-bg);
+      color: #f1f5f9;
+      padding: 56px 56px 48px;
+      display: flex; flex-direction: column;
+      position: relative; overflow: hidden;
+    }
+    .login-brand::after {
+      content: ""; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      -webkit-mask-image: radial-gradient(800px 500px at 30% 20%, #000 0%, transparent 70%);
+      mask-image: radial-gradient(800px 500px at 30% 20%, #000 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .brand-mark { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .brand-mark .logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 18px rgba(20,184,166,.35);
+      flex: none;
+    }
+    .brand-mark .logo svg { width: 22px; height: 22px; }
+    .brand-name { font-size: 19px; font-weight: 700; letter-spacing: .2px; }
+    .brand-name span { color: #14b8a6; }
+    .brand-hero { margin-top: auto; position: relative; z-index: 1; }
+    .brand-hero h1 { font-size: 34px; line-height: 1.3; font-weight: 700; margin: 0 0 14px; letter-spacing: .3px; }
+    .brand-hero p { font-size: 15px; line-height: 1.7; color: #94a3b8; margin: 0 0 32px; max-width: 40ch; }
+    .brand-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+    .brand-points li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; color: #cbd5e1; }
+    .brand-points .dot {
+      width: 22px; height: 22px; border-radius: 7px; flex: none; margin-top: 1px;
+      background: rgba(20,184,166,.14); color: #2dd4bf;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-foot { position: relative; z-index: 1; margin-top: 48px; font-size: 12px; color: #64748b; }
+
+    .login-form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .login-form-card { width: 100%; max-width: 380px; }
+    .login-form-card h2 { font-size: 26px; margin: 0 0 6px; letter-spacing: .2px; }
+    .login-form-card .sub { color: var(--text-3); font-size: 14px; margin: 0 0 32px; }
+    .login-form-card .el-form-item { margin-bottom: 22px; }
+    .login-actions { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 26px; }
+    .login-btn { width: 100%; height: 44px; font-size: 15px; font-weight: 600; letter-spacing: 2px; }
+    .login-links { display: flex; justify-content: space-between; margin-top: 18px; font-size: 13px; }
+
+    .shell { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 236px; flex: none; background: var(--sb-bg);
+      display: flex; flex-direction: column;
+      transition: width .2s cubic-bezier(.4,0,.2,1);
+      position: sticky; top: 0; height: 100vh;
+    }
+    .sidebar.collapsed { width: 64px; }
+    .sb-head {
+      height: 56px; display: flex; align-items: center; gap: 11px;
+      padding: 0 16px; border-bottom: 1px solid var(--sb-border); flex: none;
+    }
+    .sb-head .logo {
+      width: 30px; height: 30px; border-radius: 8px; flex: none;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sb-head .logo svg { width: 18px; height: 18px; }
+    .sb-head .name { color: #f1f5f9; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; }
+    .sb-head .name span { color: #14b8a6; }
+
+    .sb-nav { flex: 1; overflow-y: auto; padding: 12px 10px; }
+    .sb-nav::-webkit-scrollbar { width: 0; }
+    .sb-group { margin-bottom: 2px; }
+    .sb-item {
+      display: flex; align-items: center; gap: 12px;
+      height: 40px; padding: 0 12px; border-radius: 8px;
+      color: var(--sb-text); cursor: pointer; font-size: 14px;
+      transition: background .15s, color .15s; user-select: none;
+    }
+    .sb-item:hover { background: rgba(255,255,255,.05); color: var(--sb-text-hover); }
+    .sb-item.active { background: rgba(20,184,166,.13); color: var(--sb-text-active); }
+    .sb-item.active .sb-ico { color: #2dd4bf; }
+    .sb-item .sb-ico { width: 20px; height: 20px; flex: none; display: flex; align-items: center; justify-content: center; }
+    .sb-item .sb-label { flex: 1; white-space: nowrap; overflow: hidden; }
+    .sb-item .arrow { transition: transform .2s; color: var(--sb-text); }
+    .sb-item .arrow.open { transform: rotate(90deg); }
+    .sb-sub { overflow: hidden; }
+    .sb-sub-item {
+      display: flex; align-items: center; gap: 12px; height: 36px;
+      padding: 0 12px 0 44px; border-radius: 8px;
+      color: var(--sb-text); cursor: pointer; font-size: 13px;
+    }
+    .sb-sub-item:hover { color: var(--sb-text-hover); }
+    .sb-sub-item.active { color: #2dd4bf; background: rgba(20,184,166,.1); }
+    .sb-sub-item .bar { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .5; flex: none; }
+
+    .sidebar.collapsed .sb-head { padding: 0 17px; }
+    .sidebar.collapsed .sb-head .name,
+    .sidebar.collapsed .sb-item .sb-label,
+    .sidebar.collapsed .sb-item .arrow,
+    .sidebar.collapsed .sb-sub { display: none; }
+    .sidebar.collapsed .sb-item { justify-content: center; padding: 0; }
+
+    .sb-foot { flex: none; padding: 12px 10px; border-top: 1px solid var(--sb-border); }
+    .sb-foot .sb-item { color: var(--sb-text); }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header {
+      height: 56px; flex: none; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 20;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-title { font-size: 15px; font-weight: 600; }
+    .header-title .crumb { color: var(--text-3); font-weight: 400; margin-right: 8px; }
+    .header-right { display: flex; align-items: center; gap: 6px; }
+    .hdr-btn {
+      height: 34px; min-width: 34px; padding: 0 8px; border-radius: 8px;
+      display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+      color: var(--text-2); font-size: 13px; border: none; background: transparent;
+    }
+    .hdr-btn:hover { background: var(--surface-2); color: var(--text-1); }
+    .hdr-btn .el-icon { font-size: 16px; }
+    .proj-switch {
+      height: 34px; display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; color: var(--text-1); cursor: pointer; background: var(--surface);
+    }
+    .proj-switch:hover { border-color: var(--accent); }
+    .proj-switch .divider { width: 1px; height: 16px; background: var(--border); }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex: none;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .content { flex: 1; padding: 20px; max-width: 1500px; width: 100%; margin: 0 auto; }
+
+    .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .page-head h2 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: .2px; }
+    .page-head .desc { color: var(--text-3); font-size: 13px; margin-top: 4px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 20px; box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-ico {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--accent-soft-2); color: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .stat-value { font-size: 28px; font-weight: 700; letter-spacing: .5px; font-family: var(--font-mono); line-height: 1; }
+    .stat-label { color: var(--text-3); font-size: 13px; }
+    .delta { font-size: 12px; display: inline-flex; align-items: center; gap: 3px; font-weight: 600; }
+    .delta.up { color: #16a34a; }
+    .delta.down { color: #dc2626; }
+
+    .home-grid { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--border-2);
+    }
+    .panel-head .t { font-size: 14px; font-weight: 600; }
+    .panel-body { padding: 8px 10px; }
+
+    .todo-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 8px; border-radius: 8px;
+      cursor: pointer; transition: background .12s;
+    }
+    .todo-item:hover { background: var(--surface-2); }
+    .todo-item .tk { flex: 1; min-width: 0; }
+    .todo-item .tk .ti { font-size: 13px; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .todo-item .tk .tm { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+    .tag-pill { font-size: 12px; padding: 2px 8px; border-radius: 6px; line-height: 1.6; flex: none; }
+
+    .toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; flex-wrap: wrap; }
+    .case-layout { display: grid; grid-template-columns: 232px 1fr; gap: 16px; margin-top: 16px; }
+    .tree-panel { padding: 10px; }
+    .tree-title { font-size: 13px; font-weight: 600; color: var(--text-2); padding: 6px 8px 10px; }
+
+    .split-col { display: grid; grid-template-columns: 250px 1fr; gap: 0; margin-top: 16px; }
+    .req-col { border-right: 1px solid var(--border-2); }
+    .req-list-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--border-2); }
+    .req-list-item:hover { background: var(--surface-2); }
+    .req-list-item.active { background: var(--accent-soft-2); border-left: 2px solid var(--accent); }
+    .req-list-item .m { font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
+    .req-list-item .n { font-size: 13px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .http-bar { display: flex; gap: 8px; padding: 14px 16px; align-items: center; }
+    .http-bar .el-select { width: 116px; flex: none; }
+    .http-bar .el-input { flex: 1; }
+    .resp-status { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border-2); font-size: 13px; }
+    .status-code { font-family: var(--font-mono); font-weight: 700; padding: 2px 9px; border-radius: 6px; }
+    .status-code.ok { background: #dcfce7; color: #15803d; }
+    html.dark .status-code.ok { background: #052e1b; color: #4ade80; }
+    .meta-kv { color: var(--text-3); font-size: 12px; }
+    .meta-kv b { color: var(--text-2); font-weight: 600; margin-right: 3px; }
+    .code-block {
+      margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7;
+      color: var(--text-2); background: var(--surface-2); border-radius: 0; overflow: auto;
+    }
+    .code-block .k { color: #0d9488; }
+    .code-block .s { color: #16a34a; }
+    .code-block .n { color: #2563eb; }
+    html.dark .code-block .k { color: #2dd4bf; }
+    html.dark .code-block .s { color: #4ade80; }
+    html.dark .code-block .n { color: #60a5fa; }
+
+    .kv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .kv-table th, .kv-table td { text-align: left; padding: 9px 16px; border-bottom: 1px solid var(--border-2); }
+    .kv-table th { color: var(--text-3); font-weight: 500; font-size: 12px; }
+
+    .placeholder-body { padding: 80px 24px; text-align: center; color: var(--text-3); }
+    .placeholder-body .big { font-size: 40px; margin-bottom: 12px; }
+    .placeholder-body .t { font-size: 16px; color: var(--text-2); font-weight: 600; }
+    .placeholder-body .s { font-size: 13px; margin-top: 6px; }
+
+    .empty-tip { padding: 30px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+    @media (max-width: 1080px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .home-grid { grid-template-columns: 1fr; }
+      .case-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .login-brand { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" v-cloak></div>
+
+  <script type="text/x-template" id="appTemplate">
+    <!-- ==================== 登录页 ==================== -->
+    <div v-if="!loggedIn" class="login-wrap">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3h6"></path><path d="M10 3v5.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 8.5V3"></path>
+              <path d="M7.5 14.5h9"></path>
+            </svg>
+          </div>
+          <div class="brand-name">Test<span>Engine</span></div>
+        </div>
+        <div class="brand-hero">
+          <h1>统一的测试管理与<br>接口自动化平台</h1>
+          <p>用例、接口、场景、计划与缺陷在同一平台内闭环，把测试能力纳入持续交付体系。</p>
+          <ul class="brand-points">
+            <li><span class="dot"><el-icon><Tickets></Tickets></el-icon></span>功能用例列表与脑图双模式沉淀测试资产</li>
+            <li><span class="dot"><el-icon><Connection></Connection></el-icon></span>接口调试、定义、Mock 与场景编排一体化</li>
+            <li><span class="dot"><el-icon><DataLine></DataLine></el-icon></span>测试计划汇总结果，产出可分享的质量报告</li>
+          </ul>
+        </div>
+        <div class="brand-foot">TestEngine 持续测试平台 · 前端静态预览</div>
+      </div>
+
+      <div class="login-form-panel">
+        <div class="login-form-card">
+          <h2>欢迎回来</h2>
+          <p class="sub">登录后进入你的测试工作台</p>
+          <el-form @submit.prevent="login">
+            <el-form-item>
+              <el-input v-model="loginForm.account" size="large" placeholder="账号" clearable>
+                <template #prefix><el-icon><User></User></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input v-model="loginForm.password" size="large" type="password" placeholder="密码" show-password>
+                <template #prefix><el-icon><Lock></Lock></el-icon></template>
+              </el-input>
+            </el-form-item>
+            <div class="login-actions">
+              <el-checkbox v-model="loginForm.remember">记住我</el-checkbox>
+              <el-link type="primary" :underline="false">忘记密码</el-link>
+            </div>
+            <el-button type="primary" class="login-btn" @click="login">登 录</el-button>
+          </el-form>
+          <div class="login-links">
+            <span class="meta-kv">还没有账号？<el-link type="primary" :underline="false">注册</el-link></span>
+            <span class="meta-kv">v0.1 预览</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 主布局 ==================== -->
+    <div v-else class="shell">
+      <aside class="sidebar" :class="{ collapsed }">
+        <div class="sb-head">
+          <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 3h6"></path><path d="M10 3v5.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 8.5V3"></path>
+              <path d="M7.5 14.5h9"></path>
+            </svg>
+          </div>
+          <div class="name">Test<span>Engine</span></div>
+        </div>
+
+        <nav class="sb-nav">
+          <template v-for="m in menus" :key="m.key">
+            <div v-if="m.children" class="sb-group">
+              <div class="sb-item" :class="{ active: isParentActive(m) }" @click="toggleMenu(m.key)">
+                <span class="sb-ico"><el-icon><component :is="m.icon"></component></el-icon></span>
+                <span class="sb-label">{{ m.label }}</span>
+                <el-icon class="arrow" :class="{ open: openMenus.includes(m.key) }"><ArrowRight></ArrowRight></el-icon>
+              </div>
+              <div v-show="openMenus.includes(m.key)" class="sb-sub">
+                <div v-for="c in m.children" :key="c.key"
+                     class="sb-sub-item" :class="{ active: activeMenu === c.key }"
+                     @click="go(c)">
+                  <span class="bar"></span><span class="sb-label">{{ c.label }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="sb-group">
+              <div class="sb-item" :class="{ active: activeMenu === m.key }" @click="go(m)">
+                <span class="sb-ico"><el-icon><component :is="m.icon"></component></el-icon></span>
+                <span class="sb-label">{{ m.label }}</span>
+              </div>
+            </div>
+          </template>
+        </nav>
+
+        <div class="sb-foot">
+          <div class="sb-item" @click="collapsed = !collapsed">
+            <span class="sb-ico"><el-icon><Fold v-if="!collapsed"></Fold><Expand v-else></Expand></el-icon></span>
+            <span class="sb-label">收起菜单</span>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <header class="header">
+          <div class="header-left">
+            <div class="header-title">
+              <span class="crumb">{{ currentBreadcrumb }}</span>{{ currentTitle }}
+            </div>
+          </div>
+          <div class="header-right">
+            <el-dropdown trigger="click" @command="onProj">
+              <span class="proj-switch">
+                <el-icon><OfficeBuilding></OfficeBuilding></el-icon>
+                <span>MeterSphere 演示</span>
+                <span class="divider"></span>
+                <span style="font-weight:600">示例项目</span>
+                <el-icon style="font-size:12px;color:var(--text-3)"><ArrowDown></ArrowDown></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="p1">示例项目</el-dropdown-item>
+                  <el-dropdown-item command="p2">电商中台</el-dropdown-item>
+                  <el-dropdown-item command="p3">支付网关</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <el-dropdown trigger="click">
+              <el-badge :value="3" :offset="[0,4]">
+                <span class="hdr-btn"><el-icon><Bell></Bell></el-icon></span>
+              </el-badge>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item>测试计划「v2.6 回归」已完成</el-dropdown-item>
+                  <el-dropdown-item>缺陷 #BUG-1024 已指派给你</el-dropdown-item>
+                  <el-dropdown-item>用例评审「登录模块」待处理</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <el-dropdown trigger="click" @command="onLang">
+              <span class="hdr-btn"><el-icon><Switch></Switch></el-icon>中文</span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="zh">中文</el-dropdown-item>
+                  <el-dropdown-item command="en">English</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <span class="hdr-btn" @click="toggleTheme">
+              <el-icon><Sunny v-if="isDark"></Sunny><Moon v-else></Moon></el-icon>
+            </span>
+
+            <el-tooltip content="帮助中心" placement="bottom">
+              <span class="hdr-btn"><el-icon><QuestionFilled></QuestionFilled></el-icon></span>
+            </el-tooltip>
+
+            <el-dropdown trigger="click" @command="onUser">
+              <span class="avatar">{{ userInitial }}</span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                  <el-dropdown-item command="setting">个人设置</el-dropdown-item>
+                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </header>
+
+        <main class="content">
+          <!-- 工作台首页 -->
+          <div v-if="currentView === 'home'">
+            <div class="page-head">
+              <div>
+                <h2>工作台</h2>
+                <div class="desc">项目测试概览与近期动态</div>
+              </div>
+              <el-radio-group v-model="timeRange">
+                <el-radio-button value="3d">近 3 天</el-radio-button>
+                <el-radio-button value="7d">近 7 天</el-radio-button>
+                <el-radio-button value="30d">近 30 天</el-radio-button>
+              </el-radio-group>
+            </div>
+
+            <div class="stat-grid">
+              <div class="stat-card" v-for="s in stats" :key="s.label">
+                <div class="stat-top">
+                  <span class="stat-label">{{ s.label }}</span>
+                  <span class="stat-ico"><el-icon><component :is="s.icon"></component></el-icon></span>
+                </div>
+                <div class="stat-value">{{ s.value }}</div>
+                <div>
+                  <span class="delta" :class="s.up ? 'up' : 'down'">
+                    <el-icon><component :is="s.up ? 'CaretTop' : 'CaretBottom'"></component></el-icon>{{ s.delta }}
+                  </span>
+                  <span class="meta-kv" style="margin-left:6px">较上周期</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-grid">
+              <div class="card">
+                <div class="panel-head">
+                  <span class="t">资产趋势</span>
+                  <el-link type="primary" :underline="false">查看详情</el-link>
+                </div>
+                <div class="panel-body" style="padding: 14px 16px 6px">
+                  <div id="trendChart" style="height: 300px; width: 100%"></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="panel-head">
+                  <span class="t">我的待办</span>
+                  <el-link type="primary" :underline="false">全部</el-link>
+                </div>
+                <div class="panel-body">
+                  <div class="todo-item" v-for="t in todos" :key="t.id">
+                    <span class="tag-pill" :style="tagStyle(t.type)">{{ t.type }}</span>
+                    <div class="tk">
+                      <div class="ti">{{ t.title }}</div>
+                      <div class="tm">{{ t.time }}</div>
+                    </div>
+                    <el-icon style="color:var(--text-3)"><ArrowRight></ArrowRight></el-icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 测试用例列表 -->
+          <div v-else-if="currentView === 'testcase'">
+            <div class="page-head">
+              <div>
+                <h2>测试用例</h2>
+                <div class="desc">功能用例的列表与脑图管理</div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <el-button><el-icon><Upload></Upload></el-icon>导入</el-button>
+                <el-button><el-icon><Download></Download></el-icon>导出</el-button>
+                <el-button type="primary"><el-icon><Plus></Plus></el-icon>新建用例</el-button>
+              </div>
+            </div>
+
+            <div class="case-layout">
+              <div class="card tree-panel">
+                <div class="tree-title">模块</div>
+                <el-tree :data="moduleTree" node-key="label" default-expand-all :props="{ children: 'children', label: 'label' }"></el-tree>
+              </div>
+
+              <div class="card">
+                <div class="toolbar">
+                  <el-input v-model="caseKeyword" placeholder="搜索用例名称 / ID" style="width: 240px" clearable>
+                    <template #prefix><el-icon><Search></Search></el-icon></template>
+                  </el-input>
+                  <el-select v-model="caseLevel" placeholder="等级" clearable style="width: 120px">
+                    <el-option label="P0" value="P0"></el-option>
+                    <el-option label="P1" value="P1"></el-option>
+                    <el-option label="P2" value="P2"></el-option>
+                  </el-select>
+                  <el-select v-model="caseStatus" placeholder="状态" clearable style="width: 130px">
+                    <el-option label="通过" value="通过"></el-option>
+                    <el-option label="失败" value="失败"></el-option>
+                    <el-option label="未执行" value="未执行"></el-option>
+                    <el-option label="阻塞" value="阻塞"></el-option>
+                  </el-select>
+                  <div style="flex:1"></div>
+                  <el-tooltip content="列表视图" placement="top"><span class="hdr-btn"><el-icon><List></List></el-icon></span></el-tooltip>
+                  <el-tooltip content="脑图视图" placement="top"><span class="hdr-btn"><el-icon><Share></Share></el-icon></span></el-tooltip>
+                </div>
+
+                <el-table :data="filteredCases" style="width:100%">
+                  <el-table-column type="selection" width="46"></el-table-column>
+                  <el-table-column label="用例名称" min-width="260">
+                    <template #default="{ row }">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <el-icon style="color:var(--text-3)"><Document></Document></el-icon>
+                        <span style="font-size:13px">{{ row.name }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="module" label="模块" width="110"></el-table-column>
+                  <el-table-column label="等级" width="72">
+                    <template #default="{ row }"><span class="mono" style="font-size:12px">{{ row.level }}</span></template>
+                  </el-table-column>
+                  <el-table-column prop="owner" label="执行人" width="90"></el-table-column>
+                  <el-table-column label="状态" width="90">
+                    <template #default="{ row }">
+                      <el-tag :type="statusType(row.status)" size="small" effect="light">{{ row.status }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="标签" width="110">
+                    <template #default="{ row }">
+                      <el-tag v-if="row.tag" size="small" effect="plain" type="info">{{ row.tag }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="updated" label="更新时间" width="150">
+                    <template #default="{ row }"><span class="mono" style="font-size:12px;color:var(--text-3)">{{ row.updated }}</span></template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="120" fixed="right">
+                    <template #default>
+                      <el-button link type="primary" size="small">编辑</el-button>
+                      <el-button link type="primary" size="small">执行</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+
+                <div style="display:flex;justify-content:flex-end;padding:14px 16px">
+                  <el-pagination layout="total, prev, pager, next" :total="284" :page-size="10" background></el-pagination>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 接口调试 -->
+          <div v-else-if="currentView === 'apidebug'">
+            <div class="page-head">
+              <div>
+                <h2>接口调试</h2>
+                <div class="desc">联调请求、查看响应与控制台</div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <el-button><el-icon><Link></Link></el-icon>导入 cURL</el-button>
+                <el-button type="primary"><el-icon><VideoPlay></VideoPlay></el-icon>发送</el-button>
+              </div>
+            </div>
+
+            <div class="card split-col">
+              <div class="req-col">
+                <div class="tree-title" style="padding:12px 14px 8px">请求</div>
+                <div class="req-list-item active">
+                  <div class="m" style="color:#16a34a">POST</div>
+                  <div class="n">用户登录 /v1/user/login</div>
+                </div>
+                <div class="req-list-item">
+                  <div class="m" style="color:#2563eb">GET</div>
+                  <div class="n">获取用户信息 /v1/user/profile</div>
+                </div>
+                <div class="req-list-item">
+                  <div class="m" style="color:#0d9488">GET</div>
+                  <div class="n">查询订单列表 /v1/order/list</div>
+                </div>
+                <div class="req-list-item">
+                  <div class="m" style="color:#d97706">PUT</div>
+                  <div class="n">更新订单状态 /v1/order/status</div>
+                </div>
+              </div>
+
+              <div style="min-width:0">
+                <div class="http-bar">
+                  <el-select v-model="req.method">
+                    <el-option v-for="m in methods" :key="m" :label="m" :value="m"></el-option>
+                  </el-select>
+                  <el-input v-model="req.url" class="mono" placeholder="请求 URL">
+                    <template #prefix><el-icon><Globe></Globe></el-icon></template>
+                  </el-input>
+                  <el-button type="primary"><el-icon><VideoPlay></VideoPlay></el-icon>发送</el-button>
+                  <el-button>保存</el-button>
+                </div>
+
+                <el-tabs v-model="reqTab" style="padding:0 16px">
+                  <el-tab-pane label="请求体" name="body">
+                    <table class="kv-table">
+                      <thead><tr><th style="width:40%">参数</th><th>值</th></tr></thead>
+                      <tbody>
+                        <tr><td>account</td><td class="mono" style="color:var(--text-1)">admin</td></tr>
+                        <tr><td>password</td><td class="mono" style="color:var(--text-1)">••••••••</td></tr>
+                        <tr><td>device</td><td class="mono" style="color:var(--text-1)">web</td></tr>
+                      </tbody>
+                    </table>
+                  </el-tab-pane>
+                  <el-tab-pane label="请求头" name="header">
+                    <table class="kv-table">
+                      <thead><tr><th style="width:40%">Header</th><th>值</th></tr></thead>
+                      <tbody>
+                        <tr><td>Content-Type</td><td class="mono">application/json</td></tr>
+                        <tr><td>Authorization</td><td class="mono">Bearer eyJhbGciOi…</td></tr>
+                      </tbody>
+                    </table>
+                  </el-tab-pane>
+                  <el-tab-pane label="Query" name="query"><div class="empty-tip">该请求无 Query 参数</div></el-tab-pane>
+                  <el-tab-pane label="REST" name="rest"><div class="empty-tip">该请求无 REST 参数</div></el-tab-pane>
+                </el-tabs>
+
+                <div class="resp-status">
+                  <span class="status-code ok">200 OK</span>
+                  <span class="meta-kv"><b>耗时</b>128ms</span>
+                  <span class="meta-kv"><b>大小</b>1.24KB</span>
+                  <span class="meta-kv"><b>环境</b>测试环境</span>
+                  <div style="flex:1"></div>
+                  <el-radio-group v-model="respTab" size="small">
+                    <el-radio-button value="body">响应体</el-radio-button>
+                    <el-radio-button value="header">响应头</el-radio-button>
+                    <el-radio-button value="actual">实际请求</el-radio-button>
+                    <el-radio-button value="console">控制台</el-radio-button>
+                  </el-radio-group>
+                </div>
+
+                <pre class="code-block" v-if="respTab === 'body'"><code>{
+  <span class="k">"code"</span>: <span class="n">200</span>,
+  <span class="k">"message"</span>: <span class="s">"success"</span>,
+  <span class="k">"data"</span>: {
+    <span class="k">"token"</span>: <span class="s">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…"</span>,
+    <span class="k">"user"</span>: {
+      <span class="k">"id"</span>: <span class="n">10086</span>,
+      <span class="k">"name"</span>: <span class="s">"陈默"</span>,
+      <span class="k">"role"</span>: <span class="s">"admin"</span>
+    }
+  }
+}</code></pre>
+                <pre class="code-block" v-else-if="respTab === 'header'"><code><span class="k">content-type</span>: application/json; charset=utf-8
+<span class="k">server</span>: nginx/1.24.0
+<span class="k">x-request-id</span>: 9f2c8a7e-…</code></pre>
+                <pre class="code-block" v-else-if="respTab === 'actual'"><code>POST https://api.example.com/v1/user/login
+Content-Type: application/json
+
+{ "account": "admin", "password": "••••••••", "device": "web" }</code></pre>
+                <pre class="code-block" v-else><code><span style="color:var(--text-3)">[14:32:05] 前置脚本执行完成
+[14:32:05] 发送请求 → POST /v1/user/login
+[14:32:05] 收到响应 200 OK (128ms)
+[14:32:05] 提取变量 token 成功</span></code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- 占位页 -->
+          <div v-else class="card">
+            <div class="placeholder-body">
+              <div class="big">🧪</div>
+              <div class="t">{{ currentTitle }}</div>
+              <div class="s">该模块将在完整项目中实现，当前为静态预览占位。</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2.9.1/dist/index.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2.9.1/dist/locale/zh-cn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@2/dist/index.iife.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <script>
+    const { createApp, ref, reactive, computed, nextTick, onMounted } = Vue;
+
+    const App = {
+      template: '#appTemplate',
+      setup() {
+        const isDark = ref(false);
+        const collapsed = ref(false);
+        const loggedIn = ref(false);
+        const currentView = ref('home');
+        const activeMenu = ref('home');
+        const timeRange = ref('7d');
+        const openMenus = ref(['testcase', 'apiparent']);
+        const currentTitle = ref('工作台');
+        const currentBreadcrumb = ref('');
+        const loginForm = reactive({ account: 'admin', password: '', remember: true });
+        const user = reactive({ name: '陈默' });
+        const userInitial = computed(() => user.name.slice(0, 1));
+
+        const menus = [
+          { key: 'home', label: '工作台', icon: 'Odometer', view: 'home' },
+          { key: 'project', label: '项目管理', icon: 'Folder', view: 'placeholder' },
+          { key: 'testplan', label: '测试计划', icon: 'Calendar', view: 'placeholder' },
+          { key: 'testcase', label: '测试用例', icon: 'Tickets', children: [
+            { key: 'case-list', label: '用例列表', view: 'testcase' },
+            { key: 'mindmap', label: '脑图', view: 'placeholder' },
+            { key: 'review', label: '用例评审', view: 'placeholder' },
+          ]},
+          { key: 'apiparent', label: '接口测试', icon: 'Connection', children: [
+            { key: 'api-debug', label: '接口调试', view: 'apidebug' },
+            { key: 'api-def', label: '接口定义', view: 'placeholder' },
+            { key: 'api-scenario', label: '场景管理', view: 'placeholder' },
+            { key: 'api-report', label: '接口报告', view: 'placeholder' },
+            { key: 'api-mock', label: 'Mock', view: 'placeholder' },
+          ]},
+          { key: 'bug', label: '缺陷管理', icon: 'WarningFilled', view: 'placeholder' },
+          { key: 'setting', label: '系统设置', icon: 'Setting', view: 'placeholder' },
+        ];
+
+        function isParentActive(m) {
+          return m.children && m.children.some(c => c.key === activeMenu.value);
+        }
+        function toggleMenu(key) {
+          if (collapsed.value) return;
+          const i = openMenus.value.indexOf(key);
+          if (i >= 0) openMenus.value.splice(i, 1);
+          else openMenus.value.push(key);
+        }
+        function go(item) {
+          activeMenu.value = item.key;
+          currentView.value = item.view || 'placeholder';
+          currentTitle.value = item.label;
+          const parent = menus.find(m => m.children && m.children.some(c => c.key === item.key));
+          currentBreadcrumb.value = parent ? parent.label + ' /' : '';
+        }
+
+        function applyTheme() {
+          document.documentElement.classList.toggle('dark', isDark.value);
+        }
+        function toggleTheme() { isDark.value = !isDark.value; applyTheme(); }
+        function onLang(c) { ElementPlus.ElMessage.success('已切换语言：' + c); }
+        function onProj() { ElementPlus.ElMessage.success('已切换项目'); }
+        function onUser(c) {
+          if (c === 'logout') logout();
+          else ElementPlus.ElMessage.info('个人中心将在完整项目中实现');
+        }
+
+        function login() {
+          loggedIn.value = true;
+          currentView.value = 'home';
+          activeMenu.value = 'home';
+          currentTitle.value = '工作台';
+          currentBreadcrumb.value = '';
+          nextTick(() => renderChart());
+        }
+        function logout() { loggedIn.value = false; }
+
+        const stats = [
+          { label: '功能用例', value: '1,284', delta: '+3.2%', up: true, icon: 'Tickets' },
+          { label: '接口用例', value: '356', delta: '+1.8%', up: true, icon: 'Connection' },
+          { label: '自动化场景', value: '128', delta: '+5.1%', up: true, icon: 'Share' },
+          { label: '未关闭缺陷', value: '87', delta: '-2.4%', up: false, icon: 'Warning' },
+        ];
+        const todos = [
+          { id: 1, type: '计划', title: '测试计划「v2.6 回归」待执行', time: '今天 14:20' },
+          { id: 2, type: '缺陷', title: 'BUG-1024 支付回调签名校验失败', time: '今天 11:05' },
+          { id: 3, type: '评审', title: '用例评审「登录模块」待处理', time: '昨天 17:40' },
+          { id: 4, type: '场景', title: '场景「下单全流程」执行失败', time: '昨天 09:18' },
+          { id: 5, type: '用例', title: '用例「购物车-批量删除」待回归', time: '08-24 16:02' },
+        ];
+        const tagColor = { '计划': '#0d9488', '缺陷': '#dc2626', '评审': '#d97706', '场景': '#2563eb', '用例': '#64748b' };
+        function tagStyle(t) {
+          const c = tagColor[t] || '#64748b';
+          return { background: hexA(c, .12), color: c };
+        }
+        function hexA(hex, a) {
+          const n = parseInt(hex.slice(1), 16);
+          return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+        }
+
+        const caseKeyword = ref('');
+        const caseLevel = ref('');
+        const caseStatus = ref('');
+        const moduleTree = [
+          { label: '全部用例', children: [
+            { label: '登录认证', children: [ { label: '账号密码登录' }, { label: '第三方登录' } ] },
+            { label: '用户中心', children: [ { label: '个人资料' }, { label: '收货地址' } ] },
+            { label: '订单中心', children: [ { label: '订单创建' }, { label: '订单支付' }, { label: '退款' } ] },
+            { label: '商品中心', children: [ { label: '商品搜索' }, { label: '购物车' } ] },
+          ]},
+        ];
+        const cases = [
+          { name: '用户登录-正确账号密码登录成功', module: '登录认证', level: 'P0', owner: '陈默', status: '通过', tag: '冒烟', updated: '2026-08-26 14:32' },
+          { name: '用户登录-密码错误提示正确', module: '登录认证', level: 'P1', owner: '李思远', status: '未执行', tag: '', updated: '2026-08-25 09:12' },
+          { name: '创建订单-库存充足时下单成功', module: '订单中心', level: 'P0', owner: '王佳怡', status: '失败', tag: '回归', updated: '2026-08-24 18:47' },
+          { name: '创建订单-库存不足时下单失败', module: '订单中心', level: 'P0', owner: '王佳怡', status: '通过', tag: '', updated: '2026-08-24 18:51' },
+          { name: '购物车-批量删除选中商品', module: '商品中心', level: 'P1', owner: '张宇航', status: '阻塞', tag: '', updated: '2026-08-23 11:20' },
+          { name: '个人资料-修改昵称生效', module: '用户中心', level: 'P2', owner: '刘畅', status: '通过', tag: '', updated: '2026-08-22 15:08' },
+          { name: '订单支付-支付成功后状态流转', module: '订单中心', level: 'P0', owner: '赵一凡', status: '未执行', tag: '回归', updated: '2026-08-21 10:33' },
+          { name: '商品搜索-关键词模糊匹配', module: '商品中心', level: 'P2', owner: '李思远', status: '通过', tag: '', updated: '2026-08-20 16:55' },
+        ];
+        const filteredCases = computed(() => {
+          return cases.filter(c => {
+            if (caseKeyword.value && !c.name.includes(caseKeyword.value)) return false;
+            if (caseLevel.value && c.level !== caseLevel.value) return false;
+            if (caseStatus.value && c.status !== caseStatus.value) return false;
+            return true;
+          });
+        });
+        function statusType(s) {
+          return { '通过': 'success', '失败': 'danger', '阻塞': 'warning', '未执行': 'info' }[s] || 'info';
+        }
+
+        const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+        const req = reactive({ method: 'POST', url: 'https://api.example.com/v1/user/login' });
+        const reqTab = ref('body');
+        const respTab = ref('body');
+
+        let chart = null;
+        function renderChart() {
+          const el = document.getElementById('trendChart');
+          if (!el || !window.echarts) return;
+          if (chart) chart.dispose();
+          chart = echarts.init(el);
+          chart.setOption({
+            grid: { left: 8, right: 16, top: 20, bottom: 4, containLabel: true },
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['功能用例', '接口用例'], top: 0, right: 0, icon: 'roundRect', itemWidth: 10, itemHeight: 10, textStyle: { color: '#94a3b8' } },
+            xAxis: {
+              type: 'category', boundaryGap: false,
+              data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+              axisLine: { lineStyle: { color: 'transparent' } },
+              axisTick: { show: false },
+              axisLabel: { color: '#94a3b8', fontSize: 12 },
+            },
+            yAxis: {
+              type: 'value',
+              splitLine: { lineStyle: { color: 'rgba(148,163,184,.18)' } },
+              axisLabel: { color: '#94a3b8', fontSize: 12 },
+            },
+            series: [
+              {
+                name: '功能用例', type: 'line', smooth: true, symbol: 'none',
+                data: [12, 19, 15, 24, 31, 28, 36],
+                lineStyle: { width: 2.5, color: '#0d9488' },
+                itemStyle: { color: '#0d9488' },
+                areaStyle: {
+                  color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(13,148,136,.22)' },
+                    { offset: 1, color: 'rgba(13,148,136,0)' },
+                  ]),
+                },
+              },
+              {
+                name: '接口用例', type: 'line', smooth: true, symbol: 'none',
+                data: [6, 9, 8, 14, 12, 17, 20],
+                lineStyle: { width: 2, color: '#94a3b8' },
+                itemStyle: { color: '#94a3b8' },
+              },
+            ],
+          });
+        }
+
+        onMounted(() => { applyTheme(); });
+
+        return {
+          isDark, collapsed, loggedIn, currentView, activeMenu, timeRange, openMenus,
+          currentTitle, currentBreadcrumb, loginForm, user, userInitial, menus,
+          toggleMenu, go, toggleTheme, onLang, onProj, onUser, login, logout, isParentActive,
+          stats, todos, tagStyle,
+          caseKeyword, caseLevel, caseStatus, moduleTree, filteredCases, statusType,
+          methods, req, reqTab, respTab,
+        };
+      },
+    };
+
+    const app = createApp(App);
+    app.use(ElementPlus, { locale: ElementPlusLocaleZhCn });
+    for (const [key, comp] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, comp);
+    }
+    app.mount('#app');
+  </script>
+</body>
+</html>
