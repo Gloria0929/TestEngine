@@ -13,7 +13,7 @@ export default {
     todo: '待办', empty: '暂无数据', backHome: '返回首页', search: '搜索', reset: '重置',
     add: '新建', edit: '编辑', delete: '删除', export: '导出', import: '导入',
     confirm: '确认', cancel: '取消', submit: '提交', save: '保存', total: '共 {total} 条',
-    success: '操作成功', deleteConfirm: '确认删除？删除后可在回收站恢复',
+    success: '操作成功', deleteConfirm: '确认删除？删除后可在回收站恢复', cancelFollow: '取消关注',
   },
   error: { forbidden: '无权限访问该页面', notFound: '页面不存在' },
 }

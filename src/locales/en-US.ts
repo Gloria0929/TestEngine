@@ -13,7 +13,7 @@ export default {
     todo: 'Todo', empty: 'No data', backHome: 'Home', search: 'Search', reset: 'Reset',
     add: 'Create', edit: 'Edit', delete: 'Delete', export: 'Export', import: 'Import',
     confirm: 'Confirm', cancel: 'Cancel', submit: 'Submit', save: 'Save', total: 'Total {total}',
-    success: 'Success', deleteConfirm: 'Delete? Recoverable in recycle bin',
+    success: 'Success', deleteConfirm: 'Delete? Recoverable in recycle bin', cancelFollow: 'Unfollow',
   },
   error: { forbidden: 'Forbidden', notFound: 'Page not found' },
 }
