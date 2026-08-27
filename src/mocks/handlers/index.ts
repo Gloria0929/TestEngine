@@ -2,4 +2,5 @@
 import { authHandlers } from './auth'
 import { workstationHandlers } from './workstation'
 import { projectHandlers } from './project'
-export const handlers = [...authHandlers, ...workstationHandlers, ...projectHandlers]
+import { testCaseHandlers } from './testCase'
+export const handlers = [...authHandlers, ...workstationHandlers, ...projectHandlers, ...testCaseHandlers]
