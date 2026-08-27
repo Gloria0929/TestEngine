@@ -10,7 +10,7 @@ export default {
   login: { title: '账号登录', username: '用户名', password: '密码', submit: '登录', success: '登录成功' },
   topbar: { personal: '个人中心', logout: '退出登录', notification: '通知', markAllRead: '全部已读' },
   common: {
-    empty: '暂无数据', backHome: '返回首页', search: '搜索', reset: '重置',
+    todo: '待办', empty: '暂无数据', backHome: '返回首页', search: '搜索', reset: '重置',
     add: '新建', edit: '编辑', delete: '删除', export: '导出', import: '导入',
     confirm: '确认', cancel: '取消', submit: '提交', save: '保存', total: '共 {total} 条',
     success: '操作成功', deleteConfirm: '确认删除？删除后可在回收站恢复',
