@@ -1,0 +1,37 @@
+// src/router/routes.ts
+import type { RouteRecordRaw } from 'vue-router'
+
+export const routes: RouteRecordRaw[] = [
+  { path: '/login', name: 'Login', component: () => import('@/views/login/index.vue'), meta: { public: true } },
+  {
+    path: '/',
+    component: () => import('@/layouts/DefaultLayout.vue'),
+    redirect: '/workstation/home',
+    children: [
+      { path: 'workstation/home', name: 'WorkstationHome', component: () => import('@/views/workstation/home/index.vue'), meta: { title: 'menu.workstation' } },
+      { path: 'workstation/todo', name: 'WorkstationTodo', component: () => import('@/views/workstation/todo/index.vue') },
+      { path: 'workstation/follow', name: 'WorkstationFollow', component: () => import('@/views/workstation/follow/index.vue') },
+      { path: 'project/info', name: 'ProjectInfo', component: () => import('@/views/project/info/index.vue'), meta: { permission: 'project:view' } },
+      { path: 'project/member', name: 'ProjectMember', component: () => import('@/views/project/member/index.vue'), meta: { permission: 'project:view' } },
+      { path: 'project/userGroup', name: 'ProjectUserGroup', component: () => import('@/views/project/userGroup/index.vue'), meta: { permission: 'project:view' } },
+      { path: 'project/environment', name: 'ProjectEnvironment', component: () => import('@/views/project/environment/index.vue'), meta: { permission: 'project:view' } },
+      { path: 'test-case/list', name: 'CaseList', component: () => import('@/views/testCase/list/index.vue'), meta: { permission: 'testCase:view' } },
+      { path: 'test-case/mindmap', name: 'CaseMindmap', component: () => import('@/views/testCase/mindmap/index.vue'), meta: { permission: 'testCase:view' } },
+      { path: 'test-case/review', name: 'CaseReview', component: () => import('@/views/testCase/review/index.vue'), meta: { permission: 'testCase:view' } },
+      { path: 'test-plan/list', name: 'TestPlanList', component: () => import('@/views/testPlan/list/index.vue'), meta: { permission: 'testPlan:view' } },
+      { path: 'test-plan/report/:id', name: 'TestPlanReport', component: () => import('@/views/testPlan/report/index.vue'), meta: { permission: 'testPlan:view' } },
+      { path: 'api-test/debug', name: 'ApiDebug', component: () => import('@/views/apiTest/debug/index.vue'), meta: { permission: 'apiTest:view' } },
+      { path: 'api-test/definition', name: 'ApiDefinition', component: () => import('@/views/apiTest/definition/index.vue'), meta: { permission: 'apiTest:view' } },
+      { path: 'api-test/scenario', name: 'ApiScenario', component: () => import('@/views/apiTest/scenario/index.vue'), meta: { permission: 'apiTest:view' } },
+      { path: 'api-test/report', name: 'ApiReport', component: () => import('@/views/apiTest/report/index.vue'), meta: { permission: 'apiTest:view' } },
+      { path: 'api-test/mock', name: 'ApiMock', component: () => import('@/views/apiTest/mock/index.vue'), meta: { permission: 'apiTest:view' } },
+      { path: 'bug/list', name: 'BugList', component: () => import('@/views/bug/list/index.vue'), meta: { permission: 'bug:view' } },
+      { path: 'setting/system/user', name: 'SysUser', component: () => import('@/views/setting/system/user/index.vue'), meta: { permission: 'system:view' } },
+      { path: 'setting/system/org', name: 'SysOrg', component: () => import('@/views/setting/system/org/index.vue'), meta: { permission: 'system:view' } },
+      { path: 'setting/org/member', name: 'OrgMember', component: () => import('@/views/setting/org/member/index.vue'), meta: { permission: 'system:view' } },
+      { path: 'personal/profile', name: 'PersonalProfile', component: () => import('@/views/personal/profile/index.vue') },
+    ],
+  },
+  { path: '/403', name: 'Forbidden', component: () => import('@/views/error/403.vue'), meta: { public: true } },
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/error/404.vue'), meta: { public: true } },
+]
