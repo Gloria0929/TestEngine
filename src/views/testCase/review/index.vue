@@ -86,6 +86,7 @@ async function openDrawer(row: Review) {
   current.value = row
   drawerVisible.value = true
   detailLoading.value = true
+  detail.value = null
   Object.keys(results).forEach((k) => delete results[k])
   const d = await fetchReviewDetail(row.id)
   detail.value = d

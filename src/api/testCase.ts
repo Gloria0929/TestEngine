@@ -39,9 +39,9 @@ export function fetchReviews(): Promise<Review[]> {
 export function createReview(data: Partial<Review>): Promise<Review> {
   return request({ url: '/api/test-case/reviews', method: 'post', data })
 }
-export function fetchReviewDetail(id: string): Promise<ReviewDetail> {
+export function fetchReviewDetail(id: string): Promise<ReviewDetail | null> {
   return request({ url: `/api/test-case/reviews/${id}`, method: 'get' })
 }
-export function submitReviewResult(id: string, results: { caseId: string; passed: boolean; comment?: string }[]): Promise<Review> {
+export function submitReviewResult(id: string, results: { caseId: string; passed: boolean; comment?: string }[]): Promise<Review | null> {
   return request({ url: `/api/test-case/reviews/${id}/result`, method: 'post', data: { results } })
 }
