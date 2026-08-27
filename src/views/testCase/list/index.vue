@@ -10,6 +10,7 @@
         <div class="spacer" />
         <el-button v-permission="'testCase:create'" type="primary" @click="openEdit()">{{ t('common.add') }}</el-button>
         <el-button @click="onExport">{{ t('common.export') }}</el-button>
+        <el-button @click="importVisible = true">{{ t('common.import') }}</el-button>
       </div>
       <DataTable :columns="columns" :data="rows" :loading="loading" :total="total" :page="page"
         selection @page-change="onPage" @selection-change="(s) => selected = s">
@@ -23,6 +24,7 @@
       </DataTable>
     </div>
     <CaseEditDialog v-model="editVisible" :case-data="editing" @saved="load" />
+    <ImportDialog v-model="importVisible" @imported="load" />
   </div>
 </template>
 
@@ -34,7 +36,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ModuleTree from '@/components/ModuleTree.vue'
 import DataTable, { type DataColumn } from '@/components/DataTable.vue'
 import CaseEditDialog from './components/CaseEditDialog.vue'
+import ImportDialog from './components/ImportDialog.vue'
 import { fetchModuleTree, fetchCaseList, deleteCase } from '@/api/testCase'
+import { exportCases } from '@/utils/excel'
 import type { TestCase, ModuleNode } from '@/types/models'
 
 const { t } = useI18n()
@@ -63,7 +67,7 @@ function onAddModule(_parentId: string | null) { ElMessage.info('模块新建（
 function onPage(p: number, s: number) { page.pageNum = p; page.pageSize = s; load() }
 function openEdit(row?: TestCase) { editVisible.value = true; editing.value = row ?? null }
 function openDetail(row: TestCase) { router.push(`/test-case/detail/${row.id}`) }
-function onExport() { ElMessage.info('导出（Task 3.4 实现）') }
+function onExport() { exportCases(rows.value) }
 async function onDelete(row: TestCase) {
   await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirm'), { type: 'warning' })
   await deleteCase(row.id)
@@ -79,6 +83,7 @@ async function load() {
   loading.value = false
 }
 const editVisible = ref(false)
+const importVisible = ref(false)
 const editing = ref<TestCase | null>(null)
 onMounted(async () => { modules.value = await fetchModuleTree('p-1'); load() })
 </script>
