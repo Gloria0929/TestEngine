@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import { bootstrapMock } from './mocks/browser'
 import { i18n } from './locales'
+import { permission } from './directives/permission'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -16,6 +17,7 @@ app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
 app.use(i18n)
+app.directive('permission', permission)
 for (const [key, comp] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, comp)
 }
