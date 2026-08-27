@@ -8,7 +8,9 @@ export function fail(code: number, message: string): ApiResult<null> {
   return { code, message, data: null }
 }
 export function page<T>(list: T[], query: PageQuery): PageResult<T> {
-  const { pageNum, pageSize, keyword } = query
+  const pageNum = Number(query.pageNum) || 1
+  const pageSize = Number(query.pageSize) || 10
+  const { keyword } = query
   let filtered = list
   if (keyword) {
     filtered = filtered.filter((it) =>
