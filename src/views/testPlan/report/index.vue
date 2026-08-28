@@ -49,21 +49,70 @@
             <el-tag :type="resultTag(row.result).type" size="small">{{ resultTag(row.result).label }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="90">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.result === 'FAIL' || row.result === 'BLOCK'"
+              type="primary"
+              link
+              @click="openBugDialog(row)"
+            >
+              转缺陷
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog v-model="bugDialogVisible" title="转缺陷" width="480px">
+      <el-form label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="bugTitle" />
+        </el-form-item>
+        <el-form-item label="严重程度">
+          <el-select v-model="bugSeverity" style="width: 100%">
+            <el-option v-for="s in severityOptions" :key="s.value" :label="s.label" :value="s.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="处理人">
+          <el-input v-model="bugAssignee" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="bugDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="onSubmitBug">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import { fetchPlanReport, exportPlanReport, sharePlanReport } from '@/api/testPlan'
-import type { PlanReport, ExecuteResult } from '@/types/models'
+import { createBug } from '@/api/bug'
+import type { PlanReport, ExecuteResult, BugSeverity } from '@/types/models'
+
+type ResultRow = PlanReport['results'][number]
 
 const route = useRoute()
+const router = useRouter()
 const report = ref<PlanReport | null>(null)
+const bugDialogVisible = ref(false)
+const currentRow = ref<ResultRow | null>(null)
+const bugTitle = ref('')
+const bugSeverity = ref<BugSeverity>('MAJOR')
+const bugAssignee = ref('')
+
+const severityOptions: Array<{ value: BugSeverity; label: string }> = [
+  { value: 'BLOCKER', label: '阻塞' },
+  { value: 'CRITICAL', label: '严重' },
+  { value: 'MAJOR', label: '主要' },
+  { value: 'MINOR', label: '次要' },
+  { value: 'TRIVIAL', label: '轻微' },
+]
 const loading = ref(false)
 const chartRef = ref<HTMLDivElement>()
 let chart: echarts.ECharts | null = null
@@ -121,6 +170,31 @@ async function onShare() {
   } catch {
     ElMessage.error('复制失败，请手动复制：' + res.shareUrl)
   }
+}
+
+function openBugDialog(row: ResultRow) {
+  currentRow.value = row
+  bugTitle.value = `[${planName.value}] 失败用例：${row.caseName}`
+  bugSeverity.value = 'MAJOR'
+  bugAssignee.value = ''
+  bugDialogVisible.value = true
+}
+
+async function onSubmitBug() {
+  if (!currentRow.value) return
+  await createBug({
+    projectId: 'p-1',
+    title: bugTitle.value,
+    severity: bugSeverity.value,
+    status: 'NEW',
+    assignee: bugAssignee.value,
+    reporter: 'Administrator',
+    description: '',
+    moduleId: '',
+  })
+  ElMessage.success('已转缺陷')
+  bugDialogVisible.value = false
+  router.push('/bug/list')
 }
 
 onMounted(load)
