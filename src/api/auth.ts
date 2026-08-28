@@ -8,3 +8,9 @@ export function login(payload: LoginPayload): Promise<LoginResult> {
 export function logout(): Promise<null> {
   return request({ url: '/api/auth/logout', method: 'post' })
 }
+export function updateProfile(data: { name: string; email: string }): Promise<null> {
+  return request({ url: '/api/auth/profile', method: 'put', data })
+}
+export function changePassword(data: { oldPassword: string; newPassword: string }): Promise<null> {
+  return request({ url: '/api/auth/password', method: 'post', data })
+}

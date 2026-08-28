@@ -11,4 +11,6 @@ export const authHandlers = [
     return HttpResponse.json(ok({ token: `mock-token-${u.id}`, user: toPublicUser(u), permissions: u.permissions }))
   }),
   http.post('/api/auth/logout', () => HttpResponse.json(ok(null))),
+  http.put('/api/auth/profile', () => HttpResponse.json(ok(null))),
+  http.post('/api/auth/password', () => HttpResponse.json(ok(null))),
 ]

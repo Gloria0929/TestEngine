@@ -43,6 +43,7 @@ export const routes: RouteRecordRaw[] = [
       { path: 'setting/org/integration', name: 'OrgIntegration', component: () => import('@/views/setting/org/integration/index.vue'), meta: { permission: 'system:view' } },
       { path: 'setting/org/project', name: 'OrgProject', component: () => import('@/views/setting/org/project/index.vue'), meta: { permission: 'system:view' } },
       { path: 'personal/profile', name: 'PersonalProfile', component: () => import('@/views/personal/profile/index.vue') },
+      { path: 'personal/recycle', name: 'PersonalRecycle', component: () => import('@/views/personal/recycle/index.vue') },
     ],
   },
   { path: '/403', name: 'Forbidden', component: () => import('@/views/error/403.vue'), meta: { public: true } },

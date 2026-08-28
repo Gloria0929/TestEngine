@@ -7,6 +7,7 @@ import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod
 let debugRequests = createDebugRequests()
 let definitions = createApiDefinitions()
 let scenarios = createScenarios()
+let scenarioRecycle: Scenario[] = []
 let reports: ApiReport[] = [
   { id: 'rp-1', name: '登录态通用场景', scenarioId: 'sc-1', status: 'PASS', duration: 812, createTime: '2026-08-27 08:00', steps: [
     { id: 'rs-1', name: '获取 Token', status: 'PASS', time: 210, request: 'POST /api/auth/login', response: '200 OK', assertion: 'status==200 通过', extract: 'token 已提取', console: ['> POST /api/auth/login', '< 200 OK'] },
@@ -116,7 +117,24 @@ export const apiTestHandlers = [
     return HttpResponse.json(ok(s))
   }),
   http.delete('/api/api-test/scenarios/:id', ({ params }) => {
-    scenarios = scenarios.filter((x) => x.id !== params.id)
+    const target = scenarios.find((x) => x.id === params.id)
+    if (target) {
+      scenarioRecycle.unshift(target)
+      scenarios = scenarios.filter((x) => x.id !== params.id)
+    }
+    return HttpResponse.json(ok(null))
+  }),
+  http.get('/api/api-test/scenarios/recycle', () => HttpResponse.json(ok(scenarioRecycle))),
+  http.post('/api/api-test/scenarios/recycle/:id/restore', ({ params }) => {
+    const target = scenarioRecycle.find((x) => x.id === params.id)
+    if (target) {
+      scenarioRecycle = scenarioRecycle.filter((x) => x.id !== params.id)
+      scenarios.unshift(target)
+    }
+    return HttpResponse.json(ok(null))
+  }),
+  http.delete('/api/api-test/scenarios/recycle/:id', ({ params }) => {
+    scenarioRecycle = scenarioRecycle.filter((x) => x.id !== params.id)
     return HttpResponse.json(ok(null))
   }),
   http.post('/api/api-test/scenarios/:id/execute', async ({ params }) => {
