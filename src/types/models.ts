@@ -86,3 +86,10 @@ export interface PlanReport {
 export interface ProjectMember { id: string; name: string; email: string; role: string; groupId: string }
 export interface UserGroup { id: string; name: string; builtin: boolean; permissions: string[] }
 export interface PermissionNode { id: string; name: string; children?: PermissionNode[] }
+export interface Environment { id: string; projectId: string; name: string; domain: string; variables: KeyValue[]; hosts: KeyValue[]; headers: KeyValue[] }
+export interface MessageConfig { id: string; type: '站内信' | '邮件' | '机器人'; enabled: boolean; receivers: string[] }
+export interface OperationLog { id: string; scope: string; object: string; action: string; user: string; time: string }
+export interface FileItem { id: string; name: string; type: string; size: number; repo: string; time: string }
+export interface ProjectTemplate { id: string; name: string; kind: '用例' | '缺陷'; fields: TemplateField[] }
+export interface TemplateField { id: string; key: string; label: string; required: boolean; type: 'text' | 'select' | 'textarea' }
+export interface Script { id: string; name: string; content: string; updateTime: string }

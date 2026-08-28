@@ -1,4 +1,4 @@
-import type { Project, ProjectMember, UserGroup, PermissionNode } from '@/types/models'
+import type { Project, ProjectMember, UserGroup, PermissionNode, Environment, MessageConfig, OperationLog, FileItem, ProjectTemplate, Script } from '@/types/models'
 
 export function createProjects(): Project[] {
   return [
@@ -35,5 +35,47 @@ export function createPermissionTree(): PermissionNode[] {
     ] },
     { id: 'testPlan', name: '测试计划', children: [{ id: 'testPlan:view', name: '查看' }] },
     { id: 'system', name: '系统设置', children: [{ id: 'system:view', name: '查看' }] },
+  ]
+}
+export function createEnvironments(): Environment[] {
+  return [
+    { id: 'env-1', projectId: 'p-1', name: '测试环境', domain: 'http://demo.testengine.io', variables: [{ key: 'token', value: 'abc123', enabled: true }], hosts: [], headers: [] },
+    { id: 'env-2', projectId: 'p-1', name: '预发环境', domain: 'https://pre.testengine.io', variables: [], hosts: [{ key: 'api.testengine.io', value: '10.0.0.8', enabled: true }], headers: [] },
+  ]
+}
+export function createLogs(): OperationLog[] {
+  return [
+    { id: 'l-1', scope: '用例', object: '登录用例', action: '删除', user: 'test', time: '2026-08-26 14:00' },
+    { id: 'l-2', scope: '场景', object: '登录态通用场景', action: '执行', user: 'Administrator', time: '2026-08-26 13:30' },
+  ]
+}
+export function createMessageConfigs(): MessageConfig[] {
+  return [
+    { id: 'm1', type: '站内信', enabled: true, receivers: ['test', 'dev'] },
+    { id: 'm2', type: '邮件', enabled: true, receivers: ['admin@testengine.io'] },
+    { id: 'm3', type: '机器人', enabled: false, receivers: [] },
+  ]
+}
+export function createTemplates(): ProjectTemplate[] {
+  return [
+    { id: 'tpl-1', name: '功能用例模板', kind: '用例', fields: [
+      { id: 'f-1', key: 'title', label: '用例标题', required: true, type: 'text' },
+      { id: 'f-2', key: 'precondition', label: '前置条件', required: false, type: 'textarea' },
+    ] },
+    { id: 'tpl-2', name: '缺陷模板', kind: '缺陷', fields: [
+      { id: 'f-3', key: 'severity', label: '严重程度', required: true, type: 'select' },
+    ] },
+  ]
+}
+export function createFiles(): FileItem[] {
+  return [
+    { id: 'file-1', name: '登录模块脚本.sql', type: 'SQL', size: 2048, repo: 'GitLab', time: '2026-08-26 10:00' },
+    { id: 'file-2', name: '测试数据.csv', type: 'CSV', size: 51200, repo: 'GitHub', time: '2026-08-25 09:00' },
+  ]
+}
+export function createScripts(): Script[] {
+  return [
+    { id: 'script-1', name: '登录前脚本', content: 'pm.environment.set("token", "abc");', updateTime: '2026-08-26 10:00' },
+    { id: 'script-2', name: '数据清理脚本', content: 'console.log("cleanup");', updateTime: '2026-08-25 09:00' },
   ]
 }
