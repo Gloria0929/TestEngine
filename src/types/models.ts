@@ -61,3 +61,12 @@ export interface ExecuteResponse {
   status: number; time: number; headers: Record<string, string>
   body: string; console: string[]
 }
+export interface ReportStep {
+  id: string; name: string; status: 'PASS' | 'FAIL'; time: number
+  request: string; response: string; assertion: string; extract: string
+  console: string[]
+}
+export interface ApiReport {
+  id: string; name: string; scenarioId: string; status: 'PASS' | 'FAIL'
+  duration: number; createTime: string; steps: ReportStep[]
+}

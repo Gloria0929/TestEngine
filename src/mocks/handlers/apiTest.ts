@@ -2,11 +2,17 @@
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
 import { createDebugRequests, createApiDefinitions, createScenarios } from '../seed/apiTest'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario } from '@/types/models'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario, ApiReport } from '@/types/models'
 
 let debugRequests = createDebugRequests()
 let definitions = createApiDefinitions()
 let scenarios = createScenarios()
+let reports: ApiReport[] = [
+  { id: 'rp-1', name: '登录态通用场景', scenarioId: 'sc-1', status: 'PASS', duration: 812, createTime: '2026-08-27 08:00', steps: [
+    { id: 'rs-1', name: '获取 Token', status: 'PASS', time: 210, request: 'POST /api/auth/login', response: '200 OK', assertion: 'status==200 通过', extract: 'token 已提取', console: ['> POST /api/auth/login', '< 200 OK'] },
+    { id: 'rs-2', name: '查询用户', status: 'PASS', time: 340, request: 'GET /api/user/info', response: '200 OK', assertion: 'status==200 通过', extract: '', console: ['> GET /api/user/info', '< 200 OK'] },
+  ] },
+]
 
 function parseCurl(text: string): DebugRequest {
   // 朴素按空白分词，处理常见 curl：
@@ -117,4 +123,6 @@ export const apiTestHandlers = [
     const s = scenarios.find((x) => x.id === params.id)
     return HttpResponse.json(ok({ scenarioId: params.id, status: s?.status === 'FAIL' ? 'FAIL' : 'PASS', duration: 1234, steps: s?.steps ?? [] }))
   }),
+  http.get('/api/api-test/reports', () => HttpResponse.json(ok(reports))),
+  http.get('/api/api-test/reports/:id', ({ params }) => HttpResponse.json(ok(reports.find((r) => r.id === params.id) ?? null))),
 ]
