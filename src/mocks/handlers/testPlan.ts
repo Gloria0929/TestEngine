@@ -2,10 +2,12 @@
 import { http, HttpResponse } from 'msw'
 import { ok, page } from '../utils'
 import { createPlans } from '../seed/testPlan'
+import { createCases } from '../seed/testCase'
 import type { PageQuery } from '@/types'
-import type { TestPlan } from '@/types/models'
+import type { TestPlan, PlanCaseResult } from '@/types/models'
 
 let plans = createPlans()
+let planCases: Record<string, PlanCaseResult[]> = {}
 
 export const testPlanHandlers = [
   http.get('/api/test-plan/list', ({ request }) => {
@@ -29,5 +31,14 @@ export const testPlanHandlers = [
     if (!src) return HttpResponse.json(ok(null))
     const cp = { ...src, id: 'tp-' + Date.now(), name: src.name + '（副本）' }
     plans.unshift(cp); return HttpResponse.json(ok(cp))
+  }),
+  http.get('/api/test-plan/:id/cases', ({ params }) => {
+    const result = planCases[params.id as string] ?? []
+    return HttpResponse.json(ok(createCases().slice(0, 4).map((c) => ({ ...c, result: result.find((r) => r.caseId === c.id)?.result ?? null }))))
+  }),
+  http.post('/api/test-plan/:id/results', async ({ params, request }) => {
+    const body = await request.json() as PlanCaseResult[]
+    planCases[params.id as string] = body
+    return HttpResponse.json(ok(null))
   }),
 ]

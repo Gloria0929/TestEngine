@@ -74,3 +74,5 @@ export interface MockRule {
   id: string; name: string; definitionId: string; method: HttpMethod
   path: string; match: KeyValue[]; responseStatus: number; responseBody: string; delay: number
 }
+export type ExecuteResult = 'PASS' | 'FAIL' | 'BLOCK' | 'SKIP'
+export interface PlanCaseResult { caseId: string; result: ExecuteResult; actual: string }
