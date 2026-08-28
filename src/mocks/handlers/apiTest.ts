@@ -77,6 +77,20 @@ export const apiTestHandlers = [
     definitions.unshift(d)
     return HttpResponse.json(ok(d))
   }),
+  http.put('/api/api-test/definitions/:id', async ({ params, request }) => {
+    const body = await request.json() as Partial<ApiDefinition>
+    definitions = definitions.map((d) => (d.id === params.id ? { ...d, ...body } : d))
+    return HttpResponse.json(ok(definitions.find((d) => d.id === params.id)))
+  }),
+  http.delete('/api/api-test/definitions/:id', ({ params }) => {
+    definitions = definitions.filter((d) => d.id !== params.id)
+    return HttpResponse.json(ok(null))
+  }),
+  http.post('/api/api-test/import-definition', async ({ request }) => {
+    const { text } = await request.json() as { text: string }
+    const count = text.split('\n').filter((l) => l.trim()).length
+    return HttpResponse.json(ok({ count }))
+  }),
   http.post('/api/api-test/import-curl', async ({ request }) => {
     const { text } = await request.json() as { text: string }
     return HttpResponse.json(ok(parseCurl(text)))

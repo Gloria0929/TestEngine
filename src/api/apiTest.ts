@@ -20,3 +20,12 @@ export function fetchApiDefinitions(): Promise<ApiDefinition[]> {
 export function createApiDefinition(data: Partial<ApiDefinition>): Promise<ApiDefinition> {
   return request({ url: '/api/api-test/definitions', method: 'post', data })
 }
+export function updateApiDefinition(id: string, data: Partial<ApiDefinition>): Promise<ApiDefinition> {
+  return request({ url: `/api/api-test/definitions/${id}`, method: 'put', data })
+}
+export function deleteApiDefinition(id: string): Promise<null> {
+  return request({ url: `/api/api-test/definitions/${id}`, method: 'delete' })
+}
+export function importDefinition(text: string): Promise<{ count: number }> {
+  return request({ url: '/api/api-test/import-definition', method: 'post', data: { text } })
+}
