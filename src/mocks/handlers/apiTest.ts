@@ -1,11 +1,12 @@
 // src/mocks/handlers/apiTest.ts
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
-import { createDebugRequests, createApiDefinitions } from '../seed/apiTest'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType } from '@/types/models'
+import { createDebugRequests, createApiDefinitions, createScenarios } from '../seed/apiTest'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario } from '@/types/models'
 
 let debugRequests = createDebugRequests()
 let definitions = createApiDefinitions()
+let scenarios = createScenarios()
 
 function parseCurl(text: string): DebugRequest {
   // 朴素按空白分词，处理常见 curl：
@@ -94,5 +95,26 @@ export const apiTestHandlers = [
   http.post('/api/api-test/import-curl', async ({ request }) => {
     const { text } = await request.json() as { text: string }
     return HttpResponse.json(ok(parseCurl(text)))
+  }),
+  http.get('/api/api-test/scenarios', () => HttpResponse.json(ok(scenarios))),
+  http.post('/api/api-test/scenarios', async ({ request }) => {
+    const body = await request.json() as Scenario
+    const i = scenarios.findIndex((x) => x.id === body.id)
+    if (i >= 0) {
+      scenarios[i] = { ...body }
+      return HttpResponse.json(ok(scenarios[i]))
+    }
+    const s = { ...body, id: 'sc-' + Date.now() }
+    scenarios.unshift(s)
+    return HttpResponse.json(ok(s))
+  }),
+  http.delete('/api/api-test/scenarios/:id', ({ params }) => {
+    scenarios = scenarios.filter((x) => x.id !== params.id)
+    return HttpResponse.json(ok(null))
+  }),
+  http.post('/api/api-test/scenarios/:id/execute', async ({ params }) => {
+    await new Promise((r) => setTimeout(r, 400))
+    const s = scenarios.find((x) => x.id === params.id)
+    return HttpResponse.json(ok({ scenarioId: params.id, status: s?.status === 'FAIL' ? 'FAIL' : 'PASS', duration: 1234, steps: s?.steps ?? [] }))
   }),
 ]

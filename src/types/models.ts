@@ -34,6 +34,10 @@ export interface ScenarioStep {
   enabled: boolean; children?: ScenarioStep[]
   config: Record<string, unknown>
 }
+export interface Scenario {
+  id: string; name: string; moduleId: string
+  status: 'DRAFT' | 'PASS' | 'FAIL'; steps: ScenarioStep[]
+}
 export interface TestPlan {
   id: string; projectId: string; name: string; status: 'DRAFT' | 'RUNNING' | 'DONE'
   owner: string; startTime: string; endTime: string; progress: number

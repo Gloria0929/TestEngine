@@ -1,6 +1,6 @@
 // src/api/apiTest.ts
 import { request } from '@/utils/request'
-import type { DebugRequest, ExecuteResponse, ApiDefinition } from '@/types/models'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, Scenario } from '@/types/models'
 
 export function fetchDebugRequests(): Promise<DebugRequest[]> {
   return request({ url: '/api/api-test/debug', method: 'get' })
@@ -28,4 +28,16 @@ export function deleteApiDefinition(id: string): Promise<null> {
 }
 export function importDefinition(text: string): Promise<{ count: number }> {
   return request({ url: '/api/api-test/import-definition', method: 'post', data: { text } })
+}
+export function fetchScenarios(): Promise<Scenario[]> {
+  return request({ url: '/api/api-test/scenarios', method: 'get' })
+}
+export function saveScenario(data: Scenario): Promise<Scenario> {
+  return request({ url: '/api/api-test/scenarios', method: 'post', data })
+}
+export function executeScenario(id: string): Promise<Record<string, unknown>> {
+  return request({ url: `/api/api-test/scenarios/${id}/execute`, method: 'post' })
+}
+export function deleteScenario(id: string): Promise<null> {
+  return request({ url: `/api/api-test/scenarios/${id}`, method: 'delete' })
 }
