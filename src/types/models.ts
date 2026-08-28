@@ -83,3 +83,6 @@ export interface PlanReport {
   results: Array<{ caseName: string; type: 'manual' | 'auto'; result: ExecuteResult }>
   shareUrl: string; expireAt: string
 }
+export interface ProjectMember { id: string; name: string; email: string; role: string; groupId: string }
+export interface UserGroup { id: string; name: string; builtin: boolean; permissions: string[] }
+export interface PermissionNode { id: string; name: string; children?: PermissionNode[] }
