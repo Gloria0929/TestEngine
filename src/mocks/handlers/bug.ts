@@ -24,7 +24,10 @@ export const bugHandlers = [
   }),
   http.post('/api/bug', async ({ request }) => {
     const body = await request.json() as Bug
-    const b = { ...body, id: 'b-' + Date.now() }
+    const now = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const createTime = body.createTime || `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
+    const b = { ...body, id: 'b-' + Date.now(), createTime }
     bugs.unshift(b)
     return HttpResponse.json(ok(b))
   }),
