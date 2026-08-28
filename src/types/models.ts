@@ -76,3 +76,10 @@ export interface MockRule {
 }
 export type ExecuteResult = 'PASS' | 'FAIL' | 'BLOCK' | 'SKIP'
 export interface PlanCaseResult { caseId: string; result: ExecuteResult; actual: string }
+export interface PlanReport {
+  id: string; planId: string; name: string; progress: number; passRate: number
+  total: number; passed: number; failed: number; blocked: number; skipped: number
+  failDistribution: Array<{ module: string; count: number }>
+  results: Array<{ caseName: string; type: 'manual' | 'auto'; result: ExecuteResult }>
+  shareUrl: string; expireAt: string
+}

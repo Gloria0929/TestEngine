@@ -1,7 +1,7 @@
 // src/api/testPlan.ts
 import { request } from '@/utils/request'
 import type { PageQuery, PageResult } from '@/types'
-import type { TestPlan, TestCase, ExecuteResult, PlanCaseResult } from '@/types/models'
+import type { TestPlan, TestCase, ExecuteResult, PlanCaseResult, PlanReport } from '@/types/models'
 
 export function fetchPlans(query: PageQuery): Promise<PageResult<TestPlan>> {
   return request({ url: '/api/test-plan/list', method: 'get', params: query })
@@ -23,4 +23,13 @@ export function fetchPlanCases(planId: string): Promise<Array<TestCase & { resul
 }
 export function submitCaseResult(planId: string, results: PlanCaseResult[]): Promise<null> {
   return request({ url: `/api/test-plan/${planId}/results`, method: 'post', data: results })
+}
+export function fetchPlanReport(planId: string): Promise<PlanReport> {
+  return request({ url: `/api/test-plan/${planId}/report`, method: 'get' })
+}
+export function exportPlanReport(planId: string): Promise<{ url: string }> {
+  return request({ url: `/api/test-plan/${planId}/report/export`, method: 'post' })
+}
+export function sharePlanReport(planId: string): Promise<{ shareUrl: string; expireAt: string }> {
+  return request({ url: `/api/test-plan/${planId}/report/share`, method: 'post' })
 }
