@@ -96,3 +96,4 @@ export interface Script { id: string; name: string; content: string; updateTime:
 export interface SysUser { id: string; username: string; name: string; email: string; role: string; enabled: boolean }
 export interface SysParam { id: string; key: string; value: string; description: string }
 export interface Plugin { id: string; name: string; type: '协议' | '缺陷'; version: string; enabled: boolean }
+export interface Integration { id: string; name: string; type: 'Jira' | '禅道' | 'TAPD'; enabled: boolean; description: string }

@@ -1,12 +1,15 @@
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
-import type { SysUser, SysParam, Plugin, Organization } from '@/types/models'
-import { createSysUsers, createSysParams, createPlugins, createSysOrgs } from '../seed/setting'
+import type { SysUser, SysParam, Plugin, Organization, ProjectMember, UserGroup, Integration } from '@/types/models'
+import { createSysUsers, createSysParams, createPlugins, createSysOrgs, createOrgMembers, createOrgGroups, createIntegrations } from '../seed/setting'
 
 let sysUsers = createSysUsers()
 let sysParams = createSysParams()
 let plugins = createPlugins()
 let sysOrgs = createSysOrgs()
+let orgMembers = createOrgMembers()
+let orgGroups = createOrgGroups()
+let integrations = createIntegrations()
 
 export const settingHandlers = [
   http.get('/api/setting/users', () => HttpResponse.json(ok(sysUsers))),
@@ -62,5 +65,34 @@ export const settingHandlers = [
     }
     sysOrgs.push(org)
     return HttpResponse.json(ok(org))
+  }),
+  http.get('/api/setting/org-members', () => HttpResponse.json(ok(orgMembers))),
+  http.post('/api/setting/org-members', async ({ request }) => {
+    const body = await request.json() as Partial<ProjectMember>
+    const member: ProjectMember = {
+      id: 'om-' + Date.now(),
+      name: body.name ?? '',
+      email: body.email ?? '',
+      role: body.role ?? '组织成员',
+      groupId: body.groupId ?? '',
+    }
+    orgMembers.push(member)
+    return HttpResponse.json(ok(member))
+  }),
+  http.delete('/api/setting/org-members/:id', ({ params }) => {
+    orgMembers = orgMembers.filter((m) => m.id !== params.id)
+    return HttpResponse.json(ok(null))
+  }),
+  http.get('/api/setting/org-groups', () => HttpResponse.json(ok(orgGroups))),
+  http.put('/api/setting/org-groups/:id/permissions', async ({ params, request }) => {
+    const { permissions } = await request.json() as { permissions: string[] }
+    orgGroups = orgGroups.map((g) => (g.id === params.id ? { ...g, permissions } : g))
+    return HttpResponse.json(ok(null))
+  }),
+  http.get('/api/setting/integrations', () => HttpResponse.json(ok(integrations))),
+  http.put('/api/setting/integrations/:id', async ({ params, request }) => {
+    const body = await request.json() as { enabled: boolean }
+    integrations = integrations.map((it) => (it.id === params.id ? { ...it, enabled: body.enabled } : it))
+    return HttpResponse.json(ok(integrations.find((it) => it.id === params.id) ?? null))
   }),
 ]
