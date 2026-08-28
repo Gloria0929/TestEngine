@@ -1,6 +1,6 @@
 // src/api/apiTest.ts
 import { request } from '@/utils/request'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, Scenario, ApiReport } from '@/types/models'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, Scenario, ApiReport, MockRule } from '@/types/models'
 
 export function fetchDebugRequests(): Promise<DebugRequest[]> {
   return request({ url: '/api/api-test/debug', method: 'get' })
@@ -46,4 +46,16 @@ export function fetchApiReports(): Promise<ApiReport[]> {
 }
 export function fetchApiReport(id: string): Promise<ApiReport> {
   return request({ url: `/api/api-test/reports/${id}`, method: 'get' })
+}
+export function fetchMockRules(): Promise<MockRule[]> {
+  return request({ url: '/api/api-test/mock', method: 'get' })
+}
+export function saveMockRule(data: MockRule): Promise<MockRule> {
+  return request({ url: '/api/api-test/mock', method: 'post', data })
+}
+export function updateMockRule(id: string, data: Partial<MockRule>): Promise<MockRule> {
+  return request({ url: `/api/api-test/mock/${id}`, method: 'put', data })
+}
+export function deleteMockRule(id: string): Promise<null> {
+  return request({ url: `/api/api-test/mock/${id}`, method: 'delete' })
 }

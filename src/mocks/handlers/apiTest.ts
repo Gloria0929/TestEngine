@@ -1,8 +1,8 @@
 // src/mocks/handlers/apiTest.ts
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
-import { createDebugRequests, createApiDefinitions, createScenarios } from '../seed/apiTest'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario, ApiReport } from '@/types/models'
+import { createDebugRequests, createApiDefinitions, createScenarios, createMockRules } from '../seed/apiTest'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario, ApiReport, MockRule } from '@/types/models'
 
 let debugRequests = createDebugRequests()
 let definitions = createApiDefinitions()
@@ -13,6 +13,7 @@ let reports: ApiReport[] = [
     { id: 'rs-2', name: '查询用户', status: 'PASS', time: 340, request: 'GET /api/user/info', response: '200 OK', assertion: 'status==200 通过', extract: '', console: ['> GET /api/user/info', '< 200 OK'] },
   ] },
 ]
+let mockRules = createMockRules()
 
 function parseCurl(text: string): DebugRequest {
   // 朴素按空白分词，处理常见 curl：
@@ -125,4 +126,20 @@ export const apiTestHandlers = [
   }),
   http.get('/api/api-test/reports', () => HttpResponse.json(ok(reports))),
   http.get('/api/api-test/reports/:id', ({ params }) => HttpResponse.json(ok(reports.find((r) => r.id === params.id) ?? null))),
+  http.get('/api/api-test/mock', () => HttpResponse.json(ok(mockRules))),
+  http.post('/api/api-test/mock', async ({ request }) => {
+    const body = await request.json() as MockRule
+    const r = { ...body, id: 'mk-' + Date.now() }
+    mockRules.unshift(r)
+    return HttpResponse.json(ok(r))
+  }),
+  http.put('/api/api-test/mock/:id', async ({ params, request }) => {
+    const body = await request.json() as Partial<MockRule>
+    mockRules = mockRules.map((r) => (r.id === params.id ? { ...r, ...body } : r))
+    return HttpResponse.json(ok(mockRules.find((r) => r.id === params.id)))
+  }),
+  http.delete('/api/api-test/mock/:id', ({ params }) => {
+    mockRules = mockRules.filter((r) => r.id !== params.id)
+    return HttpResponse.json(ok(null))
+  }),
 ]

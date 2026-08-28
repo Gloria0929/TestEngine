@@ -70,3 +70,7 @@ export interface ApiReport {
   id: string; name: string; scenarioId: string; status: 'PASS' | 'FAIL'
   duration: number; createTime: string; steps: ReportStep[]
 }
+export interface MockRule {
+  id: string; name: string; definitionId: string; method: HttpMethod
+  path: string; match: KeyValue[]; responseStatus: number; responseBody: string; delay: number
+}

@@ -1,5 +1,5 @@
 // src/mocks/seed/apiTest.ts
-import type { DebugRequest, ApiDefinition, Scenario } from '@/types/models'
+import type { DebugRequest, ApiDefinition, Scenario, MockRule } from '@/types/models'
 
 export function createDebugRequests(): DebugRequest[] {
   return [
@@ -31,5 +31,11 @@ export function createScenarios(): Scenario[] {
       ] },
       { id: 'st-3', name: '等待 1s', type: 'WAIT', enabled: true, config: { seconds: 1 } },
     ] },
+  ]
+}
+
+export function createMockRules(): MockRule[] {
+  return [
+    { id: 'mk-1', name: '用户信息 Mock', definitionId: 'a-1', method: 'GET', path: '/api/user/info', match: [], responseStatus: 200, responseBody: '{"code":0,"data":{"id":1,"name":"mock-user"}}', delay: 0 },
   ]
 }
