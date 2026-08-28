@@ -36,6 +36,8 @@ export const routes: RouteRecordRaw[] = [
       { path: 'bug/list', name: 'BugList', component: () => import('@/views/bug/list/index.vue'), meta: { permission: 'bug:view' } },
       { path: 'setting/system/user', name: 'SysUser', component: () => import('@/views/setting/system/user/index.vue'), meta: { permission: 'system:view' } },
       { path: 'setting/system/org', name: 'SysOrg', component: () => import('@/views/setting/system/org/index.vue'), meta: { permission: 'system:view' } },
+      { path: 'setting/system/param', name: 'SysParam', component: () => import('@/views/setting/system/param/index.vue'), meta: { permission: 'system:view' } },
+      { path: 'setting/system/plugin', name: 'SysPlugin', component: () => import('@/views/setting/system/plugin/index.vue'), meta: { permission: 'system:view' } },
       { path: 'setting/org/member', name: 'OrgMember', component: () => import('@/views/setting/org/member/index.vue'), meta: { permission: 'system:view' } },
       { path: 'personal/profile', name: 'PersonalProfile', component: () => import('@/views/personal/profile/index.vue') },
     ],

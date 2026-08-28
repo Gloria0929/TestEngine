@@ -27,6 +27,20 @@ let scripts = createScripts()
 
 export const projectHandlers = [
   http.get('/api/project/list', () => HttpResponse.json(ok(projects))),
+  http.post('/api/project', async ({ request }) => {
+    const body = await request.json() as Partial<Project>
+    const project: Project = {
+      id: 'p-' + Date.now(),
+      orgId: body.orgId ?? '100001',
+      name: body.name ?? '',
+      description: body.description ?? '',
+      createTime: body.createTime ?? '',
+      members: body.members ?? 0,
+      caseCount: body.caseCount ?? 0,
+    }
+    projects.push(project)
+    return HttpResponse.json(ok(project))
+  }),
   http.get('/api/project/groups', () => HttpResponse.json(ok(groups))),
   http.get('/api/project/permission-tree', () => HttpResponse.json(ok(createPermissionTree()))),
 

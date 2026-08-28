@@ -93,3 +93,6 @@ export interface FileItem { id: string; name: string; type: string; size: number
 export interface ProjectTemplate { id: string; name: string; kind: '用例' | '缺陷'; fields: TemplateField[] }
 export interface TemplateField { id: string; key: string; label: string; required: boolean; type: 'text' | 'select' | 'textarea' }
 export interface Script { id: string; name: string; content: string; updateTime: string }
+export interface SysUser { id: string; username: string; name: string; email: string; role: string; enabled: boolean }
+export interface SysParam { id: string; key: string; value: string; description: string }
+export interface Plugin { id: string; name: string; type: '协议' | '缺陷'; version: string; enabled: boolean }

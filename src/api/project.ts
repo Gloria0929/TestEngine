@@ -16,6 +16,9 @@ import type {
 export function fetchProjects(params: { orgId: string }): Promise<Project[]> {
   return request({ url: '/api/project/list', method: 'get', params })
 }
+export function createProject(data: Partial<Project>): Promise<Project> {
+  return request({ url: '/api/project', method: 'post', data })
+}
 export function fetchProject(id: string): Promise<Project> {
   return request({ url: `/api/project/${id}`, method: 'get' })
 }
