@@ -1,7 +1,6 @@
 // src/api/workstation.ts
 import { request } from '@/utils/request'
-import type { Notification } from '@/types/models'
-import type { TrendPoint, TodoItem, FollowItem } from '@/mocks/seed/workstation'
+import type { Notification, TrendPoint, TodoItem, FollowItem } from '@/types/models'
 
 export interface OverviewStats { caseCount: number; reviewCount: number; apiCount: number; scenarioCount: number }
 

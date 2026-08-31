@@ -15,8 +15,8 @@
       <TrendChart :data="trend" />
     </el-card>
     <el-card shadow="never" class="todos">
-      <template #header>{{ t('menu.workstation') }} · {{ t('common.todo') }}</template>
-      <div v-if="todos.length === 0" class="empty">{{ t('common.empty') }}</div>
+      <template #header>{{ '工作台' }} · {{ '待办' }}</template>
+      <div v-if="todos.length === 0" class="empty">{{ '暂无数据' }}</div>
       <div v-for="td in todos" :key="td.id" class="todo-row" @click="router.push(td.targetUrl)">
         <span class="type">{{ td.type }}</span>
         <span class="title">{{ td.title }}</span>
@@ -29,14 +29,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import StatCard from '@/components/StatCard.vue'
 import TrendChart from '@/components/TrendChart.vue'
 import { fetchOverview, fetchTrend, fetchTodos } from '@/api/workstation'
 import type { OverviewStats } from '@/api/workstation'
-import type { TrendPoint, TodoItem } from '@/mocks/seed/workstation'
+import type { TrendPoint, TodoItem } from '@/types/models'
 
-const { t } = useI18n()
 const router = useRouter()
 const range = ref('7d')
 const overview = ref<OverviewStats>({ caseCount: 0, reviewCount: 0, apiCount: 0, scenarioCount: 0 })

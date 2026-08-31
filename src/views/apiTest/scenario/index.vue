@@ -79,8 +79,11 @@ function onAddModule() { ElMessage.info('模块管理请到用例模块树') }
 
 async function load() {
   loading.value = true
-  scenarios.value = await fetchScenarios()
-  loading.value = false
+  try {
+    scenarios.value = await fetchScenarios()
+  } finally {
+    loading.value = false
+  }
 }
 
 function onCreate() {

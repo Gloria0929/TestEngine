@@ -34,28 +34,42 @@ function parseCurl(text: string): DebugRequest {
   let first = true
   for (const raw of tokens) {
     const t = strip(raw)
-    if (first) { first = false; if (t.toLowerCase() === 'curl') continue }
+    if (first) {
+      first = false
+      if (t.toLowerCase() === 'curl') continue
+    }
     if (pendingFlag) {
       if (pendingFlag === 'header') {
         const idx = t.indexOf(':')
         headers.push({ key: idx >= 0 ? t.slice(0, idx) : t, value: idx >= 0 ? t.slice(idx + 1).trim() : '', enabled: true })
       } else if (pendingFlag === 'data') {
-        body = t; bodyType = 'raw'; hasData = true
+        body = t
+        bodyType = 'raw'
+        hasData = true
       } else if (pendingFlag === 'request') {
         method = t.toUpperCase()
       }
       pendingFlag = ''
       continue
     }
-    if (t === '-H' || t === '--header') { pendingFlag = 'header'; continue }
-    if (t === '-d' || t === '--data' || t === '--data-raw') { pendingFlag = 'data'; continue }
-    if (t === '-X' || t === '--request') { pendingFlag = 'request'; continue }
+    if (t === '-H' || t === '--header') {
+      pendingFlag = 'header'
+      continue
+    }
+    if (t === '-d' || t === '--data' || t === '--data-raw') {
+      pendingFlag = 'data'
+      continue
+    }
+    if (t === '-X' || t === '--request') {
+      pendingFlag = 'request'
+      continue
+    }
     if (t.startsWith('-')) continue
     if (!url) url = t
   }
   return {
     id: '', name: '导入请求', method: (method || (hasData ? 'POST' : 'GET')) as HttpMethod, url, protocol: 'HTTP',
-    headers, query: [], bodyType, body, authType: 'none', auth: {},
+    headers, query: [], bodyType, body, bodyParams: [], authType: 'none', auth: {},
   }
 }
 
@@ -74,8 +88,20 @@ export const apiTestHandlers = [
       status: 200,
       time: Math.floor(120 + Math.random() * 200),
       headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: JSON.stringify({ code: 0, message: 'ok', data: { mock: true, method: req.method, url: req.url } }, null, 2),
-      console: [`> ${req.method} ${req.url}`, '< 200 OK (mock)'],
+      body: JSON.stringify({
+        code: 0,
+        message: 'ok',
+        data: {
+          mock: true,
+          method: req.method,
+          url: req.url,
+          bodyType: req.bodyType,
+          body: req.bodyType === 'raw' ? req.body : req.bodyParams,
+          headers: req.headers,
+          auth: req.auth,
+        },
+      }, null, 2),
+      console: [`> ${req.method} ${req.url}`, '< 200 OK (mock 回显)'],
     }
     return HttpResponse.json(ok(resp))
   }),

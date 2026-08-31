@@ -126,8 +126,11 @@ const tree = computed(() => {
 
 async function load() {
   loading.value = true
-  definitions.value = await fetchApiDefinitions()
-  loading.value = false
+  try {
+    definitions.value = await fetchApiDefinitions()
+  } finally {
+    loading.value = false
+  }
 }
 
 function openCreate() {

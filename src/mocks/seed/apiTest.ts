@@ -3,9 +3,9 @@ import type { DebugRequest, ApiDefinition, Scenario, MockRule } from '@/types/mo
 
 export function createDebugRequests(): DebugRequest[] {
   return [
-    { id: 'd-1', name: '获取用户信息', method: 'GET', url: 'http://demo.testengine.io/api/user/info', protocol: 'HTTP', headers: [{ key: 'Authorization', value: 'Bearer ${token}', enabled: true }], query: [], bodyType: 'none', body: '', authType: 'none', auth: {} },
-    { id: 'd-2', name: '用户登录', method: 'POST', url: 'http://demo.testengine.io/api/auth/login', protocol: 'HTTP', headers: [{ key: 'Content-Type', value: 'application/json', enabled: true }], query: [], bodyType: 'raw', body: '{"username":"admin","password":"123456"}', authType: 'none', auth: {} },
-    { id: 'd-3', name: '创建订单', method: 'POST', url: 'http://demo.testengine.io/api/order/create', protocol: 'HTTP', headers: [], query: [], bodyType: 'form-data', body: '', authType: 'bearer', auth: { token: '${token}' } },
+    { id: 'd-1', name: '获取用户信息', method: 'GET', url: 'http://demo.testengine.io/api/user/info', protocol: 'HTTP', headers: [{ key: 'Authorization', value: 'Bearer ${token}', enabled: true }], query: [], bodyType: 'none', body: '', bodyParams: [], authType: 'none', auth: {} },
+    { id: 'd-2', name: '用户登录', method: 'POST', url: 'http://demo.testengine.io/api/auth/login', protocol: 'HTTP', headers: [{ key: 'Content-Type', value: 'application/json', enabled: true }], query: [], bodyType: 'raw', body: '{"username":"admin","password":"123456"}', bodyParams: [], authType: 'none', auth: {} },
+    { id: 'd-3', name: '创建订单', method: 'POST', url: 'http://demo.testengine.io/api/order/create', protocol: 'HTTP', headers: [], query: [], bodyType: 'form-data', body: '', bodyParams: [{ key: 'productId', value: '1001', enabled: true }, { key: 'quantity', value: '2', enabled: true }], authType: 'bearer', auth: { token: '${token}' } },
   ]
 }
 

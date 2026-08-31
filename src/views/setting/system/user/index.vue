@@ -80,8 +80,11 @@ async function onReset(row: SysUser) {
 }
 async function load() {
   loading.value = true
-  users.value = await fetchSysUsers()
-  loading.value = false
+  try {
+    users.value = await fetchSysUsers()
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

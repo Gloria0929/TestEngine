@@ -1,20 +1,85 @@
 <template>
-  <div>
-    <div v-for="(kv, i) in modelValue" :key="i" class="kv-row">
-      <el-input v-model="kv.key" placeholder="Key" />
-      <el-input v-model="kv.value" placeholder="Value" />
-      <el-checkbox v-model="kv.enabled" />
-      <el-icon @click="remove(i)"><Delete /></el-icon>
+  <div class="kv-editor">
+    <div class="kv-head">
+      <span class="col-check" />
+      <el-button v-if="showAdd" link type="primary" class="kv-add" @click="add"
+        >+ 新建</el-button
+      >
     </div>
-    <el-button link type="primary" @click="add">{{ t('common.add') }}</el-button>
+    <div v-for="(kv, i) in modelValue" :key="i" class="kv-row">
+      <el-checkbox v-model="kv.enabled" class="col-check" />
+      <el-input v-model="kv.key" placeholder="Key" class="col-key" />
+      <el-input v-model="kv.value" placeholder="Value" class="col-value" />
+      <el-icon class="col-action" @click="remove(i)"><Delete /></el-icon>
+    </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import type { KeyValue } from '@/types/models'
-const props = defineProps<{ modelValue: KeyValue[] }>()
-const emit = defineEmits<{ (e: 'update:modelValue', v: KeyValue[]): void }>()
-const { t } = useI18n()
-function add() { emit('update:modelValue', [...props.modelValue, { key: '', value: '', enabled: true }]) }
-function remove(i: number) { emit('update:modelValue', props.modelValue.filter((_, idx) => idx !== i)) }
+import { onMounted } from "vue";
+import type { KeyValue } from "@/types/models";
+const props = withDefaults(
+  defineProps<{ modelValue: KeyValue[]; showAdd?: boolean }>(),
+  {
+    showAdd: true,
+  },
+);
+const emit = defineEmits<{ (e: "update:modelValue", v: KeyValue[]): void }>();
+function add() {
+  emit("update:modelValue", [
+    ...props.modelValue,
+    { key: "", value: "", enabled: true },
+  ]);
+}
+function remove(i: number) {
+  emit(
+    "update:modelValue",
+    props.modelValue.filter((_, idx) => idx !== i),
+  );
+}
+onMounted(() => {
+  if (props.modelValue.length === 0) add();
+});
 </script>
+
+<style scoped>
+.kv-editor {
+  display: flex;
+  flex-direction: column;
+}
+.kv-head,
+.kv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kv-head {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.kv-row {
+  margin-bottom: 8px;
+}
+.col-check {
+  width: 24px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.col-action {
+  width: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--text-3);
+  transition: color 0.2s;
+}
+.col-action:hover {
+  color: var(--el-color-danger);
+}
+.kv-add {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+</style>

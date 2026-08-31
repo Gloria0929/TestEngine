@@ -16,7 +16,10 @@ export const testCaseHandlers = [
     const body = await request.json() as { name: string; parentId?: string }
     const node = { id: 'm-' + Date.now(), name: body.name, children: [] }
     if (body.parentId) {
-      const walk = (list: typeof modules) => list.forEach((m) => { if (m.id === body.parentId) m.children.push(node); else walk(m.children) })
+      const walk = (list: typeof modules) => list.forEach((m) => {
+        if (m.id === body.parentId) m.children.push(node)
+        else walk(m.children)
+      })
       walk(modules)
     } else modules.push(node)
     return HttpResponse.json(ok(node))
@@ -34,7 +37,10 @@ export const testCaseHandlers = [
   http.get('/api/test-case/recycle', () => HttpResponse.json(ok(recycleBin))),
   http.post('/api/test-case/recycle/:id/restore', ({ params }) => {
     const it = recycleBin.find((c) => c.id === params.id)
-    if (it) { cases.unshift(it); recycleBin = recycleBin.filter((c) => c.id !== params.id) }
+    if (it) {
+      cases.unshift(it)
+      recycleBin = recycleBin.filter((c) => c.id !== params.id)
+    }
     return HttpResponse.json(ok(null))
   }),
   http.delete('/api/test-case/recycle/:id', ({ params }) => {

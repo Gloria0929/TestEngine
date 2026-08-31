@@ -84,8 +84,11 @@ async function onRemove(row: ProjectMember) {
 }
 async function load() {
   loading.value = true
-  members.value = await fetchOrgMembers()
-  loading.value = false
+  try {
+    members.value = await fetchOrgMembers()
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

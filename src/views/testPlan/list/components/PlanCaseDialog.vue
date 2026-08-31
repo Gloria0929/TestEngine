@@ -40,10 +40,13 @@ const loading = ref(false)
 
 async function load() {
   loading.value = true
-  const res = await fetchCaseList({ pageNum: pageNum.value, pageSize: pageSize.value, keyword: keyword.value })
-  rows.value = res.list
-  total.value = res.total
-  loading.value = false
+  try {
+    const res = await fetchCaseList({ pageNum: pageNum.value, pageSize: pageSize.value, keyword: keyword.value })
+    rows.value = res.list
+    total.value = res.total
+  } finally {
+    loading.value = false
+  }
 }
 function onSearch() {
   pageNum.value = 1

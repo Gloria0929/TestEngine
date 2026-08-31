@@ -10,6 +10,7 @@ export type CaseLevel = 'P0' | 'P1' | 'P2' | 'P3'
 export type CaseStatus = 'DRAFT' | 'REVIEW' | 'READY'
 export interface TestCase {
   id: string; projectId: string; moduleId: string; name: string
+  testPoint: string
   precondition: string; steps: CaseStep[]; level: CaseLevel
   status: CaseStatus; executor: string; tags: string[]
   createUser: string; updateTime: string; follow: boolean
@@ -40,12 +41,16 @@ export interface Scenario {
 }
 export interface TestPlan {
   id: string; projectId: string; name: string; status: 'DRAFT' | 'RUNNING' | 'DONE'
-  owner: string; startTime: string; endTime: string; progress: number
+  owner: string; startTime: string; endTime: string; progress: number; passRate: number
+  group: string
 }
 export interface Notification {
   id: string; type: string; title: string; content: string
   read: boolean; createTime: string; targetUrl: string
 }
+export interface TrendPoint { date: string; cases: number; apis: number }
+export interface TodoItem { id: string; type: string; title: string; targetUrl: string; dueTime: string }
+export interface FollowItem { id: string; type: string; name: string; owner: string; updateTime: string }
 export interface Review { id: string; name: string; reviewers: string[]; status: 'PENDING' | 'PASSED' | 'REJECTED'; caseCount: number; caseIds: string[]; startTime: string; endTime: string }
 export interface ReviewDetail extends Review { cases: TestCase[] }
 
@@ -55,6 +60,7 @@ export interface DebugRequest {
   id: string; name: string; method: HttpMethod; url: string
   protocol: 'HTTP' | 'TCP' | 'SQL' | 'DUBBO'
   headers: KeyValue[]; query: KeyValue[]; bodyType: BodyType; body: string
+  bodyParams: KeyValue[]
   authType: 'none' | 'basic' | 'bearer' | 'cookie'; auth: Record<string, string>
 }
 export interface ExecuteResponse {
@@ -80,14 +86,15 @@ export interface PlanReport {
   id: string; planId: string; name: string; progress: number; passRate: number
   total: number; passed: number; failed: number; blocked: number; skipped: number
   failDistribution: Array<{ module: string; count: number }>
-  results: Array<{ caseName: string; type: 'manual' | 'auto'; result: ExecuteResult }>
+  results: Array<{ caseId: string; caseName: string; testPoint: string; level: CaseLevel; type: 'manual' | 'auto'; result: ExecuteResult }>
   shareUrl: string; expireAt: string
 }
 export interface ProjectMember { id: string; name: string; email: string; role: string; groupId: string }
-export interface UserGroup { id: string; name: string; builtin: boolean; permissions: string[] }
+export interface UserGroup { id: string; name: string; builtin: boolean; scope: 'internal' | 'project' | 'global'; memberCount: number; permissions: string[] }
+export interface GroupMember { id: string; name: string; email: string; phone?: string; adminFlag?: boolean }
 export interface PermissionNode { id: string; name: string; children?: PermissionNode[] }
 export interface Environment { id: string; projectId: string; name: string; domain: string; variables: KeyValue[]; hosts: KeyValue[]; headers: KeyValue[] }
-export interface MessageConfig { id: string; type: '站内信' | '邮件' | '机器人'; enabled: boolean; receivers: string[] }
+export interface MessageConfig { id: string; type: string; enabled: boolean; receivers: string[] }
 export interface OperationLog { id: string; scope: string; object: string; action: string; user: string; time: string }
 export interface FileItem { id: string; name: string; type: string; size: number; repo: string; time: string }
 export interface ProjectTemplate { id: string; name: string; kind: '用例' | '缺陷'; fields: TemplateField[] }

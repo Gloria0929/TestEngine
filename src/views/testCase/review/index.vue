@@ -79,8 +79,11 @@ const statusMap: Record<ReviewStatus, { text: string; type: 'warning' | 'success
 
 async function load() {
   loading.value = true
-  rows.value = await fetchReviews()
-  loading.value = false
+  try {
+    rows.value = await fetchReviews()
+  } finally {
+    loading.value = false
+  }
 }
 async function openDrawer(row: Review) {
   current.value = row

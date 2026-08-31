@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as echarts from 'echarts'
-import type { TrendPoint } from '@/mocks/seed/workstation'
+import type { TrendPoint } from '@/types/models'
 
 const props = defineProps<{ data: TrendPoint[] }>()
 const chartRef = ref<HTMLDivElement>()
@@ -20,7 +20,7 @@ function render() {
     xAxis: { type: 'category', data: props.data.map((d) => d.date) },
     yAxis: { type: 'value' },
     series: [
-      { name: '用例数', type: 'line', smooth: true, data: props.data.map((d) => d.cases), itemStyle: { color: '#0d9488' } },
+      { name: '用例数', type: 'line', smooth: true, data: props.data.map((d) => d.cases), itemStyle: { color: '#1E40AF' } },
       { name: '接口数', type: 'line', smooth: true, data: props.data.map((d) => d.apis), itemStyle: { color: '#64748b' } },
     ],
   })

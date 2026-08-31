@@ -30,8 +30,8 @@ export function createOrgMembers(): ProjectMember[] {
 }
 export function createOrgGroups(): UserGroup[] {
   return [
-    { id: 'og-1', name: '组织管理员', builtin: true, permissions: ['project:view', 'testCase:view', 'testCase:create', 'apiTest:view', 'bug:view', 'system:view'] },
-    { id: 'og-2', name: '组织成员', builtin: true, permissions: ['project:view', 'testCase:view', 'apiTest:view', 'bug:view'] },
+    { id: 'og-1', name: '组织管理员', builtin: true, scope: 'internal', memberCount: 1, permissions: ['project:view', 'testCase:view', 'testCase:create', 'apiTest:view', 'bug:view', 'system:view'] },
+    { id: 'og-2', name: '组织成员', builtin: true, scope: 'project', memberCount: 2, permissions: ['project:view', 'testCase:view', 'apiTest:view', 'bug:view'] },
   ]
 }
 export function createIntegrations(): Integration[] {

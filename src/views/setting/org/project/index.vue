@@ -23,8 +23,11 @@ const loading = ref(false)
 
 async function load() {
   loading.value = true
-  projects.value = await fetchProjects({ orgId: '100001' })
-  loading.value = false
+  try {
+    projects.value = await fetchProjects({ orgId: '100001' })
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

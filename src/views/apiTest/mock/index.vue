@@ -96,8 +96,11 @@ function statusType(code: number): TagType {
 
 async function load() {
   loading.value = true
-  rules.value = await fetchMockRules()
-  loading.value = false
+  try {
+    rules.value = await fetchMockRules()
+  } finally {
+    loading.value = false
+  }
 }
 
 function openCreate() {

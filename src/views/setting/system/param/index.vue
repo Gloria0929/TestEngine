@@ -62,8 +62,11 @@ async function onSave() {
 }
 async function load() {
   loading.value = true
-  params.value = await fetchSysParams()
-  loading.value = false
+  try {
+    params.value = await fetchSysParams()
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

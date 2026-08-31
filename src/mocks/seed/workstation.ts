@@ -1,9 +1,5 @@
 // src/mocks/seed/workstation.ts
-import type { Notification } from '@/types/models'
-
-export interface TrendPoint { date: string; cases: number; apis: number }
-export interface TodoItem { id: string; type: string; title: string; targetUrl: string; dueTime: string }
-export interface FollowItem { id: string; type: string; name: string; owner: string; updateTime: string }
+import type { Notification, TrendPoint, TodoItem, FollowItem } from '@/types/models'
 
 export const overviewStats = { caseCount: 1284, reviewCount: 36, apiCount: 208, scenarioCount: 42 }
 

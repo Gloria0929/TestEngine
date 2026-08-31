@@ -30,8 +30,11 @@ function statusText(s: TestCase['status']) { return { DRAFT: '草稿', REVIEW: '
 
 async function load() {
   loading.value = true
-  rows.value = await fetchRecycle()
-  loading.value = false
+  try {
+    rows.value = await fetchRecycle()
+  } finally {
+    loading.value = false
+  }
 }
 async function onRestore(row: TestCase) {
   await restoreCase(row.id)

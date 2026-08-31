@@ -3,14 +3,14 @@
     <div class="left"><ModuleTree :modules="modules" :selected="moduleId" @select="onSelect" @add="onAddModule" /></div>
     <div class="right">
       <div class="toolbar">
-        <el-input v-model="query.keyword" :placeholder="t('common.search')" clearable style="width: 220px" @change="load" />
+        <el-input v-model="query.keyword" :placeholder="'搜索'" clearable style="width: 220px" @change="load" />
         <el-select v-model="level" placeholder="等级" clearable style="width: 120px" @change="load">
           <el-option v-for="lv in levels" :key="lv" :label="lv" :value="lv" />
         </el-select>
         <div class="spacer" />
-        <el-button v-permission="'testCase:create'" type="primary" @click="openEdit()">{{ t('common.add') }}</el-button>
-        <el-button @click="onExport">{{ t('common.export') }}</el-button>
-        <el-button @click="importVisible = true">{{ t('common.import') }}</el-button>
+        <el-button v-permission="'testCase:create'" type="primary" @click="openEdit()">{{ '新建' }}</el-button>
+        <el-button @click="onExport">{{ '导出' }}</el-button>
+        <el-button @click="importVisible = true">{{ '导入' }}</el-button>
       </div>
       <DataTable :columns="columns" :data="rows" :loading="loading" :total="total" :page="page"
         selection @page-change="onPage" @selection-change="(s) => selected = s">
@@ -18,8 +18,8 @@
         <template #col-level="{ row }"><el-tag size="small">{{ row.level }}</el-tag></template>
         <template #col-status="{ row }">{{ statusText(row.status) }}</template>
         <template #actions="{ row }">
-          <el-button link type="primary" @click="openEdit(row)">{{ t('common.edit') }}</el-button>
-          <el-button link type="danger" @click="onDelete(row)">{{ t('common.delete') }}</el-button>
+          <el-button link type="primary" @click="openEdit(row)">{{ '编辑' }}</el-button>
+          <el-button link type="danger" @click="onDelete(row)">{{ '删除' }}</el-button>
         </template>
       </DataTable>
     </div>
@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ModuleTree from '@/components/ModuleTree.vue'
 import DataTable, { type DataColumn } from '@/components/DataTable.vue'
@@ -41,7 +40,6 @@ import { fetchModuleTree, fetchCaseList, deleteCase } from '@/api/testCase'
 import { exportCases } from '@/utils/excel'
 import type { TestCase, ModuleNode } from '@/types/models'
 
-const { t } = useI18n()
 const router = useRouter()
 const modules = ref<ModuleNode[]>([])
 const moduleId = ref('')
@@ -69,18 +67,21 @@ function openEdit(row?: TestCase) { editVisible.value = true; editing.value = ro
 function openDetail(row: TestCase) { router.push(`/test-case/detail/${row.id}`) }
 function onExport() { exportCases(rows.value) }
 async function onDelete(row: TestCase) {
-  await ElMessageBox.confirm(t('common.deleteConfirm'), t('common.confirm'), { type: 'warning' })
+  await ElMessageBox.confirm('确认删除？删除后可在回收站恢复', '确认', { type: 'warning' })
   await deleteCase(row.id)
-  ElMessage.success(t('common.success'))
+  ElMessage.success('操作成功')
   load()
 }
 async function load() {
   loading.value = true
-  const params = { ...query, pageNum: page.pageNum, pageSize: page.pageSize, moduleId: moduleId.value || undefined, level: level.value || undefined }
-  const res = await fetchCaseList(params as never)
-  rows.value = res.list
-  total.value = res.total
-  loading.value = false
+  try {
+    const params = { ...query, pageNum: page.pageNum, pageSize: page.pageSize, moduleId: moduleId.value || undefined, level: level.value || undefined }
+    const res = await fetchCaseList(params as never)
+    rows.value = res.list
+    total.value = res.total
+  } finally {
+    loading.value = false
+  }
 }
 const editVisible = ref(false)
 const importVisible = ref(false)

@@ -24,19 +24,17 @@
         </el-form>
         <el-button type="primary" @click="saveCase">保存</el-button>
       </template>
-      <el-empty v-else :description="t('common.empty')" />
+      <el-empty v-else :description="'暂无数据'" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useI18n } from 'vue-i18n'
 import { fetchModuleTree, fetchCaseList, updateCase } from '@/api/testCase'
 import type { ModuleNode, TestCase, CaseLevel } from '@/types/models'
 
 type TreeNode = { id: string; name: string; type: 'module' | 'case' | 'step'; children: TreeNode[]; level?: CaseLevel; precondition?: string; description?: string; expected?: string; caseId?: string }
-const { t } = useI18n()
 const treeData = ref<TreeNode[]>([])
 const current = ref<TreeNode | null>(null)
 
@@ -75,7 +73,7 @@ async function saveCase() {
       await updateCase(node.caseId, { steps })
     }
   }
-  ElMessage.success(t('common.success'))
+  ElMessage.success('操作成功')
 }
 onMounted(async () => {
   const [modules, caseRes] = await Promise.all([fetchModuleTree('p-1'), fetchCaseList({ pageNum: 1, pageSize: 100 })])

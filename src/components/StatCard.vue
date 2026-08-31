@@ -12,9 +12,9 @@
 defineProps<{ label: string; value: number | string; delta?: string; icon?: string }>()
 </script>
 <style scoped>
-.stat-card { display: flex; align-items: center; gap: 12px; }
-.stat-icon { width: 44px; height: 44px; border-radius: 8px; background: var(--el-color-primary-light-9); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.value { font-size: 24px; font-weight: 700; }
+.stat-card { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.stat-icon { width: 40px; height: 40px; border-radius: var(--radius); background: var(--el-color-primary-light-9); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.value { font-size: 22px; font-weight: 600; color: var(--text-1); line-height: 1.2; }
 .label { font-size: 13px; color: var(--text-2); }
-.delta { font-size: 12px; color: var(--accent); }
+.delta { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: auto; }
 </style>

@@ -37,8 +37,11 @@ function onUpload(file: UploadFile) {
 }
 async function load() {
   loading.value = true
-  plugins.value = await fetchPlugins()
-  loading.value = false
+  try {
+    plugins.value = await fetchPlugins()
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

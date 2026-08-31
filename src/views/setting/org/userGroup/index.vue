@@ -55,9 +55,12 @@ async function onSave() {
 }
 async function load() {
   loading.value = true
-  groups.value = await fetchOrgGroups()
-  tree.value = await fetchPermissionTree()
-  loading.value = false
+  try {
+    groups.value = await fetchOrgGroups()
+    tree.value = await fetchPermissionTree()
+  } finally {
+    loading.value = false
+  }
 }
 onMounted(load)
 </script>

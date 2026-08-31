@@ -6,16 +6,16 @@
     </div>
     <div class="login-form">
       <el-card shadow="never">
-        <h2>{{ t('login.title') }}</h2>
+        <h2>{{ '账号登录' }}</h2>
         <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-          <el-form-item prop="username" :label="t('login.username')">
+          <el-form-item prop="username" :label="'用户名'">
             <el-input v-model="form.username" placeholder="Administrator" />
           </el-form-item>
-          <el-form-item prop="password" :label="t('login.password')">
+          <el-form-item prop="password" :label="'密码'">
             <el-input v-model="form.password" type="password" show-password @keyup.enter="onSubmit" />
           </el-form-item>
           <el-button type="primary" class="submit" :loading="loading" @click="onSubmit">
-            {{ t('login.submit') }}
+            {{ '登录' }}
           </el-button>
         </el-form>
       </el-card>
@@ -27,10 +27,8 @@
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance } from 'element-plus'
-import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 
-const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
@@ -48,7 +46,7 @@ async function onSubmit() {
   loading.value = true
   try {
     await userStore.login(form)
-    ElMessage.success(t('login.success'))
+    ElMessage.success('登录成功')
     router.replace((route.query.redirect as string) || '/workstation/home')
   } finally {
     loading.value = false
@@ -59,10 +57,10 @@ async function onSubmit() {
 <style scoped lang="scss">
 .login-wrap { height: 100vh; display: flex; }
 .login-brand {
-  flex: 1; background: var(--sb-bg); color: #fff;
+  flex: 1; background: var(--accent); color: #fff;
   display: flex; flex-direction: column; justify-content: center; padding: 0 80px;
   h1 { font-size: 44px; margin-bottom: 12px; }
-  p { color: #94a3b8; }
+  p { color: rgba(255,255,255,0.75); }
 }
 .login-form { width: 440px; display: flex; align-items: center; justify-content: center; background: var(--surface); }
 .submit { width: 100%; margin-top: 8px; }
