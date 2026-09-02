@@ -1,6 +1,6 @@
 // src/api/apiTest.ts
 import { request } from '@/utils/request'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, Scenario, ApiReport, MockRule } from '@/types/models'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, Scenario, ApiReport } from '@/types/models'
 
 export function fetchDebugRequests(): Promise<DebugRequest[]> {
   return request({ url: '/api/api-test/debug', method: 'get' })
@@ -17,6 +17,13 @@ export function importCurl(text: string): Promise<DebugRequest> {
 export function fetchApiDefinitions(): Promise<ApiDefinition[]> {
   return request({ url: '/api/api-test/definitions', method: 'get' })
 }
+export interface DefinitionPageQuery {
+  pageNum: number; pageSize: number
+  keyword?: string; method?: string; status?: string
+}
+export function fetchApiDefinitionPage(query: DefinitionPageQuery): Promise<{ list: ApiDefinition[]; total: number }> {
+  return request({ url: '/api/api-test/definitions', method: 'get', params: query })
+}
 export function createApiDefinition(data: Partial<ApiDefinition>): Promise<ApiDefinition> {
   return request({ url: '/api/api-test/definitions', method: 'post', data })
 }
@@ -31,6 +38,19 @@ export function importDefinition(text: string): Promise<{ count: number }> {
 }
 export function fetchScenarios(): Promise<Scenario[]> {
   return request({ url: '/api/api-test/scenarios', method: 'get' })
+}
+export interface ScenarioPageQuery {
+  pageNum: number; pageSize: number
+  keyword?: string; status?: string
+}
+export function fetchScenarioPage(query: ScenarioPageQuery): Promise<{ list: Scenario[]; total: number }> {
+  return request({ url: '/api/api-test/scenarios', method: 'get', params: query })
+}
+export function createScenario(data: Partial<Scenario>): Promise<Scenario> {
+  return request({ url: '/api/api-test/scenarios', method: 'post', data })
+}
+export function updateScenario(id: string, data: Partial<Scenario>): Promise<Scenario> {
+  return request({ url: `/api/api-test/scenarios/${id}`, method: 'put', data })
 }
 export function saveScenario(data: Scenario): Promise<Scenario> {
   return request({ url: '/api/api-test/scenarios', method: 'post', data })
@@ -50,21 +70,16 @@ export function restoreScenario(id: string): Promise<null> {
 export function purgeScenario(id: string): Promise<null> {
   return request({ url: `/api/api-test/scenarios/recycle/${id}`, method: 'delete' })
 }
-export function fetchApiReports(): Promise<ApiReport[]> {
-  return request({ url: '/api/api-test/reports', method: 'get' })
+export interface ReportPageQuery {
+  pageNum: number; pageSize: number
+  keyword?: string; type?: string
+}
+export function fetchApiReportPage(query: ReportPageQuery): Promise<{ list: ApiReport[]; total: number }> {
+  return request({ url: '/api/api-test/reports', method: 'get', params: query })
 }
 export function fetchApiReport(id: string): Promise<ApiReport> {
   return request({ url: `/api/api-test/reports/${id}`, method: 'get' })
 }
-export function fetchMockRules(): Promise<MockRule[]> {
-  return request({ url: '/api/api-test/mock', method: 'get' })
-}
-export function saveMockRule(data: MockRule): Promise<MockRule> {
-  return request({ url: '/api/api-test/mock', method: 'post', data })
-}
-export function updateMockRule(id: string, data: Partial<MockRule>): Promise<MockRule> {
-  return request({ url: `/api/api-test/mock/${id}`, method: 'put', data })
-}
-export function deleteMockRule(id: string): Promise<null> {
-  return request({ url: `/api/api-test/mock/${id}`, method: 'delete' })
+export function deleteApiReport(id: string): Promise<null> {
+  return request({ url: `/api/api-test/reports/${id}`, method: 'delete' })
 }

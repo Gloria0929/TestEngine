@@ -135,4 +135,20 @@ export const testPlanHandlers = [
   http.post('/api/test-plan/:id/report/share', ({ params }) => {
     return HttpResponse.json(ok({ shareUrl: 'https://mock.testengine.io/share/' + params.id, expireAt: '2026-09-03 23:59:59' }))
   }),
+
+  // 报告列表
+  http.get('/api/test-report/list', ({ request }) => {
+    const url = new URL(request.url)
+    const query = Object.fromEntries(url.searchParams) as unknown as PageQuery
+    const reports = [
+      { id: 'rp-1', name: '登录模块测试报告', type: '测试计划报告', planName: 'v1.0 回归测试', result: '通过', passRate: 96, trigger: '手动执行', owner: 'Administrator', createTime: '2026-08-28 15:30' },
+      { id: 'rp-2', name: '支付接口测试报告', type: '接口测试报告', planName: '支付中台接口测试', result: '部分通过', passRate: 72, trigger: '定时任务', owner: 'test', createTime: '2026-08-28 02:00' },
+      { id: 'rp-3', name: '订单模块测试报告', type: '测试计划报告', planName: '订单中心回归', result: '失败', passRate: 45, trigger: 'API 触发', owner: 'dev', createTime: '2026-08-27 18:00' },
+      { id: 'rp-4', name: '系统任务执行报告', type: '任务报告', planName: '每日自动巡检', result: '通过', passRate: 100, trigger: '定时任务', owner: 'Administrator', createTime: '2026-08-27 06:00' },
+    ]
+    return HttpResponse.json(ok(page(reports, query)))
+  }),
+  http.delete('/api/test-report/:id', ({ params }) => {
+    return HttpResponse.json(ok(null))
+  }),
 ]

@@ -59,12 +59,12 @@ export const routes: RouteRecordRaw[] = [
         component: () => import("@/views/testCase/list/index.vue"),
         meta: { permission: "testCase:view" },
       },
-      {
-        path: "test-case/mindmap",
-        name: "CaseMindmap",
-        component: () => import("@/views/testCase/mindmap/index.vue"),
-        meta: { permission: "testCase:view" },
-      },
+      // {
+      //   path: "test-case/mindmap",
+      //   name: "CaseMindmap",
+      //   component: () => import("@/views/testCase/mindmap/index.vue"),
+      //   meta: { permission: "testCase:view" },
+      // },
       {
         path: "test-case/review",
         name: "CaseReview",
@@ -123,12 +123,6 @@ export const routes: RouteRecordRaw[] = [
         path: "api-test/report",
         name: "ApiReport",
         component: () => import("@/views/apiTest/report/index.vue"),
-        meta: { permission: "apiTest:view" },
-      },
-      {
-        path: "api-test/mock",
-        name: "ApiMock",
-        component: () => import("@/views/apiTest/mock/index.vue"),
         meta: { permission: "apiTest:view" },
       },
       {

@@ -9,38 +9,7 @@ export interface MenuItem {
 }
 
 export const menuTree: MenuItem[] = [
-  { key: "home", label: "工作台", icon: "Odometer", path: "/workstation/home" },
-  {
-    key: "project",
-    label: "项目管理",
-    icon: "Folder",
-    children: [
-      {
-        key: "project-info",
-        label: "基本信息",
-        path: "/project/info",
-        permission: "project:view",
-      },
-      {
-        key: "project-file",
-        label: "文件管理",
-        path: "/project/file",
-        permission: "project:view",
-      },
-      {
-        key: "project-message",
-        label: "消息管理",
-        path: "/project/message",
-        permission: "project:view",
-      },
-      {
-        key: "project-log",
-        label: "日志",
-        path: "/project/log",
-        permission: "project:view",
-      },
-    ],
-  },
+  { key: "project", label: "项目设置", icon: "Folder", path: "/project/info" },
   {
     key: "testplan",
     label: "测试计划",
@@ -51,31 +20,20 @@ export const menuTree: MenuItem[] = [
     key: "testcase",
     label: "测试用例",
     icon: "Tickets",
-    children: [
-      {
-        key: "case-list",
-        label: "用例列表",
-        path: "/test-case/list",
-        permission: "testCase:view",
-      },
-      {
-        key: "mindmap",
-        label: "脑图",
-        path: "/test-case/mindmap",
-        permission: "testCase:view",
-      },
-      {
-        key: "review",
-        label: "用例评审",
-        path: "/test-case/review",
-        permission: "testCase:view",
-      },
-    ],
+    path: "/test-case/list",
+  },
+  {
+    key: "bug",
+    label: "缺陷管理",
+    icon: "Warning",
+    path: "/bug/list",
+    permission: "bug:view",
   },
   {
     key: "apiparent",
     label: "接口测试",
     icon: "Connection",
+    path: "/api-test/debug",
     children: [
       {
         key: "api-debug",
@@ -101,26 +59,6 @@ export const menuTree: MenuItem[] = [
         path: "/api-test/report",
         permission: "apiTest:view",
       },
-      {
-        key: "api-mock",
-        label: "Mock",
-        path: "/api-test/mock",
-        permission: "apiTest:view",
-      },
     ],
-  },
-  {
-    key: "bug",
-    label: "缺陷管理",
-    icon: "WarningFilled",
-    path: "/bug/list",
-    permission: "bug:view",
-  },
-  {
-    key: "setting",
-    label: "系统设置",
-    icon: "Setting",
-    path: "/setting/system/user",
-    permission: "system:view",
   },
 ];

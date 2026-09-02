@@ -1,6 +1,7 @@
 // src/styles/index.scss
 @use "./variables.scss";
 @use "./element.scss";
+@import "./bg-common.css";
 
 * {
   box-sizing: border-box;

@@ -28,7 +28,8 @@
       <el-tab-pane label="场景" name="scenario">
         <el-table :data="scenarios" v-loading="scenarioLoading">
           <el-table-column prop="name" label="场景名称" min-width="240" />
-          <el-table-column prop="moduleId" label="模块" width="120" />
+          <el-table-column prop="apiCount" label="接口数" width="80" />
+          <el-table-column prop="responsible" label="责任人" width="120" />
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
               <el-tag :type="scenarioStatusTag(row.status)" size="small">{{
@@ -73,10 +74,10 @@ function caseStatusText(s: TestCase["status"]) {
   return { DRAFT: "草稿", REVIEW: "待评审", READY: "就绪" }[s] ?? s;
 }
 function scenarioStatusTag(status: Scenario["status"]) {
-  return status === "PASS" ? "success" : status === "FAIL" ? "danger" : "info";
+  return status === "通过" ? "success" : status === "失败" ? "danger" : "info";
 }
 function scenarioStatusText(status: Scenario["status"]) {
-  return status === "PASS" ? "通过" : status === "FAIL" ? "失败" : "草稿";
+  return status;
 }
 
 async function loadCases() {

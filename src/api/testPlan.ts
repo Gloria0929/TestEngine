@@ -33,3 +33,11 @@ export function exportPlanReport(planId: string): Promise<{ url: string }> {
 export function sharePlanReport(planId: string): Promise<{ shareUrl: string; expireAt: string }> {
   return request({ url: `/api/test-plan/${planId}/report/share`, method: 'post' })
 }
+
+// 报告列表（汇总）
+export function rptList(query: PageQuery): Promise<PageResult<any>> {
+  return request({ url: '/api/test-report/list', method: 'get', params: query })
+}
+export function rptDel(id: string): Promise<null> {
+  return request({ url: `/api/test-report/${id}`, method: 'delete' })
+}

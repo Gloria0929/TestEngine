@@ -1,20 +1,14 @@
 // src/mocks/handlers/apiTest.ts
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
-import { createDebugRequests, createApiDefinitions, createScenarios, createMockRules } from '../seed/apiTest'
-import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario, ApiReport, MockRule } from '@/types/models'
+import { createDebugRequests, createApiDefinitions, createScenarios, createApiReports } from '../seed/apiTest'
+import type { DebugRequest, ExecuteResponse, ApiDefinition, KeyValue, HttpMethod, BodyType, Scenario } from '@/types/models'
 
 let debugRequests = createDebugRequests()
 let definitions = createApiDefinitions()
 let scenarios = createScenarios()
 let scenarioRecycle: Scenario[] = []
-let reports: ApiReport[] = [
-  { id: 'rp-1', name: '登录态通用场景', scenarioId: 'sc-1', status: 'PASS', duration: 812, createTime: '2026-08-27 08:00', steps: [
-    { id: 'rs-1', name: '获取 Token', status: 'PASS', time: 210, request: 'POST /api/auth/login', response: '200 OK', assertion: 'status==200 通过', extract: 'token 已提取', console: ['> POST /api/auth/login', '< 200 OK'] },
-    { id: 'rs-2', name: '查询用户', status: 'PASS', time: 340, request: 'GET /api/user/info', response: '200 OK', assertion: 'status==200 通过', extract: '', console: ['> GET /api/user/info', '< 200 OK'] },
-  ] },
-]
-let mockRules = createMockRules()
+let reports = createApiReports()
 
 function parseCurl(text: string): DebugRequest {
   // 朴素按空白分词，处理常见 curl：
@@ -105,10 +99,30 @@ export const apiTestHandlers = [
     }
     return HttpResponse.json(ok(resp))
   }),
-  http.get('/api/api-test/definitions', () => HttpResponse.json(ok(definitions))),
+  http.get('/api/api-test/definitions', ({ request }) => {
+    const url = new URL(request.url)
+    const pageNum = url.searchParams.get('pageNum')
+    // 无分页参数：返回全量数组（场景/Mock 页面复用）
+    if (!pageNum) return HttpResponse.json(ok(definitions))
+    // 分页 + 过滤：返回 { list, total }（接口定义列表页）
+    const pageSize = Number(url.searchParams.get('pageSize')) || 10
+    const keyword = (url.searchParams.get('keyword') || '').toLowerCase()
+    const method = url.searchParams.get('method') || ''
+    const status = url.searchParams.get('status') || ''
+    let list = definitions.filter((d) => {
+      if (method && d.method !== method) return false
+      if (status && d.status !== status) return false
+      if (keyword && !`${d.name} ${d.path} ${d.id}`.toLowerCase().includes(keyword)) return false
+      return true
+    })
+    const total = list.length
+    const start = (Number(pageNum) - 1) * pageSize
+    list = list.slice(start, start + pageSize)
+    return HttpResponse.json(ok({ list, total }))
+  }),
   http.post('/api/api-test/definitions', async ({ request }) => {
     const body = await request.json() as ApiDefinition
-    const d = { ...body, id: 'a-' + Date.now() }
+    const d = { ...body, id: 'API-' + Date.now() }
     definitions.unshift(d)
     return HttpResponse.json(ok(d))
   }),
@@ -130,17 +144,33 @@ export const apiTestHandlers = [
     const { text } = await request.json() as { text: string }
     return HttpResponse.json(ok(parseCurl(text)))
   }),
-  http.get('/api/api-test/scenarios', () => HttpResponse.json(ok(scenarios))),
+  http.get('/api/api-test/scenarios', ({ request }) => {
+    const url = new URL(request.url)
+    const pageNum = url.searchParams.get('pageNum')
+    if (!pageNum) return HttpResponse.json(ok(scenarios))
+    const pageSize = Number(url.searchParams.get('pageSize')) || 10
+    const keyword = (url.searchParams.get('keyword') || '').toLowerCase()
+    const status = url.searchParams.get('status') || ''
+    let list = scenarios.filter((d) => {
+      if (status && d.status !== status) return false
+      if (keyword && !`${d.name} ${d.id}`.toLowerCase().includes(keyword)) return false
+      return true
+    })
+    const total = list.length
+    const start = (Number(pageNum) - 1) * pageSize
+    list = list.slice(start, start + pageSize)
+    return HttpResponse.json(ok({ list, total }))
+  }),
   http.post('/api/api-test/scenarios', async ({ request }) => {
     const body = await request.json() as Scenario
-    const i = scenarios.findIndex((x) => x.id === body.id)
-    if (i >= 0) {
-      scenarios[i] = { ...body }
-      return HttpResponse.json(ok(scenarios[i]))
-    }
-    const s = { ...body, id: 'sc-' + Date.now() }
+    const s = { ...body, id: 'SCEN-' + Date.now() }
     scenarios.unshift(s)
     return HttpResponse.json(ok(s))
+  }),
+  http.put('/api/api-test/scenarios/:id', async ({ params, request }) => {
+    const body = await request.json() as Partial<Scenario>
+    scenarios = scenarios.map((s) => (s.id === params.id ? { ...s, ...body } : s))
+    return HttpResponse.json(ok(scenarios.find((s) => s.id === params.id)))
   }),
   http.delete('/api/api-test/scenarios/:id', ({ params }) => {
     const target = scenarios.find((x) => x.id === params.id)
@@ -166,24 +196,44 @@ export const apiTestHandlers = [
   http.post('/api/api-test/scenarios/:id/execute', async ({ params }) => {
     await new Promise((r) => setTimeout(r, 400))
     const s = scenarios.find((x) => x.id === params.id)
-    return HttpResponse.json(ok({ scenarioId: params.id, status: s?.status === 'FAIL' ? 'FAIL' : 'PASS', duration: 1234, steps: s?.steps ?? [] }))
+    const pass = s?.status !== '失败' && s?.status !== '执行中'
+    return HttpResponse.json(ok({ result: pass ? 'SUCCESS' : 'FAIL', passRate: pass ? Math.floor(80 + Math.random() * 20) : Math.floor(20 + Math.random() * 50) }))
   }),
-  http.get('/api/api-test/reports', () => HttpResponse.json(ok(reports))),
-  http.get('/api/api-test/reports/:id', ({ params }) => HttpResponse.json(ok(reports.find((r) => r.id === params.id) ?? null))),
-  http.get('/api/api-test/mock', () => HttpResponse.json(ok(mockRules))),
-  http.post('/api/api-test/mock', async ({ request }) => {
-    const body = await request.json() as MockRule
-    const r = { ...body, id: 'mk-' + Date.now() }
-    mockRules.unshift(r)
-    return HttpResponse.json(ok(r))
+  http.get('/api/api-test/reports', ({ request }) => {
+    const url = new URL(request.url)
+    const pageNum = Number(url.searchParams.get('pageNum')) || 1
+    const pageSize = Number(url.searchParams.get('pageSize')) || 10
+    const keyword = (url.searchParams.get('keyword') || '').toLowerCase()
+    const type = url.searchParams.get('type') || ''
+    let list = reports.filter((r) => {
+      if (type && r.type !== type) return false
+      if (keyword && !`${r.name} ${r.id}`.toLowerCase().includes(keyword)) return false
+      return true
+    })
+    const total = list.length
+    const start = (pageNum - 1) * pageSize
+    list = list.slice(start, start + pageSize)
+    return HttpResponse.json(ok({ list, total }))
   }),
-  http.put('/api/api-test/mock/:id', async ({ params, request }) => {
-    const body = await request.json() as Partial<MockRule>
-    mockRules = mockRules.map((r) => (r.id === params.id ? { ...r, ...body } : r))
-    return HttpResponse.json(ok(mockRules.find((r) => r.id === params.id)))
+  http.get('/api/api-test/reports/:id', ({ params }) => {
+    const item = reports.find((r) => r.id === params.id)
+    if (!item) return HttpResponse.json(ok(null))
+    const definitions = createApiDefinitions()
+    const steps = []
+    for (let k = 0; k < item.total; k++) {
+      const def = definitions[(k * 7) % definitions.length]
+      steps.push({
+        name: def ? def.name : '接口步骤 ' + (k + 1),
+        method: def ? def.method : 'GET',
+        path: def ? def.path : '/api/v1/step/' + (k + 1),
+        result: k < item.success ? '成功' : '失败',
+        time: 30 + ((k * 37) % 220),
+      })
+    }
+    return HttpResponse.json(ok({ ...item, steps }))
   }),
-  http.delete('/api/api-test/mock/:id', ({ params }) => {
-    mockRules = mockRules.filter((r) => r.id !== params.id)
+  http.delete('/api/api-test/reports/:id', ({ params }) => {
+    reports = reports.filter((r) => r.id !== params.id)
     return HttpResponse.json(ok(null))
   }),
 ]

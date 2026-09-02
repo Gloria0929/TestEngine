@@ -162,12 +162,21 @@
     </div>
 
     <!-- 执行结果抽屉 -->
-    <el-drawer
-      v-model="executeVisible"
-      :title="'执行用例：' + currentRow?.name"
-      size="520px"
-    >
+    <el-drawer v-model="executeVisible" title="执行用例" size="640px">
       <div v-if="currentRow" class="execute-form">
+        <!-- 用例基本信息 -->
+        <div class="case-info-box">
+          <div class="info-row">
+            <span class="info-label">用例名称</span>
+            <span>{{ currentRow.name }}</span>
+          </div>
+          <div class="info-row" v-if="currentRow.precondition">
+            <span class="info-label">前置条件</span>
+            <span>{{ currentRow.precondition }}</span>
+          </div>
+        </div>
+
+        <!-- 整体执行结果 -->
         <div class="form-section">
           <div class="section-label">执行结果</div>
           <div class="result-btns">
@@ -182,20 +191,60 @@
             >
           </div>
         </div>
-        <div class="form-section">
-          <div class="section-label">实际结果</div>
-          <el-input
-            v-model="executeForm.actual"
-            type="textarea"
-            :rows="5"
-            placeholder="填写实际结果"
-          />
-        </div>
-        <div class="form-footer">
-          <el-button @click="executeVisible = false">取消</el-button>
-          <el-button type="primary" :loading="saving" @click="onExecuteSubmit"
-            >保存</el-button
+
+        <!-- 步骤执行表格 -->
+        <div class="form-section" v-if="currentRow.steps.length">
+          <div class="section-label">步骤执行</div>
+          <el-table
+            :data="currentRow.steps"
+            border
+            size="small"
+            class="step-table"
           >
+            <el-table-column type="index" label="序号" width="52" />
+            <el-table-column
+              prop="description"
+              label="用例步骤"
+              min-width="140"
+            />
+            <el-table-column prop="expected" label="预期结果" min-width="140" />
+            <el-table-column label="实际结果" min-width="160">
+              <template #default="{ row: step }">
+                <el-input
+                  v-model="stepForm[step.id].actual"
+                  placeholder="请输入实际"
+                  size="small"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="步骤执行结果" width="110">
+              <template #default="{ row: step }">
+                <el-select
+                  v-model="stepForm[step.id].result"
+                  placeholder="请选择"
+                  size="small"
+                >
+                  <el-option
+                    v-for="s in stepStates"
+                    :key="s.value"
+                    :label="s.label"
+                    :value="s.value"
+                  />
+                </el-select>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <!-- 底部操作 -->
+        <div class="form-footer">
+          <el-switch v-model="autoNext" active-text="自动下一条" size="small" />
+          <div class="footer-btns">
+            <el-button @click="executeVisible = false">取消</el-button>
+            <el-button type="primary" :loading="saving" @click="onExecuteSubmit"
+              >提交结果</el-button
+            >
+          </div>
         </div>
       </div>
     </el-drawer>
@@ -205,7 +254,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
@@ -258,6 +307,10 @@ const executeForm = reactive<{ result: ExecuteResult | ""; actual: string }>({
   result: "",
   actual: "",
 });
+const stepForm = reactive<
+  Record<string, { actual: string; result: ExecuteResult | "" }>
+>({});
+const autoNext = ref(false);
 
 const planStatusLabel = computed(() => {
   return (
@@ -297,10 +350,17 @@ const states: {
   label: string;
   type: "success" | "danger" | "warning" | "info";
 }[] = [
-  { value: "PASS", label: "通过", type: "success" },
+  { value: "PASS", label: "成功", type: "success" },
   { value: "FAIL", label: "失败", type: "danger" },
   { value: "BLOCK", label: "阻塞", type: "warning" },
   { value: "SKIP", label: "跳过", type: "info" },
+];
+
+const stepStates: { value: ExecuteResult; label: string }[] = [
+  { value: "PASS", label: "成功" },
+  { value: "FAIL", label: "失败" },
+  { value: "BLOCK", label: "阻塞" },
+  { value: "SKIP", label: "跳过" },
 ];
 
 function goBack() {
@@ -308,10 +368,18 @@ function goBack() {
 }
 function onTreeNodeClick(node: ModuleNode) {
   if (treeMode.value === "module") {
-    currentModuleId.value = node.id;
+    if (currentModuleId.value === node.id) {
+      currentModuleId.value = "";
+    } else {
+      currentModuleId.value = node.id;
+    }
     currentTestPoint.value = "";
   } else {
-    currentTestPoint.value = node.id;
+    if (node.id === "__all__" || currentTestPoint.value === node.id) {
+      currentTestPoint.value = "";
+    } else {
+      currentTestPoint.value = node.id;
+    }
     currentModuleId.value = "";
   }
   loadCases();
@@ -321,22 +389,35 @@ async function loadTree() {
   if (treeMode.value === "module") {
     treeData.value = await fetchModuleTree("p-1");
   } else {
-    // 测试点模式：聚合所有用例的 testPoint 生成树节点
     const all = await fetchPlanCases(planId.value);
+    const countMap = all.reduce(
+      (acc, c) => {
+        acc[c.testPoint] = (acc[c.testPoint] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
     const points = Array.from(
       new Set(all.map((c) => c.testPoint).filter(Boolean)),
     );
-    treeData.value = points.map((p) => ({
-      id: p,
-      name: p,
-      children: [] as ModuleNode[],
-    }));
+    treeData.value = [
+      {
+        id: "__all__",
+        name: `全部功能用例 (${all.length})`,
+        children: points.map((p) => ({
+          id: p,
+          name: `${p} (${countMap[p]})`,
+          children: [] as ModuleNode[],
+        })),
+      },
+    ];
   }
 }
 async function loadCases() {
   loading.value = true;
   try {
-    const params: { moduleId?: string; testPoint?: string; keyword?: string } = {};
+    const params: { moduleId?: string; testPoint?: string; keyword?: string } =
+      {};
     if (treeMode.value === "module" && currentModuleId.value) {
       params.moduleId = currentModuleId.value;
     }
@@ -354,12 +435,22 @@ function openExecute(row: CaseRow) {
   currentRow.value = row;
   executeForm.result = row.result ?? "PASS";
   executeForm.actual = "";
+  // 初始化步骤表单
+  Object.keys(stepForm).forEach((k) => delete stepForm[k]);
+  for (const step of row.steps) {
+    stepForm[step.id] = { actual: "", result: "" };
+  }
   executeVisible.value = true;
 }
 
 async function onExecuteSubmit() {
   if (!currentRow.value || !executeForm.result) return;
   saving.value = true;
+  const stepResults = currentRow.value.steps.map((s) => ({
+    stepId: s.id,
+    result: (stepForm[s.id]?.result ?? "") as ExecuteResult | "",
+    actual: stepForm[s.id]?.actual ?? "",
+  }));
   const existing = rows.value
     .filter((r) => r.result && r.id !== currentRow.value!.id)
     .map(
@@ -372,12 +463,21 @@ async function onExecuteSubmit() {
       caseId: currentRow.value.id,
       result: executeForm.result,
       actual: executeForm.actual,
+      stepResults,
     },
   ]);
   saving.value = false;
   currentRow.value.result = executeForm.result;
+  const submittedId = currentRow.value.id;
   executeVisible.value = false;
   ElMessage.success("已保存执行结果");
+
+  if (autoNext.value) {
+    const idx = rows.value.findIndex((r) => r.id === submittedId);
+    if (idx >= 0 && idx < rows.value.length - 1) {
+      nextTick(() => openExecute(rows.value[idx + 1]));
+    }
+  }
 }
 
 async function unlinkCase(row: CaseRow) {
@@ -503,6 +603,16 @@ onMounted(() => {
 }
 .tree-mode :deep(.el-radio-button__inner) {
   width: 100%;
+  border-radius: 0;
+  transition: all 0.2s;
+  font-size: 13px;
+  padding: 5px 0;
+}
+.tree-mode :deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-radius: 4px 0 0 4px;
+}
+.tree-mode :deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-radius: 0 4px 4px 0;
 }
 .tree-search {
   width: 100%;
@@ -552,6 +662,26 @@ onMounted(() => {
   flex-direction: column;
   gap: 20px;
 }
+.case-info-box {
+  background: var(--el-fill-color-light);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.info-label {
+  color: var(--text-3);
+  white-space: nowrap;
+  min-width: 56px;
+}
 .form-section {
   display: flex;
   flex-direction: column;
@@ -566,10 +696,17 @@ onMounted(() => {
   display: flex;
   gap: 10px;
 }
+.step-table :deep(.el-table__cell) {
+  padding: 6px 0;
+}
 .form-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 12px;
+}
+.footer-btns {
+  display: flex;
+  gap: 10px;
 }
 </style>

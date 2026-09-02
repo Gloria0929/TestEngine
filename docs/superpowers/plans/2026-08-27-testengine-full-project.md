@@ -2654,8 +2654,8 @@ onMounted(async () => { reqs.value = await fetchDebugRequests() })
 <template>
   <div>
     <div v-for="(kv, i) in modelValue" :key="i" class="kv-row">
-      <el-input v-model="kv.key" placeholder="Key" />
-      <el-input v-model="kv.value" placeholder="Value" />
+      <el-input v-model="kv.key" placeholder="键" />
+      <el-input v-model="kv.value" placeholder="值" />
       <el-checkbox v-model="kv.enabled" />
       <el-icon @click="remove(i)"><Delete /></el-icon>
     </div>

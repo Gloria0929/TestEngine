@@ -24,20 +24,18 @@ export interface Bug {
   status: BugStatus; assignee: string; reporter: string
   description: string; createTime: string; moduleId: string
 }
+export type DefinitionStatus = '未规划' | '进行中' | '已完成' | '已归档'
 export interface ApiDefinition {
-  id: string; projectId: string; moduleId: string; name: string
-  method: HttpMethod; path: string; protocol: 'HTTP' | 'TCP' | 'SQL' | 'DUBBO'
-  description: string
+  id: string; name: string; method: HttpMethod; path: string
+  protocol: 'HTTP' | 'HTTPS'; status: DefinitionStatus
+  responsible: string; caseCount: number; tags: string[]
+  updateTime: string; desc: string
 }
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD' | 'CONNECT'
-export interface ScenarioStep {
-  id: string; name: string; type: 'REQUEST' | 'LOOP' | 'CONDITION' | 'ONCE' | 'SCRIPT' | 'WAIT'
-  enabled: boolean; children?: ScenarioStep[]
-  config: Record<string, unknown>
-}
+export type ScenarioStatus = '未执行' | '执行中' | '通过' | '失败'
 export interface Scenario {
-  id: string; name: string; moduleId: string
-  status: 'DRAFT' | 'PASS' | 'FAIL'; steps: ScenarioStep[]
+  id: string; name: string; apiCount: number; status: ScenarioStatus
+  responsible: string; creator: string; createTime: string; updateTime: string
 }
 export interface TestPlan {
   id: string; projectId: string; name: string; status: 'DRAFT' | 'RUNNING' | 'DONE'
@@ -68,20 +66,17 @@ export interface ExecuteResponse {
   body: string; console: string[]
 }
 export interface ReportStep {
-  id: string; name: string; status: 'PASS' | 'FAIL'; time: number
-  request: string; response: string; assertion: string; extract: string
-  console: string[]
+  name: string; method: string; path: string; result: string; time: number
 }
 export interface ApiReport {
-  id: string; name: string; scenarioId: string; status: 'PASS' | 'FAIL'
-  duration: number; createTime: string; steps: ReportStep[]
-}
-export interface MockRule {
-  id: string; name: string; definitionId: string; method: HttpMethod
-  path: string; match: KeyValue[]; responseStatus: number; responseBody: string; delay: number
+  id: string; name: string; type: string; result: string
+  passRate: number; total: number; success: number; fail: number
+  executor: string; createTime: string
+  steps?: ReportStep[]
 }
 export type ExecuteResult = 'PASS' | 'FAIL' | 'BLOCK' | 'SKIP'
-export interface PlanCaseResult { caseId: string; result: ExecuteResult; actual: string }
+export interface StepExecuteResult { stepId: string; result: ExecuteResult | ''; actual: string }
+export interface PlanCaseResult { caseId: string; result: ExecuteResult; actual: string; stepResults?: StepExecuteResult[] }
 export interface PlanReport {
   id: string; planId: string; name: string; progress: number; passRate: number
   total: number; passed: number; failed: number; blocked: number; skipped: number
