@@ -110,20 +110,20 @@
                   <td>
                     <span class="tc-cname" :title="row.name">{{
                       row.name
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <span class="tc-pill" :class="levelCls(row.level)">{{
                       row.level || "-"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <span class="tc-pill" :class="reviewCls((row as any).review)">{{ (row as any).review || "未评审"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <span class="tc-pill" :class="resultCls((row as any).result)">{{ (row as any).result || "未执行"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <span class="tc-mod">{{ (row as any).module || "-" }}</span>
@@ -133,7 +133,7 @@
                       <span class="tc-avatar" :style="{
                         background: avatarColor((row as any).updater || '?'),
                       }">{{ ((row as any).updater || "?").slice(0, 1) }}</span><span>{{ (row as any).updater || "-"
-                      }}</span>
+                        }}</span>
                     </div>
                   </td>
                   <td class="tc-time">{{ (row as any).updateTime || "-" }}</td>
@@ -142,7 +142,7 @@
                       <span class="tc-avatar" :style="{
                         background: avatarColor((row as any).creator || '?'),
                       }">{{ ((row as any).creator || "?").slice(0, 1) }}</span><span>{{ (row as any).creator || "-"
-                      }}</span>
+                        }}</span>
                     </div>
                   </td>
                   <td class="tc-time">{{ row.createTime || "-" }}</td>
@@ -263,7 +263,7 @@
                   <td>
                     <span class="tc-pill" :class="rvStatusCls(r.status)">{{
                       r.status || "待评审"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <div class="rv-rate" :class="rvRateClass(r.passRate)">
@@ -279,7 +279,7 @@
                   <td>
                     <span class="tc-pill" :class="modeCls((r as any).mode)">{{
                       (r as any).mode || "多人评审"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <div class="tc-stack">
@@ -296,7 +296,7 @@
                       <span class="tc-avatar" :style="{
                         background: avatarColor((r as any).creator || '?'),
                       }">{{ ((r as any).creator || "?").slice(0, 1) }}</span><span>{{ (r as any).creator || "-"
-                      }}</span>
+                        }}</span>
                     </div>
                   </td>
                   <td>
@@ -305,12 +305,12 @@
                   <td>
                     <span class="rv-desc" :title="(r as any).desc">{{
                       (r as any).desc || "—"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td>
                     <span class="rv-period">{{
                       (r as any).period || "—"
-                    }}</span>
+                      }}</span>
                   </td>
                   <td class="tc-time">{{ r.createTime || "-" }}</td>
                   <td>

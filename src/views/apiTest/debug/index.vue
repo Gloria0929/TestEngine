@@ -147,7 +147,7 @@
             <div class="at-resp-head">
               <span class="at-resp-code" :class="statusCodeCls">{{
                 statusText
-                }}</span>
+              }}</span>
               <span class="at-resp-meta">耗时 {{ last.time }} ms</span>
               <span v-if="last.matched" class="at-resp-mock">命中 Mock：{{ last.mockName || "" }}</span>
               <span v-else class="at-resp-meta">默认响应</span>
