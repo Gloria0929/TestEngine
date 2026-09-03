@@ -240,6 +240,11 @@ export const apiTestHandlers = [
     scenarioRecycle = scenarioRecycle.filter((x) => x.id !== params.id);
     return HttpResponse.json(ok(null));
   }),
+  http.get("/api/api-test/scenarios/:id", ({ params }) => {
+    return HttpResponse.json(
+      ok(scenarios.find((s) => s.id === params.id) ?? null),
+    );
+  }),
   http.post("/api/api-test/scenarios/:id/execute", async ({ params }) => {
     await new Promise((r) => setTimeout(r, 400));
     const s = scenarios.find((x) => x.id === params.id);

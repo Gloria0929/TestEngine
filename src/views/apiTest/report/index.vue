@@ -76,7 +76,7 @@
             <template #default="{ row }">
               <div v-if="row.executor" class="bg-user">
                 <span class="bg-avatar" :style="{ background: avatarColor(row.executor) }">{{ row.executor.slice(0, 1)
-                  }}</span>
+                }}</span>
                 <span>{{ row.executor }}</span>
               </div>
               <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
@@ -143,7 +143,7 @@
                 <span class="m-badge" :class="methodBadgeCls(row.method)">{{ row.method }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="路径" min-width="160">
+            <el-table-column label="路径" min-width="240">
               <template #default="{ row }">
                 <span class="at-path">{{ row.path }}</span>
               </template>
@@ -162,9 +162,6 @@
         </div>
       </template>
       <div v-else class="bg-state">加载报告详情失败</div>
-      <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
-      </template>
     </el-dialog>
   </div>
 </template>

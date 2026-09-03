@@ -4,14 +4,13 @@
       <div class="title">{{ planName }}</div>
       <div class="actions">
         <el-button @click="onExport">导出 HTML</el-button>
+        <el-button @click="onExportExcel">导出 Excel</el-button>
         <el-button type="primary" @click="onShare">复制分享链接</el-button>
       </div>
     </div>
 
     <div class="share-bar">
-      <template v-if="report && report.expireAt"
-        >分享链接有效期至 {{ report.expireAt }}</template
-      >
+      <template v-if="report && report.expireAt">分享链接有效期至 {{ report.expireAt }}</template>
       <template v-else>未分享</template>
     </div>
 
@@ -24,12 +23,7 @@
         <div class="stat-label">通过率</div>
         <div class="stat-value">{{ report?.passRate ?? 0 }}%</div>
       </el-card>
-      <el-card
-        v-for="s in stats"
-        :key="s.label"
-        shadow="never"
-        class="stat-card"
-      >
+      <el-card v-for="s in stats" :key="s.label" shadow="never" class="stat-card">
         <div class="stat-label">{{ s.label }}</div>
         <div class="stat-value" :style="{ color: s.color }">{{ s.value }}</div>
       </el-card>
@@ -46,10 +40,7 @@
         <el-table-column prop="caseName" label="用例名称" min-width="220" />
         <el-table-column label="类型" min-width="100">
           <template #default="{ row }">
-            <el-tag
-              :type="row.type === 'manual' ? 'primary' : 'success'"
-              size="small"
-            >
+            <el-tag :type="row.type === 'manual' ? 'primary' : 'success'" size="small">
               {{ row.type === "manual" ? "手工" : "自动" }}
             </el-tag>
           </template>
@@ -63,12 +54,8 @@
         </el-table-column>
         <el-table-column label="操作" min-width="90">
           <template #default="{ row }">
-            <el-button
-              v-if="row.result === 'FAIL' || row.result === 'BLOCK'"
-              type="primary"
-              link
-              @click="openBugDialog(row)"
-            >
+            <el-button v-if="row.result === 'FAIL' || row.result === 'BLOCK'" type="primary" link
+              @click="openBugDialog(row)">
               转缺陷
             </el-button>
           </template>
@@ -83,12 +70,7 @@
         </el-form-item>
         <el-form-item label="严重程度">
           <el-select v-model="bugSeverity" style="width: 100%">
-            <el-option
-              v-for="s in severityOptions"
-              :key="s.value"
-              :label="s.label"
-              :value="s.value"
-            />
+            <el-option v-for="s in severityOptions" :key="s.value" :label="s.label" :value="s.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="处理人">
@@ -108,6 +90,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import * as echarts from "echarts";
+import * as XLSX from "xlsx";
 import {
   fetchPlanReport,
   exportPlanReport,
@@ -197,6 +180,50 @@ async function onExport() {
   ElMessage.success("已导出：" + res.url);
 }
 
+const RESULT_LABEL: Record<ExecuteResult, string> = {
+  PASS: "通过",
+  FAIL: "失败",
+  BLOCK: "阻塞",
+  SKIP: "跳过",
+};
+
+function onExportExcel() {
+  const r = report.value;
+  if (!r) return;
+  const overview: Array<Array<string | number>> = [
+    ["测试计划报告"],
+    ["计划名称", planName.value || r.name],
+    ["进度", `${r.progress}%`],
+    ["通过率", `${r.passRate}%`],
+    ["总数", r.total],
+    ["通过", r.passed],
+    ["失败", r.failed],
+    ["阻塞", r.blocked],
+    ["跳过", r.skipped],
+    ["导出时间", new Date().toLocaleString()],
+    [],
+    ["失败分布"],
+    ["模块", "失败数"],
+    ...r.failDistribution.map((d) => [d.module, d.count]),
+  ];
+  const detail = [
+    ["用例ID", "用例名称", "测试点", "优先级", "类型", "结果"],
+    ...r.results.map((row) => [
+      row.caseId,
+      row.caseName,
+      row.testPoint,
+      row.level,
+      row.type === "manual" ? "手工" : "自动",
+      RESULT_LABEL[row.result],
+    ]),
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(overview), "报告概览");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detail), "执行结果");
+  XLSX.writeFile(wb, `测试计划报告-${planName.value || r.name || planId.value}.xlsx`);
+  ElMessage.success("Excel 已导出");
+}
+
 async function onShare() {
   const res = await sharePlanReport(planId.value);
   if (report.value) {
@@ -244,51 +271,62 @@ onBeforeUnmount(() => chart?.dispose());
 .report {
   padding: 16px;
 }
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
+
 .title {
   font-size: 18px;
   font-weight: 600;
 }
+
 .actions {
   display: flex;
   gap: 8px;
 }
+
 .share-bar {
   font-size: 13px;
   color: var(--el-text-color-secondary);
   margin-bottom: 12px;
 }
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
+
 .stat-card {
   text-align: center;
 }
+
 .stat-label {
   font-size: 13px;
   color: var(--el-text-color-secondary);
   margin-bottom: 8px;
 }
+
 .stat-value {
   font-size: 24px;
   font-weight: 700;
 }
+
 .chart-card {
   margin-bottom: 12px;
 }
+
 .section-title {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 12px;
 }
+
 .chart {
   height: 300px;
 }

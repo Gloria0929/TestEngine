@@ -73,6 +73,9 @@ export function fetchScenarioPage(
 export function createScenario(data: Partial<Scenario>): Promise<Scenario> {
   return request({ url: "/api/api-test/scenarios", method: "post", data });
 }
+export function fetchScenario(id: string): Promise<Scenario | null> {
+  return request({ url: `/api/api-test/scenarios/${id}`, method: "get" });
+}
 export function updateScenario(
   id: string,
   data: Partial<Scenario>,

@@ -13,7 +13,7 @@
             </el-icon>
           </el-button>
         </div>
-        <el-button text @click="addTab" title="新建标签">
+        <el-button text class="at-tab-add" @click="addTab" title="新建标签">
           <el-icon>
             <Plus />
           </el-icon>
@@ -510,6 +510,21 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 标签栏「+」按钮：与标签同高（关闭按钮 32px + 标签上下内边距 5px×2），使图标与 X 垂直居中对齐 */
+.at-tabs .at-tab-add {
+  height: 42px;
+  padding: 5px 8px;
+  margin: 0;
+  border-radius: 6px 6px 0 0;
+  color: var(--el-text-color-secondary, #909399);
+  align-self: flex-end;
+}
+
+.at-tabs .at-tab-add:hover {
+  color: var(--el-color-primary, #409eff);
+  background: var(--el-fill-color-light, #fafafa);
 }
 
 .at-reqline {

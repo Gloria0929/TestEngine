@@ -14,33 +14,17 @@
     <el-card shadow="never" class="chart">
       <TrendChart :data="trend" />
     </el-card>
-    <el-card shadow="never" class="todos">
-      <template #header>工作台 · 待办</template>
-      <div v-if="todos.length === 0" class="empty">暂无数据</div>
-      <div
-        v-for="td in todos"
-        :key="td.id"
-        class="todo-row"
-        @click="router.push(td.targetUrl)"
-      >
-        <span class="type">{{ td.type }}</span>
-        <span class="title">{{ td.title }}</span>
-        <span class="due">{{ td.dueTime }}</span>
-      </div>
-    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
 import StatCard from "@/components/StatCard.vue";
 import TrendChart from "@/components/TrendChart.vue";
-import { fetchOverview, fetchTrend, fetchTodos } from "@/api/workstation";
+import { fetchOverview, fetchTrend } from "@/api/workstation";
 import type { OverviewStats } from "@/api/workstation";
-import type { TrendPoint, TodoItem } from "@/types/models";
+import type { TrendPoint } from "@/types/models";
 
-const router = useRouter();
 const range = ref("7d");
 const overview = ref<OverviewStats>({
   caseCount: 0,
@@ -49,7 +33,6 @@ const overview = ref<OverviewStats>({
   scenarioCount: 0,
 });
 const trend = ref<TrendPoint[]>([]);
-const todos = ref<TodoItem[]>([]);
 
 const statCards = computed(() => [
   {
@@ -82,7 +65,6 @@ async function load() {
   const params = { projectId: "p-1", range: range.value };
   overview.value = await fetchOverview(params);
   trend.value = await fetchTrend(params);
-  todos.value = await fetchTodos();
 }
 onMounted(load);
 watch(range, load);
@@ -91,29 +73,12 @@ watch(range, load);
 .toolbar {
   margin-bottom: 16px;
 }
+
 .stats {
   margin-bottom: 16px;
 }
+
 .chart {
   margin-bottom: 16px;
-}
-.todo-row {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-}
-.todo-row .type {
-  color: var(--accent);
-}
-.todo-row .due {
-  margin-left: auto;
-  color: var(--text-3);
-}
-.empty {
-  text-align: center;
-  color: var(--text-3);
-  padding: 24px 0;
 }
 </style>

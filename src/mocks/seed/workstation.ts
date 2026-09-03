@@ -1,5 +1,5 @@
 // src/mocks/seed/workstation.ts
-import type { Notification, TrendPoint, TodoItem, FollowItem } from '@/types/models'
+import type { Notification, TrendPoint, FollowItem } from '@/types/models'
 
 export const overviewStats = { caseCount: 1284, reviewCount: 36, apiCount: 208, scenarioCount: 42 }
 
@@ -10,14 +10,6 @@ export function createTrend(): TrendPoint[] {
     cases: 1180 + i * 18,
     apis: 170 + i * 6,
   }))
-}
-
-export function createTodos(): TodoItem[] {
-  return [
-    { id: 'td-1', type: '计划', title: '测试计划「v2.6 回归」待执行', targetUrl: '/test-plan/list', dueTime: '2026-08-27 18:00' },
-    { id: 'td-2', type: '评审', title: '用例评审「登录模块」待评审', targetUrl: '/test-case/review', dueTime: '2026-08-28 12:00' },
-    { id: 'td-3', type: '缺陷', title: '缺陷 #BUG-1024 指派给你', targetUrl: '/bug/list', dueTime: '2026-08-27 09:00' },
-  ]
 }
 
 export function createFollows(): FollowItem[] {

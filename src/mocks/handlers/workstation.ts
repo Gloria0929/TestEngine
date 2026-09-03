@@ -4,7 +4,6 @@ import { ok } from "../utils";
 import {
   overviewStats,
   createTrend,
-  createTodos,
   createFollows,
   createNotifications,
 } from "../seed/workstation";
@@ -17,9 +16,6 @@ export const workstationHandlers = [
   ),
   http.get("/api/workstation/trend", () =>
     HttpResponse.json(ok(createTrend())),
-  ),
-  http.get("/api/workstation/todos", () =>
-    HttpResponse.json(ok(createTodos())),
   ),
   http.get("/api/workstation/follows", () =>
     HttpResponse.json(ok(createFollows())),

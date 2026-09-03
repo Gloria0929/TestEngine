@@ -94,7 +94,7 @@
                 <el-table-column label="执行结果" min-width="120">
                   <template #default="{ row }">
                     <span class="tp-pill" :class="resultCls((row as any).result)">{{ (row as any).result || '未执行'
-                    }}</span>
+                      }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="所属模块" min-width="110">
@@ -226,9 +226,10 @@
                     <span class="tp-time">{{ row.createTime }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" min-width="80">
+                <el-table-column label="操作" min-width="110">
                   <template #default="{ row }">
                     <div class="tp-ops">
+                      <el-button type="primary" link @click="onExportReport(row)">导出</el-button>
                       <el-button type="danger" link @click="onDeleteReport(row)">删除</el-button>
                     </div>
                   </template>
@@ -281,7 +282,7 @@
           <div class="tp-modal-foot">
             <el-button @click="modalVisible = false">取消</el-button>
             <el-button type="primary" :disabled="saving" @click="saveModal">{{ saving ? '保存中…' : '保存'
-            }}</el-button>
+              }}</el-button>
           </div>
         </template>
       </el-dialog>
@@ -293,6 +294,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import * as XLSX from "xlsx";
 import { fetchPlans, createPlan, updatePlan, deletePlan, copyPlan } from "@/api/testPlan";
 import { rptList, rptDel } from "@/api/testPlan";
 import type { TestPlan } from "@/types/models";
@@ -425,6 +427,25 @@ async function onDeleteReport(r: any) {
     ElMessage.success("已删除");
     loadReports();
   } catch { /* 取消 */ }
+}
+
+function onExportReport(r: any) {
+  const rows: Array<Array<string | number>> = [
+    ["测试报告"],
+    ["报告名称", r.name ?? "-"],
+    ["报告类型", r.type ?? "-"],
+    ["计划名称", r.planName ?? "-"],
+    ["执行结果", r.result ?? "未执行"],
+    ["通过率", `${r.passRate ?? 0}%`],
+    ["触发方式", r.trigger ?? "-"],
+    ["创建人", r.owner ?? "-"],
+    ["创建时间", r.createTime ?? "-"],
+    ["导出时间", new Date().toLocaleString()],
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "报告摘要");
+  XLSX.writeFile(wb, `测试报告-${r.name ?? r.id}.xlsx`);
+  ElMessage.success("已导出");
 }
 
 // 弹窗

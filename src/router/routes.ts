@@ -14,11 +14,6 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: "menu.workstation" },
       },
       {
-        path: "workstation/todo",
-        name: "WorkstationTodo",
-        component: () => import("@/views/workstation/todo/index.vue"),
-      },
-      {
         path: "workstation/follow",
         name: "WorkstationFollow",
         component: () => import("@/views/workstation/follow/index.vue"),
@@ -111,6 +106,12 @@ export const routes: RouteRecordRaw[] = [
         path: "api-test/scenario",
         name: "ApiScenario",
         component: () => import("@/views/apiTest/scenario/index.vue"),
+        meta: { permission: "apiTest:view" },
+      },
+      {
+        path: "api-test/scenario/edit/:id",
+        name: "ApiScenarioEdit",
+        component: () => import("@/views/apiTest/scenario/edit.vue"),
         meta: { permission: "apiTest:view" },
       },
       {

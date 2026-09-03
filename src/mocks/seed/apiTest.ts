@@ -28,9 +28,22 @@ export function createApiDefinitions(): ApiDefinition[] {
 
 export function createScenarios(): Scenario[] {
   return [
-    { id: 'SCEN-1001', name: '用户注册登录流程', apiCount: 12, status: '未执行', responsible: '王强', creator: '李娜', createTime: '2026-08-27 10:00', updateTime: '2026-08-28 15:00' },
-    { id: 'SCEN-1002', name: '下单支付主流程', apiCount: 18, status: '通过', responsible: '陈晨', creator: '杨帆', createTime: '2026-08-26 10:01', updateTime: '2026-08-27 15:01' },
-    { id: 'SCEN-1003', name: '订单退款逆向流程', apiCount: 9, status: '失败', responsible: '张伟', creator: '赵敏', createTime: '2026-08-25 10:02', updateTime: '2026-08-26 15:02' },
+    { id: 'SCEN-1001', name: '用户注册登录流程', apiCount: 12, status: '未执行', responsible: '王强', creator: '李娜', createTime: '2026-08-27 10:00', updateTime: '2026-08-28 15:00', level: 'P1', tags: ['冒烟'], desc: '覆盖注册、登录、令牌刷新主链路', steps: [
+      { id: 'st-1', name: '准备测试环境', expected: '环境准备就绪' },
+      { id: 'st-2', name: '输入正确账号密码完成登录', expected: '登录成功并返回令牌' },
+      { id: 'st-3', name: '查询当前用户信息', expected: '返回正确的用户ID' },
+      { id: 'st-4', name: '执行用户完成支付订单，购买系统增值服务操作', expected: '操作执行成功' },
+    ] },
+    { id: 'SCEN-1002', name: '下单支付主流程', apiCount: 18, status: '通过', responsible: '陈晨', creator: '杨帆', createTime: '2026-08-26 10:01', updateTime: '2026-08-27 15:01', level: 'P0', tags: ['核心链路'], desc: '下单→支付→回调全流程验证', steps: [
+      { id: 'st-1', name: '准备测试环境和测试数据', expected: '环境准备就绪' },
+      { id: 'st-2', name: '创建订单并提交', expected: '订单创建成功' },
+      { id: 'st-3', name: '发起支付并完成扣款', expected: '支付成功' },
+      { id: 'st-4', name: '验证操作结果', expected: '结果符合预期' },
+    ] },
+    { id: 'SCEN-1003', name: '订单退款逆向流程', apiCount: 9, status: '失败', responsible: '张伟', creator: '赵敏', createTime: '2026-08-25 10:02', updateTime: '2026-08-26 15:02', level: 'P0', tags: ['逆向流程'], desc: '', steps: [
+      { id: 'st-1', name: '对已支付订单发起退款申请', expected: '退款申请受理成功' },
+      { id: 'st-2', name: '查询退款进度', expected: '退款状态为已到账' },
+    ] },
     { id: 'SCEN-1004', name: '库存扣减与回补链路', apiCount: 15, status: '执行中', responsible: '赵敏', creator: '张伟', createTime: '2026-08-24 10:03', updateTime: '2026-08-25 15:03' },
     { id: 'SCEN-1005', name: '优惠券叠加下单场景', apiCount: 11, status: '通过', responsible: '杨帆', creator: '陈晨', createTime: '2026-08-23 10:04', updateTime: '2026-08-24 15:04' },
     { id: 'SCEN-1006', name: '秒杀高并发下单', apiCount: 24, status: '未执行', responsible: '李娜', creator: '王强', createTime: '2026-08-22 10:05', updateTime: '2026-08-23 15:05' },

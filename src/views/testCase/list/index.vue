@@ -6,7 +6,7 @@
         <div></div>
         <div style="display: flex; gap: 10px">
           <el-button v-if="tab === 'case'" @click="importVisible = true">导入用例</el-button>
-          <el-button type="primary" @click="tab === 'case' ? openCaseModal(null) : openReviewModal(null)">
+          <el-button type="primary" @click="tab === 'case' ? openCaseModal() : openReviewModal(null)">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
               stroke-linecap="round">
               <path d="M12 5v14M5 12h14" />
@@ -88,7 +88,8 @@
                   </el-table-column>
                   <el-table-column label="用例名称" min-width="220">
                     <template #default="{ row }">
-                      <span class="tc-cname" :title="row.name">{{ row.name }}</span>
+                      <span class="tc-cname" :title="row.name" style="cursor: pointer"
+                        @click="router.push('/test-case/detail/' + row.id)">{{ row.name }}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="用例等级" min-width="90">
@@ -144,7 +145,7 @@
                   <el-table-column label="操作" min-width="140">
                     <template #default="{ row }">
                       <div class="tc-ops">
-                        <el-button type="primary" link @click="openCaseModal(row)">
+                        <el-button type="primary" link @click="router.push('/test-case/detail/' + row.id)">
                           编辑
                         </el-button>
                         <el-button type="danger" link @click="onDeleteCase(row)">
@@ -326,7 +327,7 @@
     </div>
 
     <!-- 用例编辑弹窗 -->
-    <el-dialog v-model="caseModalVisible" :title="editingCaseId ? '编辑用例' : '新建用例'" width="520px">
+    <el-dialog v-model="caseModalVisible" title="新建用例" width="520px">
       <div class="tc-form">
         <div class="tc-row">
           <el-text>用例名称<em>*</em></el-text>
@@ -346,7 +347,7 @@
           </el-select>
         </div>
         <div class="tc-row">
-          <el-text>{{ editingCaseId ? "负责人" : "创建人" }}<em>*</em></el-text>
+          <el-text>创建人<em>*</em></el-text>
           <el-input v-model="caseForm.creator" maxlength="20" placeholder="请输入负责人" />
           <div v-if="caseErr.creator" class="err">{{ caseErr.creator }}</div>
         </div>
@@ -435,9 +436,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { fetchCaseList, deleteCase } from "@/api/testCase";
+import { fetchCaseList, deleteCase, createCase } from "@/api/testCase";
 import ImportDialog from "./components/ImportDialog.vue";
+
+const router = useRouter();
 
 // 常量
 const levels = [
@@ -692,7 +696,6 @@ function onRvSizeChange() {
 
 // 用例弹窗
 const caseModalVisible = ref(false);
-const editingCaseId = ref("");
 const caseSaving = ref(false);
 const importVisible = ref(false);
 const caseForm = reactive({
@@ -703,20 +706,11 @@ const caseForm = reactive({
 });
 const caseErr = reactive({ name: "", creator: "" });
 
-function openCaseModal(row: any) {
-  if (row) {
-    editingCaseId.value = row.id;
-    caseForm.name = row.name;
-    caseForm.level = row.level || "P2";
-    caseForm.module = row.module || modules[0];
-    caseForm.creator = row.creator || row.executor || "";
-  } else {
-    editingCaseId.value = "";
-    caseForm.name = "";
-    caseForm.level = "P2";
-    caseForm.module = modules[0];
-    caseForm.creator = "";
-  }
+function openCaseModal() {
+  caseForm.name = "";
+  caseForm.level = "P2";
+  caseForm.module = modules[0];
+  caseForm.creator = "";
   caseErr.name = "";
   caseErr.creator = "";
   caseModalVisible.value = true;
@@ -728,8 +722,8 @@ async function saveCase() {
   if (!caseForm.name.trim() || !caseForm.creator.trim()) return;
   caseSaving.value = true;
   try {
-    // In mock mode, just show success
-    ElMessage.success(editingCaseId.value ? "已保存" : "已创建");
+    await createCase({ ...caseForm, projectId: "p-1", status: "DRAFT" } as any);
+    ElMessage.success("已创建");
     caseModalVisible.value = false;
     loadCases();
   } finally {
@@ -925,7 +919,6 @@ onMounted(loadCases);
 
 .tc-cname {
   font-weight: 500;
-  color: var(--el-text-color-primary, #303133);
 }
 
 .tc-pill {

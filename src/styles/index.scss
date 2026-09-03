@@ -18,6 +18,12 @@ body {
     Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
   color: var(--text-1);
   background: var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 0.2s var(--ease),
+    color 0.2s var(--ease);
 }
 a {
   text-decoration: none;
@@ -33,11 +39,17 @@ a {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(144, 147, 153, 0.3);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(144, 147, 153, 0.5);
+  background: rgba(148, 163, 184, 0.55);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(69, 73, 79, 0.7);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(133, 139, 146, 0.7);
 }
 
 ::selection {

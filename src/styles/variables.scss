@@ -1,23 +1,56 @@
 // src/styles/variables.scss
 :root {
+  /* ===== 品牌色 ===== */
   --accent: #2563eb;
   --accent-rgb: 37, 99, 235;
   --secondary: #3b82f6;
+
+  /* ===== 语义色（全局唯一取值，胶囊/标签/消息共用） ===== */
+  --success: #18a058;
+  --success-rgb: 24, 160, 88;
+  --warning: #d67f1b;
+  --warning-rgb: 214, 127, 27;
+  --danger: #d93838;
+  --danger-rgb: 217, 56, 56;
+  --info: #64748b;
+  --info-rgb: 100, 116, 139;
+  /* 语义色的浅底（浅色模式下使用） */
+  --success-bg: #e8f7ee;
+  --warning-bg: #fff7e6;
+  --danger-bg: #fdecec;
+  --info-bg: #e8f3ff;
+
+  /* ===== 表面 / 文字 ===== */
   --sb-bg: #ffffff;
   --app-bg: #f8fafc;
   --surface: #ffffff;
+  --surface-hover: #f8fafc;
   --border: #e2e8f0;
+  --border-strong: #cbd5e1;
   --text-1: #1e293b;
   --text-2: #475569;
   --text-3: #94a3b8;
+
+  /* ===== 圆角 ===== */
   --radius-sm: 4px;
   --radius: 6px;
-  --radius-lg: 8px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.06);
-  --transition: all 0.15s ease;
-  // Element Plus 主色覆盖
+  --radius-lg: 10px;
+
+  /* ===== 阴影（分层：越浮起越明显） ===== */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 6px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 4px 12px rgba(15, 23, 42, 0.08), 0 12px 32px rgba(15, 23, 42, 0.1);
+  --shadow-primary: 0 2px 8px rgba(var(--accent-rgb), 0.28);
+
+  /* ===== 焦点环（键盘导航可见） ===== */
+  --focus-ring: 0 0 0 3px rgba(var(--accent-rgb), 0.18);
+
+  /* ===== 过渡 ===== */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.18s var(--ease);
+  --transition-fast: all 0.12s var(--ease);
+
+  /* ===== Element Plus 主色覆盖 ===== */
   --el-color-primary: #2563eb;
   --el-color-primary-light-3: #4b82f0;
   --el-color-primary-light-5: #7ba3f5;
@@ -25,15 +58,54 @@
   --el-color-primary-light-8: #c0d4fb;
   --el-color-primary-light-9: #d7e4fc;
   --el-color-primary-dark-2: #1d4ed8;
+
+  /* Element Plus 语义色统一映射（与上方令牌一致） */
+  --el-color-success: var(--success);
+  --el-color-warning: var(--warning);
+  --el-color-danger: var(--danger);
+  --el-color-error: var(--danger);
+  --el-color-info: var(--info);
 }
 html.dark {
-  --app-bg: #0f172a;
-  --surface: #1e293b;
-  --border: #334155;
-  --text-1: #f8fafc;
-  --text-2: #cbd5e1;
-  --text-3: #64748b;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
+  /* 方案 A：暖炭灰 Warm Graphite —— 中性低饱和，WCAG AA 全项通过 */
+  --app-bg: #17181a;
+  --surface: #1f2124;
+  --surface-hover: #26282c;
+  --border: #34373c;
+  --border-strong: #45494f;
+  --text-1: #e8e9ea;   /* 13.3:1 on surface */
+  --text-2: #b6babf;   /*  8.3:1 on surface */
+  --text-3: #858b92;   /*  4.7:1 on surface */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-primary: 0 2px 10px rgba(126, 166, 248, 0.22);
+
+  /* 主色降饱和提亮，暗色下不刺眼且保持 6.7:1 对比 */
+  --accent: #7ea6f8;
+  --accent-rgb: 126, 166, 248;
+  --secondary: #9ab5f5;
+
+  /* 语义色提亮一档保证对比度（surface 上 6.2~7.9:1），浅底改半透明融入卡片 */
+  --success: #5fc98e;
+  --success-rgb: 95, 201, 142;
+  --warning: #e0a458;
+  --warning-rgb: 224, 164, 88;
+  --danger: #ef8080;
+  --danger-rgb: 239, 128, 128;
+  --info: #9aa3ad;
+  --info-rgb: 154, 163, 173;
+  --success-bg: rgba(var(--success-rgb), 0.13);
+  --warning-bg: rgba(var(--warning-rgb), 0.13);
+  --danger-bg: rgba(var(--danger-rgb), 0.13);
+  --info-bg: rgba(126, 166, 248, 0.13);
+
+  /* Element Plus 暗色跟随 */
+  --el-color-primary: var(--accent);
+  --el-color-primary-light-3: #96b5f9;
+  --el-color-primary-light-5: #aec7fb;
+  --el-color-primary-light-7: #c6d8fc;
+  --el-color-primary-light-8: #d3e0fd;
+  --el-color-primary-light-9: #e0e8fd;
+  --el-color-primary-dark-2: #6a94ec;
 }

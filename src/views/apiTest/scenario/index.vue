@@ -4,7 +4,7 @@
     <div class="bg-head">
       <div></div>
       <el-button type="primary" @click="openModal(null)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
           stroke-linecap="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
@@ -85,7 +85,7 @@
             <template #default="{ row }">
               <div v-if="row.creator" class="bg-user">
                 <span class="bg-avatar" :style="{ background: avatarColor(row.creator) }">{{ row.creator.slice(0, 1)
-                  }}</span>
+                }}</span>
                 <span>{{ row.creator }}</span>
               </div>
               <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
@@ -96,7 +96,7 @@
           <el-table-column label="操作" min-width="160">
             <template #default="{ row }">
               <div class="bg-ops">
-                <el-button link type="primary" @click="openModal(row)">编辑</el-button>
+                <el-button link type="primary" @click="onEdit(row)">编辑</el-button>
                 <el-button link style="color:#18a058" @click="onExecute(row)">执行</el-button>
                 <el-button link type="danger" @click="onDelete(row)">删除</el-button>
               </div>
@@ -142,11 +142,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { fetchScenarioPage, createScenario, updateScenario, deleteScenario, executeScenario } from '@/api/apiTest';
 import type { Scenario, ScenarioStatus } from '@/types/models';
 
 const statuses: ScenarioStatus[] = ['未执行', '执行中', '通过', '失败'];
+const router = useRouter();
 const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#6366f1', '#ec4899'];
 
 const list = ref<Scenario[]>([]);
@@ -215,6 +217,10 @@ function openModal(row: Scenario | null) {
   form.responsible = row?.responsible ?? '';
   err.name = '';
   modalVisible.value = true;
+}
+
+function onEdit(row: Scenario) {
+  router.push(`/api-test/scenario/edit/${row.id}`);
 }
 
 async function saveModal() {

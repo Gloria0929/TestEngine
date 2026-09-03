@@ -3,14 +3,15 @@
 
 // 卡片
 .el-card {
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow: none;
+  box-shadow: var(--shadow-sm);
   transition: var(--transition);
 }
 .el-card:hover {
   box-shadow: var(--shadow);
+  border-color: var(--border-strong);
 }
 .el-card__header {
   border-bottom: 1px solid var(--border);
@@ -23,19 +24,20 @@
 .el-table {
   --el-table-border-color: var(--border);
   --el-table-header-bg-color: var(--app-bg);
-  --el-table-row-hover-bg-color: rgba(var(--accent-rgb), 0.03);
+  --el-table-row-hover-bg-color: rgba(var(--accent-rgb), 0.04);
   border-radius: var(--radius);
   overflow: hidden;
 }
 .el-table th.el-table__cell {
   background: var(--app-bg);
-  color: var(--text-1);
+  color: var(--text-2);
   font-weight: 600;
   font-size: 13px;
 }
 .el-table td.el-table__cell {
   color: var(--text-2);
   font-size: 14px;
+  transition: background-color 0.15s var(--ease);
 }
 .el-table .el-button--small {
   padding: 2px 6px;
@@ -47,29 +49,46 @@
   transition: var(--transition);
   font-weight: 500;
 }
+.el-button:not(.is-disabled):active {
+  transform: translateY(0.5px);
+}
 .el-button--primary {
   background: var(--accent);
   border-color: var(--accent);
 }
-.el-button--primary:hover {
+
+.el-button--primary:not(.is-disabled):hover {
   background: var(--el-color-primary-dark-2);
   border-color: var(--el-color-primary-dark-2);
+}
+.el-button--primary.is-disabled {
+  opacity: 0.55;
 }
 .el-button--default {
   background: var(--surface);
   border-color: var(--border);
   color: var(--text-2);
 }
-.el-button--default:hover {
-  border-color: #cbd5e1;
+.el-button--default:not(.is-disabled):hover {
+  border-color: var(--border-strong);
   color: var(--text-1);
   background: var(--app-bg);
+}
+.el-button.is-disabled {
+  color: var(--text-3);
+  cursor: not-allowed;
 }
 .el-button.is-round {
   border-radius: 20px;
 }
 .el-button.is-circle {
   border-radius: 50%;
+}
+
+// 键盘导航焦点环（仅 focus-visible，不影响鼠标点击视觉）
+.el-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 // 输入框
@@ -81,12 +100,17 @@
 }
 .el-input__inner:hover,
 .el-textarea__inner:hover {
-  border-color: #cbd5e1;
+  border-color: var(--border-strong);
 }
 .el-input__inner:focus,
 .el-textarea__inner:focus {
   border-color: var(--accent);
   outline: none;
+}
+.el-input.is-disabled .el-input__inner,
+.el-textarea.is-disabled .el-textarea__inner {
+  cursor: not-allowed;
+  color: var(--text-3);
 }
 
 // 选择器/下拉
@@ -108,7 +132,7 @@
   font-weight: 600;
 }
 
-// 标签 — 仅保留主色、成功、危险、信息，避免多彩
+// 标签 — 语义色统一走全局令牌
 .el-tag {
   border-radius: var(--radius-sm);
   font-weight: 500;
@@ -120,19 +144,19 @@
   color: var(--accent);
 }
 .el-tag--success {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #16a34a;
+  background: var(--success-bg);
+  border-color: rgba(var(--success-rgb), 0.28);
+  color: var(--success);
 }
 .el-tag--warning {
-  background: #fffbeb;
-  border-color: #fde68a;
-  color: #d97706;
+  background: var(--warning-bg);
+  border-color: rgba(var(--warning-rgb), 0.28);
+  color: var(--warning);
 }
 .el-tag--danger {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #dc2626;
+  background: var(--danger-bg);
+  border-color: rgba(var(--danger-rgb), 0.28);
+  color: var(--danger);
 }
 .el-tag--info {
   background: var(--app-bg);
@@ -151,6 +175,7 @@
   height: 40px;
   line-height: 40px;
   color: var(--text-2);
+  transition: var(--transition);
 }
 .el-menu .el-sub-menu__title:hover,
 .el-menu .el-menu-item:hover {
@@ -167,10 +192,19 @@
 }
 
 // 分页
+.el-pagination {
+  --el-pagination-button-color: var(--text-2);
+  --el-pagination-text-color: var(--text-3);
+}
 .el-pagination.is-background .el-pager li:not(.is-disabled).is-active {
   background: var(--accent);
+  box-shadow: var(--shadow-primary);
 }
 .el-pagination.is-background .el-pager li:not(.is-disabled):hover {
+  color: var(--accent);
+}
+.el-pagination button:hover:not(:disabled),
+.el-pagination .el-pager li:hover:not(.is-active):not(.is-disabled) {
   color: var(--accent);
 }
 
@@ -235,11 +269,27 @@
 }
 
 // 对话框 / 抽屉
+// 完全居中（水平+垂直）+ 固定尺寸 + header/footer 固定 + body 内部滚动
+.el-overlay-dialog {
+  display: flex;
+}
 .el-dialog {
+  --dialog-width: 720px;
+  --dialog-height: 560px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  width: var(--dialog-width);
+  height: var(--dialog-height);
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  margin: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .el-dialog__header {
+  flex: none;
   border-bottom: 1px solid var(--border);
   padding: 12px 16px;
   margin-right: 0;
@@ -249,10 +299,25 @@
   font-size: 16px;
 }
 .el-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 .el-dialog__footer {
+  flex: none;
+  border-top: 1px solid var(--border);
   padding: 12px 16px;
+}
+// 全屏对话框不受固定尺寸约束
+.el-dialog.is-fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
 }
 .el-drawer {
   --el-drawer-bg-color: var(--surface);
@@ -264,26 +329,26 @@
   font-weight: 600;
 }
 
-// 消息通知
+// 消息通知 — 语义色统一走全局令牌
 .el-message {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   border-color: var(--border);
 }
 .el-message--success {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #166534;
+  background: var(--success-bg);
+  border-color: rgba(var(--success-rgb), 0.3);
+  color: var(--success);
 }
 .el-message--warning {
-  background: #fffbeb;
-  border-color: #fde68a;
-  color: #92400e;
+  background: var(--warning-bg);
+  border-color: rgba(var(--warning-rgb), 0.3);
+  color: var(--warning);
 }
 .el-message--error {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #991b1b;
+  background: var(--danger-bg);
+  border-color: rgba(var(--danger-rgb), 0.3);
+  color: var(--danger);
 }
 .el-notification {
   border-radius: var(--radius-lg);
@@ -353,9 +418,13 @@
 .el-loading-mask {
   background: rgba(255, 255, 255, 0.75);
 }
+html.dark .el-loading-mask {
+  background: rgba(23, 24, 26, 0.7);
+}
 .el-progress-bar__inner {
   background: var(--accent);
   border-radius: 100px;
+  transition: width 0.35s var(--ease);
 }
 .el-progress-bar__outer {
   background: var(--app-bg);
@@ -405,15 +474,22 @@
   outline: none !important;
 }
 
-// 去除按钮 focus-visible 时的 outline
-.el-button:focus-visible {
-  outline: none;
-}
-
 // 去除 checkbox/radio/switch focus 时的 outline
 .el-checkbox__input.is-focus .el-checkbox__inner,
 .el-radio__input.is-focus .el-radio__inner,
 .el-switch__core:focus {
   box-shadow: none;
   outline: none;
+}
+
+// 动效可访问性：用户偏好减少动效时关闭过渡与动画
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
