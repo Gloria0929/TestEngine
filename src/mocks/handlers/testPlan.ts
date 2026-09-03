@@ -4,10 +4,11 @@ import { ok, page } from '../utils'
 import { createPlans } from '../seed/testPlan'
 import { createCases, createModules } from '../seed/testCase'
 import type { PageQuery } from '@/types'
-import type { TestPlan, PlanCaseResult, PlanReport, ModuleNode } from '@/types/models'
+import type { TestPlan, PlanCaseResult, PlanReport, ModuleNode, CaseExecuteHistory } from '@/types/models'
 
 let plans = createPlans()
 let planCases: Record<string, PlanCaseResult[]> = {}
+let caseHistory: Record<string, CaseExecuteHistory[]> = {}
 
 export const testPlanHandlers = [
   http.get('/api/test-plan/list', ({ request }) => {
@@ -72,8 +73,38 @@ export const testPlanHandlers = [
   }),
   http.post('/api/test-plan/:id/results', async ({ params, request }) => {
     const body = await request.json() as PlanCaseResult[]
-    planCases[params.id as string] = body
+    const planId = params.id as string
+    const prev = planCases[planId] ?? []
+    planCases[planId] = body
+    for (const r of body) {
+      const prevResult = prev.find((p) => p.caseId === r.caseId)?.result
+      if (r.result && r.result !== prevResult) {
+        const key = `${planId}:${r.caseId}`
+        if (!caseHistory[key]) caseHistory[key] = []
+        caseHistory[key].unshift({
+          id: 'eh-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+          planId,
+          caseId: r.caseId,
+          result: r.result,
+          actual: r.actual ?? '',
+          executor: 'Administrator',
+          executeTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        })
+      }
+    }
     return HttpResponse.json(ok(null))
+  }),
+  http.get('/api/test-plan/:planId/cases/:caseId/history', ({ params }) => {
+    const key = `${params.planId as string}:${params.caseId as string}`
+    return HttpResponse.json(ok(caseHistory[key] ?? []))
+  }),
+  http.get('/api/test-plan/:id/history', ({ params }) => {
+    const planId = params.id as string
+    const list = Object.values(caseHistory)
+      .flat()
+      .filter((h) => h.planId === planId)
+      .sort((a, b) => b.executeTime.localeCompare(a.executeTime))
+    return HttpResponse.json(ok(list))
   }),
   http.get('/api/test-plan/:id/report', ({ params }) => {
     const planId = params.id as string
@@ -148,7 +179,13 @@ export const testPlanHandlers = [
     ]
     return HttpResponse.json(ok(page(reports, query)))
   }),
-  http.delete('/api/test-report/:id', ({ params }) => {
+  http.delete('/api/test-report/:id', () => {
     return HttpResponse.json(ok(null))
+  }),
+  http.post('/api/upload', async ({ request }) => {
+    const form = await request.formData()
+    const file = form.get('file') as File | null
+    const name = file?.name ?? 'file'
+    return HttpResponse.json(ok({ url: '/uploads/' + Date.now() + '-' + name }))
   }),
 ]

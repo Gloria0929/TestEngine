@@ -6,37 +6,38 @@
         <div v-for="(tab, i) in tabs" :key="i" class="at-tab" :class="{ active: i === activeTabIdx }"
           @click="switchTab(i)">
           <span class="at-tab-method">{{ tab.method }}</span>
-          <input class="at-tab-name" v-model="tab.name" placeholder="未命名" @click.stop
-            @keydown.enter="($event.target as HTMLInputElement).blur()" />
-          <button class="at-tab-close" @click.stop="closeTab(i)" title="关闭">&times;</button>
+          <span class="at-tab-name" :title="tab.name || '未命名'">{{ tab.name || '未命名' }}</span>
+          <el-button text @click.stop="closeTab(i)" title="关闭">
+            <el-icon>
+              <Close />
+            </el-icon>
+          </el-button>
         </div>
-        <button class="at-tab-add" @click="addTab" title="新建标签">+</button>
+        <el-button text @click="addTab" title="新建标签">
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </el-button>
       </div>
     </div>
 
     <!-- 请求行：方法 + URL + 发送/清空 -->
     <div class="at-reqline">
-      <select class="bg-sel" style="width: 118px; height: 36px" v-model="activeTab.method">
-        <option v-for="m in methods" :key="m" :value="m">{{ m }}</option>
-      </select>
-      <input class="bg-in" style="
-          flex: 1;
-          height: 36px;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-          font-size: 13px;
-        " v-model="activeTab.url" :placeholder="showBody
-          ? '请输入请求 URL，POST/PUT 请求可带请求体'
-          : '请输入请求 URL，如 /api/v1/users?page=1'
-          " @keydown.enter="send" />
-      <button class="bg-btn bg-btn-pri at-send" :disabled="sending" @click="send">
+      <el-select v-model="activeTab.method" style="width:118px" size="default">
+        <el-option v-for="m in methods" :key="m" :label="m" :value="m" />
+      </el-select>
+      <el-input v-model="activeTab.url" style="flex:1" size="default"
+        :placeholder="showBody ? '请输入请求 URL，POST/PUT 请求可带请求体' : '请输入请求 URL，如 /api/v1/users?page=1'"
+        @keydown.enter="send" />
+      <el-button type="primary" size="default" :disabled="sending" @click="send">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 2 11 13" />
           <path d="M22 2 15 22l-4-9-9-4Z" />
         </svg>
         {{ sending ? "发送中…" : "发送" }}
-      </button>
-      <button class="bg-btn" @click="clear">清空</button>
+      </el-button>
+      <el-button size="default" @click="clear">清空</el-button>
     </div>
 
     <!-- 左右两栏 -->
@@ -45,33 +46,26 @@
       <div class="at-dbg-panel">
         <h4>请求配置</h4>
         <div class="at-seg">
-          <button :class="{ on: seg === 'query' }" @click="seg = 'query'">
-            Params
-          </button>
-          <button :class="{ on: seg === 'auth' }" @click="seg = 'auth'">
-            Authorization
-          </button>
-          <button :class="{ on: seg === 'headers' }" @click="seg = 'headers'">
-            Headers
-          </button>
-          <button :class="{ on: seg === 'body' }" @click="seg = 'body'">
-            Body
-          </button>
+          <el-button text :class="{ on: seg === 'query' }" @click="seg = 'query'">Params</el-button>
+          <el-button text :class="{ on: seg === 'auth' }" @click="seg = 'auth'">Authorization</el-button>
+          <el-button text :class="{ on: seg === 'headers' }" @click="seg = 'headers'">Headers</el-button>
+          <el-button text :class="{ on: seg === 'body' }" @click="seg = 'body'">Body</el-button>
         </div>
 
-        <!-- Query 参数 -->
         <div v-show="seg === 'query'">
           <div class="at-kv-wrap">
             <div class="at-kv-head">
-              <span style="width: 24px"></span>
+              <span>参数名</span><span>参数值</span><span>描述</span><span style="width:24px"></span>
             </div>
             <div class="at-kv-row" v-for="(r, i) in activeTab.query" :key="i">
-              <input class="bg-in" v-model="r.key" placeholder="键" />
-              <input class="bg-in k2" v-model="r.value" placeholder="值" />
-              <input class="bg-in k3" v-model="r.desc" placeholder="描述（选填）" />
-              <button class="at-kv-del" @click="removeKv(activeTab.query, i)" title="删除该行">
-                &times;
-              </button>
+              <el-input v-model="r.key" placeholder="key" />
+              <el-input v-model="r.value" placeholder="value" />
+              <el-input v-model="r.desc" placeholder="描述（选填）" />
+              <el-button text @click="removeKv(activeTab.query, i)">
+                <el-icon>
+                  <Close />
+                </el-icon>
+              </el-button>
             </div>
           </div>
         </div>
@@ -80,31 +74,30 @@
         <div v-show="seg === 'auth'" class="at-auth">
           <div class="at-auth-row">
             <label>Type</label>
-            <select class="bg-sel" v-model="activeTab.authType" style="width:160px;height:32px;">
-              <option value="none">No Auth</option>
-              <option value="basic">Basic Auth</option>
-              <option value="bearer">Bearer Token</option>
-              <option value="cookie">Cookie</option>
-            </select>
+            <el-select v-model="activeTab.authType" style="width:160px">
+              <el-option label="No Auth" value="none" />
+              <el-option label="Basic Auth" value="basic" />
+              <el-option label="Bearer Token" value="bearer" />
+              <el-option label="Cookie" value="cookie" />
+            </el-select>
           </div>
           <template v-if="activeTab.authType === 'basic'">
             <div class="at-auth-row">
               <label>Username</label>
-              <input class="bg-in" v-model="activeTab.authUser" placeholder="用户名" style="flex:1;height:32px;" />
+              <el-input v-model="activeTab.authUser" style="flex:1" placeholder="用户名" />
             </div>
             <div class="at-auth-row">
               <label>Password</label>
-              <input class="bg-in" v-model="activeTab.authPass" type="password" placeholder="密码"
-                style="flex:1;height:32px;" />
+              <el-input v-model="activeTab.authPass" style="flex:1" type="password" placeholder="密码" show-password />
             </div>
           </template>
           <div v-if="activeTab.authType === 'bearer'" class="at-auth-row">
             <label>Token</label>
-            <input class="bg-in" v-model="activeTab.authToken" placeholder="Bearer token" style="flex:1;height:32px;" />
+            <el-input v-model="activeTab.authToken" style="flex:1" placeholder="Bearer token" />
           </div>
           <div v-if="activeTab.authType === 'cookie'" class="at-auth-row">
             <label>Cookie</label>
-            <input class="bg-in" v-model="activeTab.authCookie" placeholder="Cookie 字符串" style="flex:1;height:32px;" />
+            <el-input v-model="activeTab.authCookie" style="flex:1" placeholder="Cookie 字符串" />
           </div>
         </div>
 
@@ -112,15 +105,17 @@
         <div v-show="seg === 'headers'">
           <div class="at-kv-wrap">
             <div class="at-kv-head">
-              <span style="width: 24px"></span>
+              <span>Header 名</span><span class="k2">值</span><span class="k3">描述</span><span style="width:24px"></span>
             </div>
             <div class="at-kv-row" v-for="(r, i) in activeTab.headers" :key="i">
-              <input class="bg-in" v-model="r.key" placeholder="键" />
-              <input class="bg-in k2" v-model="r.value" placeholder="值" />
-              <input class="bg-in k3" v-model="r.desc" placeholder="描述（选填）" />
-              <button class="at-kv-del" @click="removeKv(activeTab.headers, i)" title="删除该行">
-                &times;
-              </button>
+              <el-input v-model="r.key" placeholder="key" />
+              <el-input v-model="r.value" placeholder="value" />
+              <el-input v-model="r.desc" placeholder="描述（选填）" />
+              <el-button text @click="removeKv(activeTab.headers, i)" title="删除该行">
+                <el-icon>
+                  <Close />
+                </el-icon>
+              </el-button>
             </div>
           </div>
         </div>
@@ -145,9 +140,7 @@
           </div>
           <template v-else>
             <div class="at-resp-head">
-              <span class="at-resp-code" :class="statusCodeCls">{{
-                statusText
-              }}</span>
+              <span class="at-resp-code" :class="statusCodeCls">{{ statusText }}</span>
               <span class="at-resp-meta">耗时 {{ last.time }} ms</span>
               <span v-if="last.matched" class="at-resp-mock">命中 Mock：{{ last.mockName || "" }}</span>
               <span v-else class="at-resp-meta">默认响应</span>
@@ -164,6 +157,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { executeRequest, fetchDebugRequests } from "@/api/apiTest";
 import { ElMessage } from "element-plus";
+import { Close, Plus } from "@element-plus/icons-vue";
 import type { HttpMethod, BodyType, DebugRequest } from "@/types/models";
 import BodyEditor from "./components/BodyEditor.vue";
 
@@ -475,6 +469,7 @@ onMounted(() => {
   overflow-x: auto;
   gap: 2px;
   min-width: 0;
+  align-items: flex-end;
 }
 
 .at-tab {
@@ -510,63 +505,55 @@ onMounted(() => {
 }
 
 .at-tab-name {
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  font-family: inherit;
-  color: var(--el-text-color-primary, #303133);
-  outline: none;
   min-width: 40px;
   max-width: 110px;
-  padding: 0 2px;
-}
-
-.at-tab-name:focus {
-  border-bottom: 1px dashed var(--el-color-primary, #409eff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .at-tab-close {
-  background: none;
-  border: none;
-  padding: 0 2px;
-  font-size: 14px;
-  cursor: pointer;
-  color: var(--el-text-color-placeholder, #a8abb2);
-  line-height: 1;
-  border-radius: 3px;
-  flex-shrink: 0;
+  min-height: auto !important;
+  height: 20px !important;
+  width: 20px !important;
+  padding: 0 !important;
+  color: var(--el-text-color-placeholder, #a8abb2) !important;
 }
 
 .at-tab-close:hover {
-  color: var(--el-color-danger, #f56c6c);
-  background: rgba(245, 108, 108, 0.1);
+  color: var(--el-color-danger, #f56c6c) !important;
+  background: rgba(245, 108, 108, 0.1) !important;
 }
 
 .at-tab-add {
-  background: none;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px 6px 0 0;
-  padding: 4px 10px;
-  font-size: 16px;
-  cursor: pointer;
-  color: var(--el-text-color-secondary, #909399);
-  line-height: 1;
-  flex-shrink: 0;
-  height: 28px;
-  display: flex;
-  align-items: center;
+  min-height: auto !important;
+  height: 28px !important;
+  padding: 4px 8px !important;
+  font-size: 16px !important;
+  color: var(--el-text-color-secondary, #909399) !important;
+  border: 1px solid var(--el-border-color, #dcdfe6) !important;
+  border-radius: 6px 6px 0 0 !important;
+  border-bottom: none !important;
 }
 
 .at-tab-add:hover {
-  color: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-  background: var(--el-fill-color-light, #fafafa);
+  color: var(--el-color-primary, #409eff) !important;
+  border-color: var(--el-color-primary, #409eff) !important;
+  background: var(--el-fill-color-light, #fafafa) !important;
 }
 
 .at-reqline {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.at-method-sel {
+  width: 118px;
+}
+
+.at-url-in {
+  flex: 1;
 }
 
 .at-send {
@@ -616,18 +603,19 @@ onMounted(() => {
   padding: 8px 12px 0;
 }
 
-.at-seg button {
+.at-seg .el-button {
   background: none;
   border: none;
   padding: 7px 14px;
   font-size: 12.5px;
   font-family: inherit;
   color: var(--el-text-color-regular, #606266);
-  cursor: pointer;
   border-bottom: 2px solid transparent;
+  border-radius: 0;
+  min-height: auto;
 }
 
-.at-seg button.on {
+.at-seg .el-button.on {
   color: var(--el-color-primary, #409eff);
   border-bottom-color: var(--el-color-primary, #409eff);
   font-weight: 600;
@@ -637,78 +625,49 @@ onMounted(() => {
   padding: 10px 12px 12px;
 }
 
-.at-kv-head {
-  display: flex;
-  align-items: center;
+.at-kv-head,
+.at-kv-row {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 1.2fr 24px;
   gap: 8px;
+  align-items: center;
+}
+
+.at-kv-head {
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
   padding: 0 0 6px;
 }
 
 .at-kv-head span {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 32px;
   padding: 0 10px;
   border: 1px solid transparent;
+  border-radius: 6px;
   box-sizing: border-box;
 }
 
-.at-kv-head span.k2 {
-  flex: 0.9;
-}
-
-.at-kv-head span.k3 {
-  flex: 1.2;
-}
-
 .at-kv-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 8px;
 }
 
 .at-kv-row .bg-in {
-  flex: 1;
-  height: 32px;
-}
-
-.at-kv-row .k2 {
-  flex: 0.9;
-}
-
-.at-kv-row .k3 {
-  flex: 1.2;
+  width: 100%;
 }
 
 .at-kv-del {
-  background: none;
-  border: none;
-  padding: 0 4px;
-  font-size: 16px;
-  cursor: pointer;
-  color: var(--el-text-color-placeholder, #a8abb2);
-  line-height: 1;
+  min-height: auto !important;
+  height: 24px !important;
+  width: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--el-text-color-placeholder, #a8abb2) !important;
 }
 
 .at-kv-del:hover {
-  color: var(--el-color-danger, #f56c6c);
-}
-
-.at-add {
-  background: none;
-  border: 1px dashed var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 12.5px;
-  font-family: inherit;
-  color: var(--el-color-primary, #409eff);
-  cursor: pointer;
-  margin: 2px 12px 12px;
-}
-
-.at-add:hover {
-  border-color: var(--el-color-primary, #409eff);
+  color: var(--el-color-danger, #f56c6c) !important;
 }
 
 /* Authorization */
@@ -732,34 +691,18 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.at-auth-sel {
+  width: 160px;
+}
+
+.at-auth-in {
+  flex: 1;
+}
+
 /* Body editor wrap */
 .at-body-wrap {
   flex: 1;
   overflow: auto;
-}
-
-.at-body {
-  padding: 10px 12px 12px;
-}
-
-.at-body textarea {
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 150px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-fill-color-light, #fafafa);
-  color: var(--el-text-color-primary, #303133);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12.5px;
-  padding: 10px;
-  outline: none;
-  resize: vertical;
-  transition: border-color 0.18s ease;
-}
-
-.at-body textarea:focus {
-  border-color: var(--el-color-primary, #409eff);
 }
 
 /* 响应区 */

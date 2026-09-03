@@ -1,16 +1,16 @@
 <template>
   <div class="user-group">
     <el-table :data="groups" v-loading="loading">
-      <el-table-column prop="name" label="名称" width="180" />
-      <el-table-column label="类型" width="120">
+      <el-table-column prop="name" label="名称" min-width="180" />
+      <el-table-column label="类型" min-width="120">
         <template #default="{ row }">
           <el-tag :type="row.builtin ? 'info' : 'success'" size="small">{{ row.builtin ? '内置' : '自定义' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="权限数" width="120">
+      <el-table-column label="权限数" min-width="120">
         <template #default="{ row }">{{ row.permissions.length }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="140">
+      <el-table-column label="操作" min-width="140">
         <template #default="{ row }">
           <el-button link type="primary" @click="openPermission(row)">配置权限</el-button>
         </template>

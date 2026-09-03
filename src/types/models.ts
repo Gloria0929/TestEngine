@@ -14,13 +14,15 @@ export interface TestCase {
   precondition: string; steps: CaseStep[]; level: CaseLevel
   status: CaseStatus; executor: string; tags: string[]
   createUser: string; updateTime: string; follow: boolean
+  remark?: string
+  attachments?: string[]
 }
 export interface CaseStep { id: string; description: string; expected: string }
 
 export type BugSeverity = 'BLOCKER' | 'CRITICAL' | 'MAJOR' | 'MINOR' | 'TRIVIAL'
 export type BugStatus = 'NEW' | 'ASSIGNED' | 'FIXING' | 'FIXED' | 'CLOSED' | 'REOPEN'
 export interface Bug {
-  id: string; projectId: string; title: string; severity: BugSeverity
+  id: string; projectId: string; planId?: string; title: string; severity: BugSeverity
   status: BugStatus; assignee: string; reporter: string
   description: string; createTime: string; moduleId: string
 }
@@ -77,6 +79,15 @@ export interface ApiReport {
 export type ExecuteResult = 'PASS' | 'FAIL' | 'BLOCK' | 'SKIP'
 export interface StepExecuteResult { stepId: string; result: ExecuteResult | ''; actual: string }
 export interface PlanCaseResult { caseId: string; result: ExecuteResult; actual: string; stepResults?: StepExecuteResult[] }
+export interface CaseExecuteHistory {
+  id: string
+  planId: string
+  caseId: string
+  result: ExecuteResult
+  actual: string
+  executor: string
+  executeTime: string
+}
 export interface PlanReport {
   id: string; planId: string; name: string; progress: number; passRate: number
   total: number; passed: number; failed: number; blocked: number; skipped: number

@@ -93,12 +93,12 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="type" label="类型" width="90" />
-          <el-table-column label="大小" width="110">
+          <el-table-column prop="type" label="类型" min-width="90" />
+          <el-table-column label="大小" min-width="110">
             <template #default="{ row }">{{ formatSize(row.size) }}</template>
           </el-table-column>
-          <el-table-column prop="time" label="更新时间" width="160" />
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column prop="time" label="更新时间" min-width="160" />
+          <el-table-column label="操作" min-width="150" fixed="right">
             <template #default="{ row }">
               <el-button
                 link

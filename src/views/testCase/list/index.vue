@@ -4,445 +4,413 @@
       <!-- 头部 -->
       <div class="tc-head">
         <div></div>
-        <button class="tc-btn tc-btn-pri" @click="tab === 'case' ? openCaseModal(null) : openReviewModal(null)">
+        <el-button type="primary" @click="tab === 'case' ? openCaseModal(null) : openReviewModal(null)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           {{ tab === "case" ? "新建用例" : "新建评审" }}
-        </button>
+        </el-button>
       </div>
 
       <!-- 标签页 -->
-      <div class="tc-tabs">
-        <button class="tc-tab" :class="{ on: tab === 'case' }" @click="tab = 'case'">
-          用例列表
-        </button>
-        <button class="tc-tab" :class="{ on: tab === 'review' }" @click="switchToReview">
-          用例评审
-        </button>
-      </div>
+      <el-tabs v-model="tab" @tab-change="onTabChange">
+        <el-tab-pane label="用例列表" name="case">
+          <div class="tc-pane">
+            <div class="tc-bar">
+              <div class="tc-field">
+                <label class="tc-lab">关键词</label>
+                <el-input style="width: 220px" v-model="flt.keyword" placeholder="搜索 ID 或用例名称"
+                  @keyup.enter="searchCases" />
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">用例等级</label>
+                <el-select style="width: 110px" v-model="flt.level" @change="searchCases">
+                  <el-option value="" label="全部" />
+                  <el-option v-for="l in levels" :key="l.v" :value="l.v" :label="l.t" />
+                </el-select>
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">评审结果</label>
+                <el-select style="width: 120px" v-model="flt.review" @change="searchCases">
+                  <el-option value="" label="全部" />
+                  <el-option v-for="r in reviewLabels" :key="r.v" :value="r.v" :label="r.t" />
+                </el-select>
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">执行结果</label>
+                <el-select style="width: 120px" v-model="flt.result" @change="searchCases">
+                  <el-option value="" label="全部" />
+                  <el-option v-for="r in resultLabels" :key="r.v" :value="r.v" :label="r.t" />
+                </el-select>
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">所属模块</label>
+                <el-select style="width: 130px" v-model="flt.module" @change="searchCases">
+                  <el-option value="" label="全部" />
+                  <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
+                </el-select>
+              </div>
+              <div class="tc-spacer" />
+              <div class="tc-field">
+                <label class="tc-lab">&nbsp;</label>
+                <el-button type="primary" @click="searchCases">
+                  查询
+                </el-button>
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">&nbsp;</label>
+                <el-button @click="resetCases">重置</el-button>
+              </div>
+            </div>
 
-      <!-- 用例列表面板 -->
-      <div v-show="tab === 'case'" class="tc-pane" :class="{ on: tab === 'case' }">
-        <div class="tc-bar">
-          <div class="tc-field">
-            <label class="tc-lab">关键词</label><input class="tc-in" style="width: 220px" v-model="flt.keyword"
-              placeholder="搜索 ID 或用例名称" @keyup.enter="searchCases" />
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">用例等级</label><select class="tc-sel" style="width: 110px" v-model="flt.level"
-              @change="searchCases">
-              <option value="">全部</option>
-              <option v-for="l in levels" :key="l.v" :value="l.v">
-                {{ l.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">评审结果</label><select class="tc-sel" style="width: 120px" v-model="flt.review"
-              @change="searchCases">
-              <option value="">全部</option>
-              <option v-for="r in reviewLabels" :key="r.v" :value="r.v">
-                {{ r.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">执行结果</label><select class="tc-sel" style="width: 120px" v-model="flt.result"
-              @change="searchCases">
-              <option value="">全部</option>
-              <option v-for="r in resultLabels" :key="r.v" :value="r.v">
-                {{ r.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">所属模块</label><select class="tc-sel" style="width: 130px" v-model="flt.module"
-              @change="searchCases">
-              <option value="">全部</option>
-              <option v-for="m in modules" :key="m" :value="m">{{ m }}</option>
-            </select>
-          </div>
-          <div class="tc-spacer" />
-          <div class="tc-field">
-            <label class="tc-lab">&nbsp;</label><button class="tc-btn tc-btn-pri" @click="searchCases">
-              查询
-            </button>
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">&nbsp;</label><button class="tc-btn" @click="resetCases">重置</button>
-          </div>
-        </div>
-
-        <div class="tc-card" :class="{ 'tc-loading': st.loading }">
-          <div class="tc-scroll">
-            <div v-if="st.loading && !st.list.length" class="tc-state">
-              加载中…
-            </div>
-            <div v-else-if="!st.list.length" class="tc-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                <rect x="9" y="3" width="6" height="4" rx="1" />
-                <path d="M9 12h6M9 16h4" />
-              </svg>
-              <div>暂无符合条件的测试用例</div>
-            </div>
-            <table v-else class="tc-tb">
-              <thead>
-                <tr>
-                  <th style="width: 90px">ID</th>
-                  <th style="min-width: 220px">用例名称</th>
-                  <th style="width: 90px">用例等级</th>
-                  <th style="width: 100px">评审结果</th>
-                  <th style="width: 100px">执行结果</th>
-                  <th style="width: 120px">所属模块</th>
-                  <th style="width: 130px">更新人</th>
-                  <th style="width: 160px">更新时间</th>
-                  <th style="width: 130px">创建人</th>
-                  <th style="width: 160px">创建时间</th>
-                  <th style="width: 110px">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in st.list" :key="row.id">
-                  <td class="tc-id">{{ row.id }}</td>
-                  <td>
-                    <span class="tc-cname" :title="row.name">{{
-                      row.name
-                      }}</span>
-                  </td>
-                  <td>
-                    <span class="tc-pill" :class="levelCls(row.level)">{{
-                      row.level || "-"
-                      }}</span>
-                  </td>
-                  <td>
-                    <span class="tc-pill" :class="reviewCls((row as any).review)">{{ (row as any).review || "未评审"
-                      }}</span>
-                  </td>
-                  <td>
-                    <span class="tc-pill" :class="resultCls((row as any).result)">{{ (row as any).result || "未执行"
-                      }}</span>
-                  </td>
-                  <td>
-                    <span class="tc-mod">{{ (row as any).module || "-" }}</span>
-                  </td>
-                  <td>
-                    <div class="tc-user">
-                      <span class="tc-avatar" :style="{
-                        background: avatarColor((row as any).updater || '?'),
-                      }">{{ ((row as any).updater || "?").slice(0, 1) }}</span><span>{{ (row as any).updater || "-"
-                        }}</span>
-                    </div>
-                  </td>
-                  <td class="tc-time">{{ (row as any).updateTime || "-" }}</td>
-                  <td>
-                    <div class="tc-user">
-                      <span class="tc-avatar" :style="{
-                        background: avatarColor((row as any).creator || '?'),
-                      }">{{ ((row as any).creator || "?").slice(0, 1) }}</span><span>{{ (row as any).creator || "-"
-                        }}</span>
-                    </div>
-                  </td>
-                  <td class="tc-time">{{ row.createTime || "-" }}</td>
-                  <td>
-                    <div class="tc-ops">
-                      <button class="tc-op" @click="openCaseModal(row)">
-                        编辑
-                      </button>
-                      <button class="tc-op tc-op-del" @click="onDeleteCase(row)">
-                        删除
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="tc-foot">
-            <div class="tc-total">
-              共 {{ st.total }} 条用例，第 {{ st.pageNum }} / {{ st.pages }} 页
-            </div>
-            <div class="tc-pager">
-              <span class="tc-size">每页</span>
-              <select class="tc-sel" style="width: 74px" :value="st.pageSize" @change="onCasePageSize">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span class="tc-size">条</span>
-              <span style="width: 8px"></span>
-              <button class="tc-pg" :disabled="st.pageNum <= 1" @click="goCasePage(st.pageNum - 1)">
-                上一页
-              </button>
-              <template v-for="p in casePageNumbers" :key="p">
-                <button v-if="p === '...'" class="tc-pg" disabled>…</button>
-                <button v-else class="tc-pg" :class="{ on: p === st.pageNum }" @click="goCasePage(p as number)">
-                  {{ p }}
-                </button>
-              </template>
-              <button class="tc-pg" :disabled="st.pageNum >= st.pages" @click="goCasePage(st.pageNum + 1)">
-                下一页
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 用例评审面板 -->
-      <div v-show="tab === 'review'" class="tc-pane" :class="{ on: tab === 'review' }">
-        <div class="tc-bar">
-          <div class="tc-field">
-            <label class="tc-lab">关键词</label><input class="tc-in" style="width: 220px" v-model="rvFlt.keyword"
-              placeholder="搜索评审 ID 或名称" @keyup.enter="searchReviews" />
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">评审状态</label><select class="tc-sel" style="width: 120px" v-model="rvFlt.status"
-              @change="searchReviews">
-              <option value="">全部</option>
-              <option v-for="s in rvStatuses" :key="s.v" :value="s.v">
-                {{ s.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-spacer" />
-          <div class="tc-field">
-            <label class="tc-lab">&nbsp;</label><button class="tc-btn tc-btn-pri" @click="searchReviews">
-              查询
-            </button>
-          </div>
-          <div class="tc-field">
-            <label class="tc-lab">&nbsp;</label><button class="tc-btn" @click="resetReviews">重置</button>
-          </div>
-        </div>
-
-        <div class="tc-card" :class="{ 'tc-loading': rvSt.loading }">
-          <div class="tc-scroll">
-            <div v-if="rvSt.loading && !rvSt.list.length" class="tc-state">
-              加载中…
-            </div>
-            <div v-else-if="!rvSt.list.length" class="tc-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path d="M12 3a9 9 0 1 0 9 9" />
-                <path d="M12 8v4l3 2" />
-              </svg>
-              <div>暂无符合条件的用例评审</div>
-            </div>
-            <table v-else class="tc-tb">
-              <thead>
-                <tr>
-                  <th style="width: 120px">ID</th>
-                  <th style="min-width: 170px">评审名称</th>
-                  <th style="width: 92px">用例数量</th>
-                  <th style="width: 96px">评审状态</th>
-                  <th style="width: 120px">通过率</th>
-                  <th style="width: 96px">评审模式</th>
-                  <th style="width: 160px">评审人</th>
-                  <th style="width: 110px">创建人</th>
-                  <th style="width: 104px">所属模块</th>
-                  <th style="min-width: 200px">描述</th>
-                  <th style="width: 168px">评审周期</th>
-                  <th style="width: 160px">创建时间</th>
-                  <th style="width: 100px">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="r in rvSt.list" :key="r.id">
-                  <td class="tc-id">{{ r.id }}</td>
-                  <td>
-                    <span class="tc-cname" :title="r.name">{{ r.name }}</span>
-                  </td>
-                  <td>
-                    <span class="tc-cases"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                        <rect x="9" y="3" width="6" height="4" rx="1" />
-                      </svg><b>{{ r.caseCount }}</b></span>
-                  </td>
-                  <td>
-                    <span class="tc-pill" :class="rvStatusCls(r.status)">{{
-                      r.status || "待评审"
-                      }}</span>
-                  </td>
-                  <td>
-                    <div class="rv-rate" :class="rvRateClass(r.passRate)">
-                      <div class="rv-ratebar">
-                        <i :style="{
-                          width:
-                            Math.max(0, Math.min(100, r.passRate || 0)) + '%',
-                        }"></i>
+            <div class="tc-card" :class="{ 'tc-loading': st.loading }">
+              <div class="tc-scroll">
+                <div v-if="st.loading && !st.list.length" class="tc-state">
+                  加载中…
+                </div>
+                <div v-else-if="!st.list.length" class="tc-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                    <rect x="9" y="3" width="6" height="4" rx="1" />
+                    <path d="M9 12h6M9 16h4" />
+                  </svg>
+                  <div>暂无符合条件的测试用例</div>
+                </div>
+                <el-table v-else :data="st.list" style="width:100%">
+                  <el-table-column label="ID" min-width="90">
+                    <template #default="{ row }">
+                      <span class="tc-id">{{ row.id }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="用例名称" min-width="220">
+                    <template #default="{ row }">
+                      <span class="tc-cname" :title="row.name">{{ row.name }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="用例等级" min-width="90">
+                    <template #default="{ row }">
+                      <span class="tc-pill" :class="levelCls(row.level)">{{ row.level || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审结果" min-width="100">
+                    <template #default="{ row }">
+                      <span class="tc-pill" :class="reviewCls(row.review)">{{ row.review || "未评审" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="执行结果" min-width="100">
+                    <template #default="{ row }">
+                      <span class="tc-pill" :class="resultCls(row.result)">{{ row.result || "未执行" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="所属模块" min-width="120">
+                    <template #default="{ row }">
+                      <span class="tc-mod">{{ row.module || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="更新人" min-width="130">
+                    <template #default="{ row }">
+                      <div class="tc-user">
+                        <span class="tc-avatar" :style="{
+                          background: avatarColor(row.updater || '?'),
+                        }">{{ (row.updater || "?").slice(0, 1) }}</span>
+                        <span>{{ row.updater || "-" }}</span>
                       </div>
-                      <span>{{ r.passRate || 0 }}%</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="tc-pill" :class="modeCls((r as any).mode)">{{
-                      (r as any).mode || "多人评审"
-                      }}</span>
-                  </td>
-                  <td>
-                    <div class="tc-stack">
-                      <template v-if="r.reviewers?.length">
-                        <span v-for="(u, i) in r.reviewers.slice(0, 4)" :key="i" class="tc-avatar"
-                          :style="{ background: avatarColor(u) }" :title="u">{{ u.slice(0, 1) }}</span>
-                        <span v-if="r.reviewers.length > 4" class="tc-more">+{{ r.reviewers.length - 4 }}</span>
-                      </template>
-                      <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="tc-user">
-                      <span class="tc-avatar" :style="{
-                        background: avatarColor((r as any).creator || '?'),
-                      }">{{ ((r as any).creator || "?").slice(0, 1) }}</span><span>{{ (r as any).creator || "-"
-                        }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="tc-mod">{{ (r as any).module || "-" }}</span>
-                  </td>
-                  <td>
-                    <span class="rv-desc" :title="(r as any).desc">{{
-                      (r as any).desc || "—"
-                      }}</span>
-                  </td>
-                  <td>
-                    <span class="rv-period">{{
-                      (r as any).period || "—"
-                      }}</span>
-                  </td>
-                  <td class="tc-time">{{ r.createTime || "-" }}</td>
-                  <td>
-                    <div class="tc-ops">
-                      <button class="tc-op" @click="openReviewModal(r)">
-                        编辑
-                      </button>
-                      <button class="tc-op tc-op-del" @click="onDeleteReview(r)">
-                        删除
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="tc-foot">
-            <div class="tc-total">
-              共 {{ rvSt.total }} 条评审，第 {{ rvSt.pageNum }} /
-              {{ rvSt.pages }} 页
-            </div>
-            <div class="tc-pager">
-              <span class="tc-size">每页</span>
-              <select class="tc-sel" style="width: 74px" :value="rvSt.pageSize" @change="onRvPageSize">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span class="tc-size">条</span>
-              <span style="width: 8px"></span>
-              <button class="tc-pg" :disabled="rvSt.pageNum <= 1" @click="goRvPage(rvSt.pageNum - 1)">
-                上一页
-              </button>
-              <template v-for="p in rvPageNumbers" :key="p">
-                <button v-if="p === '...'" class="tc-pg" disabled>…</button>
-                <button v-else class="tc-pg" :class="{ on: p === rvSt.pageNum }" @click="goRvPage(p as number)">
-                  {{ p }}
-                </button>
-              </template>
-              <button class="tc-pg" :disabled="rvSt.pageNum >= rvSt.pages" @click="goRvPage(rvSt.pageNum + 1)">
-                下一页
-              </button>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="更新时间" min-width="160">
+                    <template #default="{ row }">
+                      <span class="tc-time">{{ row.updateTime || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="创建人" min-width="130">
+                    <template #default="{ row }">
+                      <div class="tc-user">
+                        <span class="tc-avatar" :style="{
+                          background: avatarColor(row.creator || '?'),
+                        }">{{ (row.creator || "?").slice(0, 1) }}</span>
+                        <span>{{ row.creator || "-" }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="创建时间" min-width="160">
+                    <template #default="{ row }">
+                      <span class="tc-time">{{ row.createTime || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" min-width="110">
+                    <template #default="{ row }">
+                      <div class="tc-ops">
+                        <el-button type="primary" link @click="openCaseModal(row)">
+                          编辑
+                        </el-button>
+                        <el-button type="danger" link @click="onDeleteCase(row)">
+                          删除
+                        </el-button>
+                      </div>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+              <div class="tc-foot">
+                <div class="tc-total">
+                  共 {{ st.total }} 条用例，第 {{ st.pageNum }} / {{ st.pages }} 页
+                </div>
+                <div class="tc-pager">
+                  <el-pagination v-model:current-page="st.pageNum" v-model:page-size="st.pageSize"
+                    :page-sizes="[10, 20, 50]" :total="st.total" layout="sizes, prev, pager, next"
+                    @current-change="loadCases" @size-change="onCaseSizeChange" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="用例评审" name="review">
+          <div class="tc-pane">
+            <div class="tc-bar">
+              <div class="tc-field">
+                <label class="tc-lab">关键词</label>
+                <el-input style="width: 220px" v-model="rvFlt.keyword" placeholder="搜索评审 ID 或名称"
+                  @keyup.enter="searchReviews" />
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">评审状态</label>
+                <el-select style="width: 120px" v-model="rvFlt.status" @change="searchReviews">
+                  <el-option value="" label="全部" />
+                  <el-option v-for="s in rvStatuses" :key="s.v" :value="s.v" :label="s.t" />
+                </el-select>
+              </div>
+              <div class="tc-spacer" />
+              <div class="tc-field">
+                <label class="tc-lab">&nbsp;</label>
+                <el-button type="primary" @click="searchReviews">
+                  查询
+                </el-button>
+              </div>
+              <div class="tc-field">
+                <label class="tc-lab">&nbsp;</label>
+                <el-button @click="resetReviews">重置</el-button>
+              </div>
+            </div>
+
+            <div class="tc-card" :class="{ 'tc-loading': rvSt.loading }">
+              <div class="tc-scroll">
+                <div v-if="rvSt.loading && !rvSt.list.length" class="tc-state">
+                  加载中…
+                </div>
+                <div v-else-if="!rvSt.list.length" class="tc-state">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M12 3a9 9 0 1 0 9 9" />
+                    <path d="M12 8v4l3 2" />
+                  </svg>
+                  <div>暂无符合条件的用例评审</div>
+                </div>
+                <el-table v-else :data="rvSt.list" style="width:100%">
+                  <el-table-column label="ID" min-width="120">
+                    <template #default="{ row }">
+                      <span class="tc-id">{{ row.id }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审名称" min-width="170">
+                    <template #default="{ row }">
+                      <span class="tc-cname" :title="row.name">{{ row.name }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="用例数量" min-width="92">
+                    <template #default="{ row }">
+                      <span class="tc-cases"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                          <rect x="9" y="3" width="6" height="4" rx="1" />
+                        </svg><b>{{ row.caseCount }}</b></span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审状态" min-width="120">
+                    <template #default="{ row }">
+                      <span class="tc-pill" :class="rvStatusCls(row.status)">{{ row.status || "待评审" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="通过率" min-width="160">
+                    <template #default="{ row }">
+                      <div class="rv-rate" :class="rvRateClass(row.passRate)">
+                        <div class="rv-ratebar">
+                          <i :style="{
+                            width:
+                              Math.max(0, Math.min(100, row.passRate || 0)) + '%',
+                          }"></i>
+                        </div>
+                        <span>{{ row.passRate || 0 }}%</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审模式" min-width="120">
+                    <template #default="{ row }">
+                      <span class="tc-pill" :class="modeCls(row.mode)">{{ row.mode || "多人评审" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审人" min-width="160">
+                    <template #default="{ row }">
+                      <div class="tc-stack">
+                        <template v-if="row.reviewers?.length">
+                          <span v-for="(u, i) in row.reviewers.slice(0, 4)" :key="i" class="tc-avatar"
+                            :style="{ background: avatarColor(u) }" :title="u">{{ u.slice(0, 1) }}</span>
+                          <span v-if="row.reviewers.length > 4" class="tc-more">+{{ row.reviewers.length - 4 }}</span>
+                        </template>
+                        <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="创建人" min-width="180">
+                    <template #default="{ row }">
+                      <div class="tc-user">
+                        <span class="tc-avatar" :style="{
+                          background: avatarColor(row.creator || '?'),
+                        }">{{ (row.creator || "?").slice(0, 1) }}</span>
+                        <span>{{ row.creator || "-" }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="所属模块" min-width="120">
+                    <template #default="{ row }">
+                      <span class="tc-mod">{{ row.module || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="描述" min-width="200">
+                    <template #default="{ row }">
+                      <span class="rv-desc" :title="row.desc">{{ row.desc || "—" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="评审周期" min-width="300">
+                    <template #default="{ row }">
+                      <span class="rv-period">{{ row.period || "—" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="创建时间" min-width="160">
+                    <template #default="{ row }">
+                      <span class="tc-time">{{ row.createTime || "-" }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" min-width="140">
+                    <template #default="{ row }">
+                      <div class="tc-ops">
+                        <el-button type="primary" link @click="openReviewModal(row)">
+                          编辑
+                        </el-button>
+                        <el-button type="danger" link @click="onDeleteReview(row)">
+                          删除
+                        </el-button>
+                      </div>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+              <div class="tc-foot">
+                <div class="tc-total">
+                  共 {{ rvSt.total }} 条评审，第 {{ rvSt.pageNum }} /
+                  {{ rvSt.pages }} 页
+                </div>
+                <div class="tc-pager">
+                  <el-pagination v-model:current-page="rvSt.pageNum" v-model:page-size="rvSt.pageSize"
+                    :page-sizes="[10, 20, 50]" :total="rvSt.total" layout="sizes, prev, pager, next"
+                    @current-change="loadReviews" @size-change="onRvSizeChange" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
 
     <!-- 用例编辑弹窗 -->
-    <div v-if="caseModalVisible" class="tc-mask" @click.self="caseModalVisible = false">
-      <div class="tc-modal">
-        <h3>{{ editingCaseId ? "编辑用例" : "新建用例" }}</h3>
-        <div class="tc-form">
-          <div class="tc-row">
-            <label>用例名称<em>*</em></label><input v-model="caseForm.name" maxlength="60" placeholder="请输入用例名称" />
-            <div v-if="caseErr.name" class="err">{{ caseErr.name }}</div>
-          </div>
-          <div class="tc-row">
-            <label>用例等级</label><select v-model="caseForm.level">
-              <option v-for="l in levels" :key="l.v" :value="l.v">
-                {{ l.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-row">
-            <label>所属模块</label><select v-model="caseForm.module">
-              <option v-for="m in modules" :key="m" :value="m">{{ m }}</option>
-            </select>
-          </div>
-          <div class="tc-row">
-            <label>{{ editingCaseId ? "负责人" : "创建人" }}<em>*</em></label><input v-model="caseForm.creator" maxlength="20"
-              placeholder="请输入负责人" />
-            <div v-if="caseErr.creator" class="err">{{ caseErr.creator }}</div>
-          </div>
+    <el-dialog v-model="caseModalVisible" :title="editingCaseId ? '编辑用例' : '新建用例'" width="520px">
+      <div class="tc-form">
+        <div class="tc-row">
+          <label>用例名称<em>*</em></label>
+          <el-input v-model="caseForm.name" maxlength="60" placeholder="请输入用例名称" />
+          <div v-if="caseErr.name" class="err">{{ caseErr.name }}</div>
         </div>
-        <div class="tc-modal-foot">
-          <button class="tc-btn" @click="caseModalVisible = false">取消</button>
-          <button class="tc-btn tc-btn-pri" :disabled="caseSaving" @click="saveCase">
-            {{ caseSaving ? "保存中…" : "保存" }}
-          </button>
+        <div class="tc-row">
+          <label>用例等级</label>
+          <el-select v-model="caseForm.level">
+            <el-option v-for="l in levels" :key="l.v" :value="l.v" :label="l.t" />
+          </el-select>
+        </div>
+        <div class="tc-row">
+          <label>所属模块</label>
+          <el-select v-model="caseForm.module">
+            <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
+          </el-select>
+        </div>
+        <div class="tc-row">
+          <label>{{ editingCaseId ? "负责人" : "创建人" }}<em>*</em></label>
+          <el-input v-model="caseForm.creator" maxlength="20" placeholder="请输入负责人" />
+          <div v-if="caseErr.creator" class="err">{{ caseErr.creator }}</div>
         </div>
       </div>
-    </div>
+      <template #footer>
+        <div class="tc-modal-foot">
+          <el-button @click="caseModalVisible = false">取消</el-button>
+          <el-button type="primary" :disabled="caseSaving" @click="saveCase">
+            {{ caseSaving ? "保存中…" : "保存" }}
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 评审编辑弹窗 -->
-    <div v-if="reviewModalVisible" class="tc-mask tc-modal-rv" @click.self="reviewModalVisible = false">
-      <div class="tc-modal">
-        <h3>{{ editingReviewId ? "编辑评审" : "新建评审" }}</h3>
-        <div class="tc-form">
-          <div class="tc-row">
-            <label>评审名称<em>*</em></label><input v-model="reviewForm.name" maxlength="60" placeholder="例如：登录鉴权-用例评审" />
-            <div v-if="reviewErr.name" class="err">{{ reviewErr.name }}</div>
-          </div>
-          <div class="tc-row">
-            <label>评审人<em>*</em></label><input v-model="reviewForm.reviewersStr" maxlength="60"
-              placeholder="多个评审人用逗号分隔，例如：张伟,李娜" />
-            <div v-if="reviewErr.reviewers" class="err">
-              {{ reviewErr.reviewers }}
-            </div>
-          </div>
-          <div class="tc-row">
-            <label>用例数量</label><input v-model.number="reviewForm.caseCount" type="number" min="1" max="99" />
-          </div>
-          <div class="tc-row">
-            <label>评审模式</label><select v-model="reviewForm.mode">
-              <option v-for="m in rvModes" :key="m.v" :value="m.v">
-                {{ m.t }}
-              </option>
-            </select>
-          </div>
-          <div class="tc-row">
-            <label>所属模块</label><select v-model="reviewForm.module">
-              <option v-for="m in modules" :key="m" :value="m">{{ m }}</option>
-            </select>
-          </div>
-          <div class="tc-row">
-            <label>评审周期</label>
-            <div style="display: flex; gap: 8px; align-items: center">
-              <input v-model="reviewForm.startDate" type="date" style="flex: 1" /><span
-                style="color: var(--el-text-color-placeholder, #a8abb2)">~</span><input v-model="reviewForm.endDate"
-                type="date" style="flex: 1" />
-            </div>
-          </div>
-          <div class="tc-row tc-full">
-            <label>描述</label><textarea v-model="reviewForm.desc" maxlength="200" placeholder="评审范围、关注点等（选填）"></textarea>
+    <el-dialog v-model="reviewModalVisible" :title="editingReviewId ? '编辑评审' : '新建评审'" width="560px"
+      class="tc-modal tc-modal-rv">
+      <div class="tc-form">
+        <div class="tc-row">
+          <label>评审名称<em>*</em></label>
+          <el-input v-model="reviewForm.name" maxlength="60" placeholder="例如：登录鉴权-用例评审" />
+          <div v-if="reviewErr.name" class="err">{{ reviewErr.name }}</div>
+        </div>
+        <div class="tc-row">
+          <label>评审人<em>*</em></label>
+          <el-input v-model="reviewForm.reviewersStr" maxlength="60" placeholder="多个评审人用逗号分隔，例如：张伟,李娜" />
+          <div v-if="reviewErr.reviewers" class="err">
+            {{ reviewErr.reviewers }}
           </div>
         </div>
+        <div class="tc-row">
+          <label>用例数量</label>
+          <el-input v-model.number="reviewForm.caseCount" type="number" min="1" max="99" />
+        </div>
+        <div class="tc-row">
+          <label>评审模式</label>
+          <el-select v-model="reviewForm.mode">
+            <el-option v-for="m in rvModes" :key="m.v" :value="m.v" :label="m.t" />
+          </el-select>
+        </div>
+        <div class="tc-row">
+          <label>所属模块</label>
+          <el-select v-model="reviewForm.module">
+            <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
+          </el-select>
+        </div>
+        <div class="tc-row">
+          <label>评审周期</label>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <el-date-picker v-model="reviewForm.startDate" type="date" value-format="YYYY-MM-DD" placeholder="开始日期"
+              style="flex: 1" />
+            <span style="color: var(--el-text-color-placeholder, #a8abb2)">~</span>
+            <el-date-picker v-model="reviewForm.endDate" type="date" value-format="YYYY-MM-DD" placeholder="结束日期"
+              style="flex: 1" />
+          </div>
+        </div>
+        <div class="tc-row tc-full">
+          <label>描述</label>
+          <el-input v-model="reviewForm.desc" type="textarea" :rows="3" maxlength="200" placeholder="评审范围、关注点等（选填）" />
+        </div>
+      </div>
+      <template #footer>
         <div class="tc-modal-foot">
-          <button class="tc-btn" @click="reviewModalVisible = false">
+          <el-button @click="reviewModalVisible = false">
             取消
-          </button>
-          <button class="tc-btn tc-btn-pri" :disabled="reviewSaving" @click="saveReview">
+          </el-button>
+          <el-button type="primary" :disabled="reviewSaving" @click="saveReview">
             {{
               reviewSaving
                 ? editingReviewId
@@ -452,15 +420,15 @@
                   ? "保存"
                   : "创建"
             }}
-          </button>
+          </el-button>
         </div>
-      </div>
-    </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchCaseList, deleteCase } from "@/api/testCase";
 import type { TestCase } from "@/types/models";
@@ -582,6 +550,13 @@ function avatarColor(name: string) {
 const tab = ref("case");
 const reviewLoaded = ref(false);
 
+function onTabChange(name: string | number) {
+  if (name === "review" && !reviewLoaded.value) {
+    reviewLoaded.value = true;
+    loadReviews();
+  }
+}
+
 // 用例列表状态
 const st = reactive({
   pageNum: 1,
@@ -609,17 +584,6 @@ const rvSt = reactive({
   pages: 1,
 });
 const rvFlt = reactive({ keyword: "", status: "" });
-
-function pageNums(cur: number, tot: number) {
-  const list: (number | string)[] = [];
-  for (let i = 1; i <= tot; i++) {
-    if (i === 1 || i === tot || Math.abs(i - cur) <= 1) list.push(i);
-    else if (list[list.length - 1] !== "...") list.push("...");
-  }
-  return list;
-}
-const casePageNumbers = computed(() => pageNums(st.pageNum, st.pages));
-const rvPageNumbers = computed(() => pageNums(rvSt.pageNum, rvSt.pages));
 
 async function loadCases() {
   st.loading = true;
@@ -699,14 +663,7 @@ function resetCases() {
   st.pageSize = 10;
   loadCases();
 }
-function goCasePage(p: number) {
-  if (p >= 1 && p <= st.pages && p !== st.pageNum) {
-    st.pageNum = p;
-    loadCases();
-  }
-}
-function onCasePageSize(e: Event) {
-  st.pageSize = parseInt((e.target as HTMLSelectElement).value, 10) || 10;
+function onCaseSizeChange(val: number) {
   st.pageNum = 1;
   loadCases();
 }
@@ -722,24 +679,9 @@ function resetReviews() {
   rvSt.pageSize = 10;
   loadReviews();
 }
-function goRvPage(p: number) {
-  if (p >= 1 && p <= rvSt.pages && p !== rvSt.pageNum) {
-    rvSt.pageNum = p;
-    loadReviews();
-  }
-}
-function onRvPageSize(e: Event) {
-  rvSt.pageSize = parseInt((e.target as HTMLSelectElement).value, 10) || 10;
+function onRvSizeChange(val: number) {
   rvSt.pageNum = 1;
   loadReviews();
-}
-
-function switchToReview() {
-  tab.value = "review";
-  if (!reviewLoaded.value) {
-    reviewLoaded.value = true;
-    loadReviews();
-  }
 }
 
 // 用例弹窗
@@ -759,8 +701,8 @@ function openCaseModal(row: any) {
     editingCaseId.value = row.id;
     caseForm.name = row.name;
     caseForm.level = row.level || "P2";
-    caseForm.module = (row as any).module || modules[0];
-    caseForm.creator = (row as any).creator || row.executor || "";
+    caseForm.module = row.module || modules[0];
+    caseForm.creator = row.creator || row.executor || "";
   } else {
     editingCaseId.value = "";
     caseForm.name = "";
@@ -824,12 +766,12 @@ function openReviewModal(row: any) {
     reviewForm.name = row.name;
     reviewForm.reviewersStr = (row.reviewers || []).join(",");
     reviewForm.caseCount = row.caseCount || 5;
-    reviewForm.mode = (row as any).mode || "多人评审";
-    reviewForm.module = (row as any).module || modules[0];
-    const parts = ((row as any).period || "").split("~");
+    reviewForm.mode = row.mode || "多人评审";
+    reviewForm.module = row.module || modules[0];
+    const parts = (row.period || "").split("~");
     reviewForm.startDate = (parts[0] || "").trim();
     reviewForm.endDate = (parts[1] || "").trim();
-    reviewForm.desc = (row as any).desc || "";
+    reviewForm.desc = row.desc || "";
   } else {
     editingReviewId.value = "";
     reviewForm.name = "";
@@ -881,7 +823,7 @@ async function onDeleteReview(row: any) {
 onMounted(loadCases);
 </script>
 
-<style>
+<style scoped>
 .case-page {
   height: 100%;
   display: flex;
@@ -899,7 +841,7 @@ onMounted(loadCases);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  /* margin-bottom: 12px; */
 }
 
 .tc-btn {
@@ -940,28 +882,6 @@ onMounted(loadCases);
   margin-bottom: 16px;
 }
 
-.tc-tab {
-  padding: 8px 20px;
-  border: none;
-  background: none;
-  font-size: 14px;
-  color: var(--el-text-color-regular, #606266);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.2s;
-}
-
-.tc-tab:hover {
-  color: var(--accent);
-}
-
-.tc-tab.on {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-  font-weight: 600;
-}
-
 .tc-pane {
   flex: 1;
   display: flex;
@@ -974,43 +894,23 @@ onMounted(loadCases);
   flex-wrap: wrap;
   gap: 12px;
   align-items: flex-end;
-  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-radius: 10px;
+  background: var(--el-bg-color, #fff);
+  margin-bottom: 14px;
 }
 
 .tc-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .tc-lab {
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
-  line-height: 1;
-}
-
-.tc-in,
-.tc-sel {
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  font-size: 13px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-}
-
-.tc-in:focus,
-.tc-sel:focus {
-  border-color: var(--accent);
-}
-
-.tc-sel {
-  appearance: auto;
-  padding-right: 24px;
+  line-height: 1.4;
 }
 
 .tc-spacer {
@@ -1022,8 +922,8 @@ onMounted(loadCases);
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: 1px solid var(--el-border-color-light, #e4e7ed);
-  border-radius: 8px;
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-radius: 10px;
   background: var(--el-bg-color, #fff);
   overflow: hidden;
 }
@@ -1034,112 +934,84 @@ onMounted(loadCases);
 }
 
 .tc-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 48px 0;
-  color: var(--el-text-color-placeholder, #a8abb2);
-  font-size: 13px;
+  padding: 52px 16px;
+  text-align: center;
+  color: var(--el-text-color-secondary, #909399);
+  font-size: 13.5px;
 }
 
 .tc-state svg {
-  width: 40px;
-  height: 40px;
-  opacity: 0.35;
-}
-
-.tc-tb {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tc-tb th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 10px 12px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-  color: var(--el-text-color-secondary, #909399);
-  background: var(--el-fill-color-light, #f5f7fa);
-  border-bottom: 1px solid var(--el-border-color-light, #e4e7ed);
-  white-space: nowrap;
-}
-
-.tc-tb td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
-  color: var(--el-text-color-regular, #606266);
-  vertical-align: middle;
-}
-
-.tc-tb tbody tr:hover {
-  background: var(--el-fill-color-lighter, #fafafa);
+  width: 34px;
+  height: 34px;
+  margin-bottom: 10px;
+  color: var(--el-border-color, #dcdfe6);
 }
 
 .tc-id {
-  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
-  font-size: 12px;
-  color: var(--el-text-color-placeholder, #a8abb2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
 }
 
 .tc-cname {
-  cursor: pointer;
-  color: var(--accent);
-}
-
-.tc-cname:hover {
-  text-decoration: underline;
+  font-weight: 500;
+  color: var(--el-text-color-primary, #303133);
 }
 
 .tc-pill {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 500;
+  line-height: 1;
   white-space: nowrap;
 }
 
 .tc-mod {
+  display: inline-flex;
+  height: 22px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 5px;
+  background: var(--el-fill-color, #f0f2f5);
+  color: var(--el-text-color-regular, #606266);
   font-size: 12px;
-  color: var(--el-text-color-secondary, #909399);
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
 
 .tc-time {
-  font-size: 12px;
-  color: var(--el-text-color-placeholder, #a8abb2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
   white-space: nowrap;
 }
 
 .tc-user {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 13px;
 }
 
 .tc-avatar {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  display: flex;
+  flex: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
   color: #fff;
-  flex-shrink: 0;
 }
 
 .tc-stack {
   display: flex;
   align-items: center;
-  gap: -6px;
 }
 
 .tc-stack .tc-avatar {
@@ -1151,8 +1023,8 @@ onMounted(loadCases);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--el-fill-color, #f0f2f5);
   font-size: 11px;
@@ -1164,17 +1036,25 @@ onMounted(loadCases);
 .tc-cases {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 5px;
+  background: var(--el-fill-color, #f0f2f5);
   color: var(--el-text-color-regular, #606266);
+  font-size: 12px;
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
 
-.tc-cases svg {
-  opacity: 0.5;
+.tc-cases b {
+  color: var(--el-color-primary, #409eff);
+  font-weight: 600;
 }
 
 .tc-ops {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
 }
 
 .tc-op {
@@ -1198,13 +1078,15 @@ onMounted(loadCases);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  border-top: 1px solid var(--el-border-color-light, #e4e7ed);
+  gap: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .tc-total {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--el-text-color-secondary, #909399);
 }
 
@@ -1217,38 +1099,6 @@ onMounted(loadCases);
 .tc-size {
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
-}
-
-.tc-pg {
-  min-width: 32px;
-  height: 28px;
-  padding: 0 6px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 4px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.tc-pg:hover:not(:disabled) {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.tc-pg.on {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.tc-pg:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* 等级色 */
@@ -1412,41 +1262,10 @@ onMounted(loadCases);
 }
 
 .rv-period {
-  font-size: 12px;
-  color: var(--el-text-color-placeholder, #a8abb2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
   white-space: nowrap;
-}
-
-/* 弹窗 */
-.tc-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.tc-modal {
-  background: var(--el-bg-color, #fff);
-  border-radius: 12px;
-  padding: 24px;
-  width: 520px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-}
-
-.tc-modal-rv .tc-modal {
-  width: 560px;
-}
-
-.tc-modal h3 {
-  margin: 0 0 20px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary, #303133);
 }
 
 .tc-form {
@@ -1473,33 +1292,6 @@ onMounted(loadCases);
   margin-left: 2px;
 }
 
-.tc-row input,
-.tc-row select,
-.tc-row textarea {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  font-size: 13px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  outline: none;
-  box-sizing: border-box;
-}
-
-.tc-row textarea {
-  height: 80px;
-  padding: 8px 10px;
-  resize: vertical;
-  font-family: inherit;
-}
-
-.tc-row input:focus,
-.tc-row select:focus,
-.tc-row textarea:focus {
-  border-color: var(--accent);
-}
-
 .tc-row .err {
   font-size: 12px;
   color: var(--el-color-danger, #f56c6c);
@@ -1511,6 +1303,5 @@ onMounted(loadCases);
   gap: 10px;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid var(--el-border-color-light, #e4e7ed);
 }
 </style>

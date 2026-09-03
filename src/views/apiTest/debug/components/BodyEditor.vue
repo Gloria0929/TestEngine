@@ -20,10 +20,14 @@
         <span>参数名</span><span class="k2">参数值</span><span class="k3">描述</span><span style="width:24px"></span>
       </div>
       <div class="at-kv-row" v-for="(kv, i) in bodyParams" :key="i">
-        <input class="bg-in" v-model="kv.key" placeholder="键" />
-        <input class="bg-in k2" v-model="kv.value" placeholder="值" />
-        <input class="bg-in k3" v-model="kv.desc" placeholder="描述（选填）" />
-        <button class="at-kv-del" @click="remove(i)" title="删除该行">&times;</button>
+        <el-input v-model="kv.key" placeholder="key" />
+        <el-input v-model="kv.value" placeholder="value" />
+        <el-input v-model="kv.desc" placeholder="描述（选填）" />
+        <el-button text @click="remove(i)" title="删除该行">
+          <el-icon>
+            <Close />
+          </el-icon>
+        </el-button>
       </div>
     </div>
   </div>
@@ -31,6 +35,7 @@
 
 <script setup lang="ts">
 import { onMounted, watch } from "vue";
+import { Close } from "@element-plus/icons-vue";
 import type { BodyType } from "@/types/models";
 
 interface KvRow {
@@ -125,74 +130,48 @@ watch(
   padding: 10px 12px 12px;
 }
 
-.at-kv-head {
-  display: flex;
-  align-items: center;
+.at-kv-head,
+.at-kv-row {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr 1.2fr 24px;
   gap: 8px;
+  align-items: center;
+}
+
+.at-kv-head {
   font-size: 12px;
   color: var(--text-3);
   padding: 0 0 6px;
 }
 
 .at-kv-head span {
-  flex: 1;
-  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
   border: 1px solid transparent;
+  border-radius: 4px;
   box-sizing: border-box;
 }
 
-.at-kv-head span.k2 {
-  flex: 0.9;
-}
-
-.at-kv-head span.k3 {
-  flex: 1.2;
-}
-
 .at-kv-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 8px;
 }
 
 .at-kv-row .bg-in {
-  flex: 1;
-  height: 32px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 4px;
-  padding: 0 8px;
-  font-size: 12.5px;
-  font-family: inherit;
-  color: var(--el-text-color-primary, #303133);
-  background: var(--el-bg-color, #fff);
-  outline: none;
-  transition: border-color 0.18s ease;
-}
-
-.at-kv-row .bg-in:focus {
-  border-color: var(--el-color-primary, #409eff);
-}
-
-.at-kv-row .k2 {
-  flex: 0.9;
-}
-
-.at-kv-row .k3 {
-  flex: 1.2;
+  width: 100%;
 }
 
 .at-kv-del {
-  background: none;
-  border: none;
-  padding: 0 4px;
-  font-size: 16px;
-  cursor: pointer;
-  color: var(--el-text-color-placeholder, #a8abb2);
-  line-height: 1;
+  min-height: auto !important;
+  height: 24px !important;
+  width: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--el-text-color-placeholder, #a8abb2) !important;
 }
 
 .at-kv-del:hover {
-  color: var(--el-color-danger, #f56c6c);
+  color: var(--el-color-danger, #f56c6c) !important;
 }
 </style>

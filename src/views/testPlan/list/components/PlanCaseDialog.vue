@@ -7,8 +7,8 @@
     <el-table :data="rows" v-loading="loading" @selection-change="onSelect">
       <el-table-column type="selection" width="48" />
       <el-table-column prop="name" label="用例名称" min-width="220" />
-      <el-table-column prop="level" label="优先级" width="80" />
-      <el-table-column prop="moduleId" label="模块" width="110" />
+      <el-table-column prop="level" label="优先级" min-width="80" />
+      <el-table-column prop="moduleId" label="模块" min-width="110" />
     </el-table>
     <div class="pager">
       <el-pagination background layout="total, prev, pager, next" :total="total"

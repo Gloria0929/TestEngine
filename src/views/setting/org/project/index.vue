@@ -1,11 +1,11 @@
 <template>
   <div class="project">
     <el-table :data="projects" v-loading="loading">
-      <el-table-column prop="name" label="项目名称" width="200" />
+      <el-table-column prop="name" label="项目名称" min-width="200" />
       <el-table-column prop="description" label="描述" min-width="240" />
-      <el-table-column prop="members" label="成员数" width="100" />
-      <el-table-column prop="caseCount" label="用例数" width="100" />
-      <el-table-column label="管理" width="100">
+      <el-table-column prop="members" label="成员数" min-width="100" />
+      <el-table-column prop="caseCount" label="用例数" min-width="100" />
+      <el-table-column label="管理" min-width="100">
         <template #default>
           <el-button link type="primary" disabled>管理</el-button>
         </template>

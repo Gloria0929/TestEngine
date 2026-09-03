@@ -9,10 +9,10 @@
       </div>
     </template>
     <el-table :data="filtered" v-loading="loading">
-      <el-table-column prop="type" label="类型" width="100" />
+      <el-table-column prop="type" label="类型" min-width="100" />
       <el-table-column prop="title" label="待办事项" />
-      <el-table-column prop="dueTime" label="截止时间" width="180" />
-      <el-table-column label="操作" width="100">
+      <el-table-column prop="dueTime" label="截止时间" min-width="180" />
+      <el-table-column label="操作" min-width="100">
         <template #default="{ row }"><el-button link type="primary" @click="router.push(row.targetUrl)">处理</el-button></template>
       </el-table-column>
     </el-table>

@@ -3,12 +3,6 @@ import type { RouteRecordRaw } from "vue-router";
 
 export const routes: RouteRecordRaw[] = [
   {
-    path: "/login",
-    name: "Login",
-    component: () => import("@/views/login/index.vue"),
-    meta: { public: true },
-  },
-  {
     path: "/",
     component: () => import("@/layouts/DefaultLayout.vue"),
     redirect: "/workstation/home",
@@ -28,12 +22,6 @@ export const routes: RouteRecordRaw[] = [
         path: "workstation/follow",
         name: "WorkstationFollow",
         component: () => import("@/views/workstation/follow/index.vue"),
-      },
-      {
-        path: "project/info",
-        name: "ProjectInfo",
-        component: () => import("@/views/project/info/index.vue"),
-        meta: { permission: "project:view" },
       },
       {
         path: "project/file",
@@ -93,6 +81,12 @@ export const routes: RouteRecordRaw[] = [
         path: "test-plan/execute/:id",
         name: "PlanExecute",
         component: () => import("@/views/testPlan/execute/index.vue"),
+        meta: { permission: "testPlan:view" },
+      },
+      {
+        path: "test-plan/case-execute/:planId/:caseId",
+        name: "PlanCaseExecute",
+        component: () => import("@/views/testPlan/caseExecute/index.vue"),
         meta: { permission: "testPlan:view" },
       },
       {

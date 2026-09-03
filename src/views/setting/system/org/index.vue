@@ -6,7 +6,7 @@
         <el-button type="primary" @click="openAddOrg">创建组织</el-button>
       </div>
       <el-table :data="orgs" v-loading="orgLoading">
-        <el-table-column prop="name" label="组织名称" width="200" />
+        <el-table-column prop="name" label="组织名称" min-width="200" />
         <el-table-column prop="description" label="描述" min-width="300" />
       </el-table>
     </div>
@@ -17,9 +17,9 @@
         <el-button type="primary" @click="openAddProject">创建项目</el-button>
       </div>
       <el-table :data="projects" v-loading="projectLoading">
-        <el-table-column prop="name" label="项目名称" width="200" />
+        <el-table-column prop="name" label="项目名称" min-width="200" />
         <el-table-column prop="description" label="描述" min-width="240" />
-        <el-table-column prop="caseCount" label="用例数" width="100" />
+        <el-table-column prop="caseCount" label="用例数" min-width="100" />
       </el-table>
     </div>
 

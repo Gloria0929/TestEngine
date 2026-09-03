@@ -6,14 +6,14 @@
         <div class="name">{{ userStore.user?.name || "-" }}</div>
         <div class="sub">
           <span class="username">@{{ userStore.user?.username || "-" }}</span>
-          <el-tag v-if="userStore.user?.role" size="small" type="info">{{
+          <el-tag v-if="userStore.user?.role" type="info">{{
             userStore.user?.role
           }}</el-tag>
         </div>
       </div>
     </div>
 
-    <el-tabs v-model="activeTab" type="border-card" class="profile-tabs">
+    <el-tabs v-model="activeTab" type="border-card">
       <el-tab-pane label="个人资料" name="profile">
         <el-form label-width="100px" style="max-width: 480px">
           <el-form-item label="姓名">
@@ -23,9 +23,7 @@
             <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSaveProfile"
-              >保存资料</el-button
-            >
+            <el-button type="primary" @click="onSaveProfile">保存资料</el-button>
           </el-form-item>
         </el-form>
       </el-tab-pane>
@@ -33,33 +31,16 @@
       <el-tab-pane label="账号安全" name="security">
         <el-form label-width="100px" style="max-width: 480px">
           <el-form-item label="旧密码">
-            <el-input
-              v-model="pwdForm.oldPassword"
-              type="password"
-              show-password
-              placeholder="请输入旧密码"
-            />
+            <el-input v-model="pwdForm.oldPassword" type="password" show-password placeholder="请输入旧密码" />
           </el-form-item>
           <el-form-item label="新密码">
-            <el-input
-              v-model="pwdForm.newPassword"
-              type="password"
-              show-password
-              placeholder="请输入新密码"
-            />
+            <el-input v-model="pwdForm.newPassword" type="password" show-password placeholder="请输入新密码" />
           </el-form-item>
           <el-form-item label="确认密码">
-            <el-input
-              v-model="pwdForm.confirmPassword"
-              type="password"
-              show-password
-              placeholder="请再次输入新密码"
-            />
+            <el-input v-model="pwdForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onChangePassword"
-              >修改密码</el-button
-            >
+            <el-button type="primary" @click="onChangePassword">修改密码</el-button>
           </el-form-item>
         </el-form>
       </el-tab-pane>
@@ -70,9 +51,7 @@
             <el-input v-model="execUrl" placeholder="http://127.0.0.1:8082" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSaveExecUrl"
-              >保存执行地址</el-button
-            >
+            <el-button type="primary" @click="onSaveExecUrl">保存执行地址</el-button>
           </el-form-item>
         </el-form>
       </el-tab-pane>
@@ -245,10 +224,5 @@ function onSaveExecUrl() {
   gap: 10px;
   color: var(--el-text-color-secondary);
   font-size: 14px;
-}
-
-.profile-tabs :deep(.el-tabs__content) {
-  padding: 24px;
-  min-height: 320px;
 }
 </style>

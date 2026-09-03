@@ -5,8 +5,8 @@
     </div>
     <div v-for="(kv, i) in modelValue" :key="i" class="kv-row">
       <el-checkbox v-model="kv.enabled" class="col-check" />
-      <el-input v-model="kv.key" placeholder="键" class="col-key" />
-      <el-input v-model="kv.value" placeholder="值" class="col-value" />
+      <el-input v-model="kv.key" placeholder="键" style="flex:1" />
+      <el-input v-model="kv.value" placeholder="值" style="flex:1" />
       <el-icon class="col-action" @click="remove(i)">
         <Delete />
       </el-icon>

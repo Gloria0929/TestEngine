@@ -26,6 +26,7 @@ onMounted(() => appStore.applyTheme());
   flex-direction: column;
   overflow: hidden;
 }
+
 .topbar {
   display: flex;
   flex-direction: column;
@@ -36,11 +37,14 @@ onMounted(() => appStore.applyTheme());
   border-bottom: 1px solid var(--border);
   padding: 0 16px;
 }
+
 .brand-row {
   display: flex;
   align-items: center;
   height: 42px;
+  padding: 30px 0;
 }
+
 .brand {
   font-weight: 700;
   font-size: 18px;
@@ -48,12 +52,14 @@ onMounted(() => appStore.applyTheme());
   white-space: nowrap;
   letter-spacing: 0.5px;
 }
+
 .content {
   background: var(--app-bg);
   padding: 20px;
   overflow: auto;
   flex: 1;
 }
+
 /* 水平菜单样式 */
 :deep(.topnav.el-menu--horizontal) {
   border-bottom: none;
@@ -63,6 +69,7 @@ onMounted(() => appStore.applyTheme());
   width: 100%;
   flex: 0 0 auto;
 }
+
 :deep(.topnav .el-menu-item) {
   height: 44px;
   line-height: 44px;
@@ -70,16 +77,19 @@ onMounted(() => appStore.applyTheme());
   font-size: 14px;
   color: var(--text-1);
 }
+
 :deep(.topnav .el-menu-item:hover) {
   color: var(--accent);
   background: transparent;
 }
+
 :deep(.topnav .el-menu-item.is-active) {
   color: var(--accent);
   border-bottom: 2px solid var(--accent);
   font-weight: 600;
   background: transparent;
 }
+
 :deep(.topnav .el-menu-item .el-icon) {
   margin-right: 4px;
   vertical-align: middle;

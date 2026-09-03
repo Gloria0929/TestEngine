@@ -7,9 +7,9 @@
     </div>
     <el-table :data="plugins" v-loading="loading">
       <el-table-column prop="name" label="插件名称" min-width="220" />
-      <el-table-column prop="type" label="类型" width="100" />
-      <el-table-column prop="version" label="版本" width="120" />
-      <el-table-column label="启用" width="90">
+      <el-table-column prop="type" label="类型" min-width="100" />
+      <el-table-column prop="version" label="版本" min-width="120" />
+      <el-table-column label="启用" min-width="90">
         <template #default="{ row }">
           <el-switch :model-value="row.enabled" @change="(v: string | number | boolean) => onToggle(row, Boolean(v))" />
         </template>

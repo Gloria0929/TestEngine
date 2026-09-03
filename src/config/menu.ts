@@ -9,7 +9,6 @@ export interface MenuItem {
 }
 
 export const menuTree: MenuItem[] = [
-  { key: "project", label: "项目设置", icon: "Folder", path: "/project/info" },
   {
     key: "testplan",
     label: "测试计划",
@@ -60,5 +59,12 @@ export const menuTree: MenuItem[] = [
         permission: "apiTest:view",
       },
     ],
+  },
+  {
+    key: "log",
+    label: "日志",
+    icon: "Document",
+    path: "/project/log",
+    permission: "project:view",
   },
 ];

@@ -4,10 +4,10 @@
       <el-button type="primary" @click="openEdit()">新建参数</el-button>
     </div>
     <el-table :data="params" v-loading="loading">
-      <el-table-column prop="key" label="参数键" width="200" />
+      <el-table-column prop="key" label="参数键" min-width="200" />
       <el-table-column prop="value" label="参数值" min-width="240" />
       <el-table-column prop="description" label="描述" min-width="200" />
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作" min-width="100">
         <template #default="{ row }">
           <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
         </template>

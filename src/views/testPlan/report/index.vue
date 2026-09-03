@@ -44,7 +44,7 @@
       <div class="section-title">执行结果</div>
       <el-table :data="report?.results ?? []">
         <el-table-column prop="caseName" label="用例名称" min-width="220" />
-        <el-table-column label="类型" width="100">
+        <el-table-column label="类型" min-width="100">
           <template #default="{ row }">
             <el-tag
               :type="row.type === 'manual' ? 'primary' : 'success'"
@@ -54,14 +54,14 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="结果" width="100">
+        <el-table-column label="结果" min-width="100">
           <template #default="{ row }">
             <el-tag :type="resultTag(row.result).type" size="small">{{
               resultTag(row.result).label
             }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="90">
+        <el-table-column label="操作" min-width="90">
           <template #default="{ row }">
             <el-button
               v-if="row.result === 'FAIL' || row.result === 'BLOCK'"

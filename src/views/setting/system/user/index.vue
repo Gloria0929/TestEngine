@@ -4,16 +4,16 @@
       <el-button type="primary" @click="openAdd">新建用户</el-button>
     </div>
     <el-table :data="users" v-loading="loading">
-      <el-table-column prop="username" label="用户名" width="160" />
-      <el-table-column prop="name" label="姓名" width="140" />
+      <el-table-column prop="username" label="用户名" min-width="160" />
+      <el-table-column prop="name" label="姓名" min-width="140" />
       <el-table-column prop="email" label="邮箱" min-width="220" />
-      <el-table-column prop="role" label="角色" width="140" />
-      <el-table-column label="启用" width="90">
+      <el-table-column prop="role" label="角色" min-width="140" />
+      <el-table-column label="启用" min-width="90">
         <template #default="{ row }">
           <el-switch :model-value="row.enabled" @change="(v: string | number | boolean) => onToggle(row, Boolean(v))" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="120">
+      <el-table-column label="操作" min-width="120">
         <template #default="{ row }">
           <el-button link type="primary" @click="onReset(row)">重置凭证</el-button>
         </template>

@@ -4,15 +4,15 @@
       <el-tab-pane label="用例" name="case">
         <el-table :data="cases" v-loading="caseLoading">
           <el-table-column prop="name" label="用例名称" min-width="240" />
-          <el-table-column prop="moduleId" label="模块" width="120" />
-          <el-table-column prop="level" label="等级" width="80" />
-          <el-table-column label="状态" width="100">
+          <el-table-column prop="moduleId" label="模块" min-width="120" />
+          <el-table-column prop="level" label="等级" min-width="80" />
+          <el-table-column label="状态" min-width="100">
             <template #default="{ row }">{{
               caseStatusText(row.status)
             }}</template>
           </el-table-column>
-          <el-table-column prop="updateTime" label="更新时间" width="160" />
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column prop="updateTime" label="更新时间" min-width="160" />
+          <el-table-column label="操作" min-width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="onRestoreCase(row)"
                 >恢复</el-button
@@ -28,16 +28,16 @@
       <el-tab-pane label="场景" name="scenario">
         <el-table :data="scenarios" v-loading="scenarioLoading">
           <el-table-column prop="name" label="场景名称" min-width="240" />
-          <el-table-column prop="apiCount" label="接口数" width="80" />
-          <el-table-column prop="responsible" label="责任人" width="120" />
-          <el-table-column label="状态" width="100">
+          <el-table-column prop="apiCount" label="接口数" min-width="80" />
+          <el-table-column prop="responsible" label="责任人" min-width="120" />
+          <el-table-column label="状态" min-width="100">
             <template #default="{ row }">
               <el-tag :type="scenarioStatusTag(row.status)" size="small">{{
                 scenarioStatusText(row.status)
               }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="180" fixed="right">
+          <el-table-column label="操作" min-width="180" fixed="right">
             <template #default="{ row }">
               <el-button link type="primary" @click="onRestoreScenario(row)"
                 >恢复</el-button

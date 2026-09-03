@@ -4,23 +4,23 @@
     <div class="bg-bar">
       <div class="bg-field">
         <label class="bg-lab">关键词</label>
-        <input class="bg-in" style="width: 220px" v-model="filter.keyword" placeholder="搜索场景名称 / ID" @keydown.enter="search" />
+        <el-input v-model="filter.keyword" style="width:220px" placeholder="搜索场景名称 / ID" clearable
+          @keydown.enter="search" @clear="search" />
       </div>
       <div class="bg-field">
         <label class="bg-lab">状态</label>
-        <select class="bg-sel" style="width: 110px" v-model="filter.status" @change="search">
-          <option value="">全部</option>
-          <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-        </select>
+        <el-select v-model="filter.status" style="width:110px" placeholder="全部" clearable @change="search">
+          <el-option v-for="s in statuses" :key="s" :label="s" :value="s" />
+        </el-select>
       </div>
       <div class="bg-spacer" />
       <div class="bg-field">
         <label class="bg-lab">&nbsp;</label>
-        <button class="bg-btn bg-btn-pri" @click="search">查询</button>
+        <el-button type="primary" @click="search">查询</el-button>
       </div>
       <div class="bg-field">
         <label class="bg-lab">&nbsp;</label>
-        <button class="bg-btn" @click="reset">重置</button>
+        <el-button @click="reset">重置</el-button>
       </div>
     </div>
 
@@ -29,110 +29,102 @@
       <div class="bg-scroll">
         <div v-if="loading && !list.length" class="bg-state">加载中…</div>
         <div v-else-if="!list.length" class="bg-state">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M8 6h13M8 12h13M8 18h13" />
+            <path d="M3 6h.01M3 12h.01M3 18h.01" />
+          </svg>
           <div>暂无符合条件的场景</div>
         </div>
-        <table v-else class="bg-tb">
-          <thead>
-            <tr>
-              <th style="width: 110px">ID</th>
-              <th style="min-width: 200px">场景名称</th>
-              <th style="width: 90px">接口数</th>
-              <th style="width: 100px">状态</th>
-              <th style="width: 130px">责任人</th>
-              <th style="width: 130px">创建人</th>
-              <th style="width: 160px">创建时间</th>
-              <th style="width: 160px">更新时间</th>
-              <th style="width: 160px">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in list" :key="row.id">
-              <td class="bg-id">{{ row.id }}</td>
-              <td><span class="bg-cname" :title="row.name">{{ row.name }}</span></td>
-              <td>
-                <span class="bg-cases">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="20" cy="18" r="2"/></svg>
-                  <b>{{ row.apiCount }}</b>
-                </span>
-              </td>
-              <td><span class="bg-pill" :class="statusCls(row.status)">{{ row.status }}</span></td>
-              <td>
-                <div v-if="row.responsible" class="bg-user">
-                  <span class="bg-avatar" :style="{ background: avatarColor(row.responsible) }">{{ row.responsible.slice(0, 1) }}</span>
-                  <span>{{ row.responsible }}</span>
-                </div>
-                <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
-              </td>
-              <td>
-                <div v-if="row.creator" class="bg-user">
-                  <span class="bg-avatar" :style="{ background: avatarColor(row.creator) }">{{ row.creator.slice(0, 1) }}</span>
-                  <span>{{ row.creator }}</span>
-                </div>
-                <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
-              </td>
-              <td class="bg-time">{{ row.createTime }}</td>
-              <td class="bg-time">{{ row.updateTime }}</td>
-              <td>
-                <div class="bg-ops">
-                  <button class="bg-op" @click="openModal(row)">编辑</button>
-                  <button class="bg-op bg-op-run" @click="onExecute(row)">执行</button>
-                  <button class="bg-op bg-op-del" @click="onDelete(row)">删除</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <el-table v-else :data="list">
+          <el-table-column prop="id" label="ID" min-width="110" class-name="bg-id" />
+          <el-table-column label="场景名称" min-width="200">
+            <template #default="{ row }">
+              <span class="bg-cname" :title="row.name">{{ row.name }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="接口数" min-width="90">
+            <template #default="{ row }">
+              <span class="bg-cases">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round">
+                  <path d="M4 6h16M4 12h16M4 18h10" />
+                  <circle cx="20" cy="18" r="2" />
+                </svg>
+                <b>{{ row.apiCount }}</b>
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" min-width="100">
+            <template #default="{ row }">
+              <span class="bg-pill" :class="statusCls(row.status)">{{ row.status }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="责任人" min-width="130">
+            <template #default="{ row }">
+              <div v-if="row.responsible" class="bg-user">
+                <span class="bg-avatar" :style="{ background: avatarColor(row.responsible) }">{{
+                  row.responsible.slice(0, 1) }}</span>
+                <span>{{ row.responsible }}</span>
+              </div>
+              <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建人" min-width="130">
+            <template #default="{ row }">
+              <div v-if="row.creator" class="bg-user">
+                <span class="bg-avatar" :style="{ background: avatarColor(row.creator) }">{{ row.creator.slice(0, 1)
+                }}</span>
+                <span>{{ row.creator }}</span>
+              </div>
+              <span v-else style="color: var(--el-text-color-placeholder, #a8abb2)">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createTime" label="创建时间" min-width="160" class-name="bg-time" />
+          <el-table-column prop="updateTime" label="更新时间" min-width="160" class-name="bg-time" />
+          <el-table-column label="操作" min-width="160">
+            <template #default="{ row }">
+              <div class="bg-ops">
+                <el-button link type="primary" @click="openModal(row)">编辑</el-button>
+                <el-button link style="color:#18a058" @click="onExecute(row)">执行</el-button>
+                <el-button link type="danger" @click="onDelete(row)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
 
       <!-- 分页 -->
       <div class="bg-foot">
         <div class="bg-total">共 {{ total }} 个场景，第 {{ pageNum }} / {{ pages }} 页</div>
-        <div class="bg-pager">
-          <span class="bg-size">每页</span>
-          <select class="bg-sel" style="width: 74px" v-model.number="pageSize" @change="goPage(1)">
-            <option v-for="n in [10, 20, 50]" :key="n" :value="n">{{ n }}</option>
-          </select>
-          <span class="bg-size">条</span>
-          <span style="width: 8px"></span>
-          <button class="bg-pg" :disabled="pageNum <= 1" @click="goPage(pageNum - 1)">上一页</button>
-          <template v-for="(p, i) in pageNums" :key="i">
-            <button v-if="p === '...'" class="bg-pg" disabled>…</button>
-            <button v-else class="bg-pg" :class="{ on: p === pageNum }" @click="goPage(p)">{{ p }}</button>
-          </template>
-          <button class="bg-pg" :disabled="pageNum >= pages" @click="goPage(pageNum + 1)">下一页</button>
-        </div>
+        <el-pagination :current-page="pageNum" :page-size="pageSize" :page-sizes="[10, 20, 50]" :total="total"
+          layout="sizes, prev, pager, next" @current-change="goPage"
+          @size-change="(n: number) => { pageSize = n; goPage(1); }" />
       </div>
     </div>
 
     <!-- 新建/编辑弹窗 -->
-    <div v-if="modalVisible" class="bg-mask" @click.self="modalVisible = false">
-      <div class="bg-modal">
-        <h3>{{ editingId ? '编辑场景' : '新建场景' }}</h3>
-        <div class="bg-form">
-          <div class="bg-row bg-full">
-            <label>场景名称<em>*</em></label>
-            <input v-model="form.name" maxlength="80" placeholder="如：下单支付主流程" />
-            <div v-if="err.name" class="err">{{ err.name }}</div>
-          </div>
-          <div class="bg-row">
-            <label>接口数</label>
-            <input v-model.number="form.apiCount" type="number" min="1" max="999" />
-          </div>
-          <div class="bg-row">
-            <label>责任人</label>
-            <input v-model="form.responsible" maxlength="20" list="at-users" placeholder="选择或输入责任人" />
-          </div>
+    <el-dialog v-model="modalVisible" :title="editingId ? '编辑场景' : '新建场景'" width="560px" destroy-on-close>
+      <div class="bg-form">
+        <div class="bg-row bg-full">
+          <label>场景名称<em>*</em></label>
+          <el-input v-model="form.name" maxlength="80" placeholder="如：下单支付主流程" />
+          <div v-if="err.name" class="err">{{ err.name }}</div>
         </div>
-        <datalist id="at-users">
-          <option v-for="u in users" :key="u" :value="u" />
-        </datalist>
-        <div class="bg-modal-foot">
-          <button class="bg-btn" @click="modalVisible = false">取消</button>
-          <button class="bg-btn bg-btn-pri" :disabled="saving" @click="saveModal">{{ saving ? '保存中…' : (editingId ? '保存' : '创建') }}</button>
+        <div class="bg-row">
+          <label>接口数</label>
+          <el-input v-model.number="form.apiCount" type="number" :min="1" :max="999" />
+        </div>
+        <div class="bg-row">
+          <label>责任人</label>
+          <el-input v-model="form.responsible" maxlength="20" placeholder="选择或输入责任人" />
         </div>
       </div>
-    </div>
+      <template #footer>
+        <el-button @click="modalVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="saving" @click="saveModal">{{ saving ? '保存中…' : (editingId ?
+          '保存' : '创建') }}</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -143,7 +135,6 @@ import { fetchScenarioPage, createScenario, updateScenario, deleteScenario, exec
 import type { Scenario, ScenarioStatus } from '@/types/models';
 
 const statuses: ScenarioStatus[] = ['未执行', '执行中', '通过', '失败'];
-const users = ['张伟', '李娜', '王强', '赵敏', '刘洋', '陈晨', '杨帆', '周杰', 'Administrator'];
 const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#6366f1', '#ec4899'];
 
 const list = ref<Scenario[]>([]);
@@ -160,16 +151,6 @@ const form = reactive({ name: '', apiCount: 1, responsible: '' });
 const err = reactive({ name: '' });
 
 const pages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
-
-const pageNums = computed(() => {
-  const cur = pageNum.value, tot = pages.value;
-  const out: (number | '...')[] = [];
-  for (let i = 1; i <= tot; i++) {
-    if (i === 1 || i === tot || Math.abs(i - cur) <= 1) out.push(i);
-    else if (out[out.length - 1] !== '...') out.push('...');
-  }
-  return out;
-});
 
 function statusCls(s: ScenarioStatus): string {
   const map: Record<ScenarioStatus, string> = { '未执行': 'st-wait', '执行中': 'st-doing', '通过': 'st-pass', '失败': 'st-fail' };
@@ -262,113 +243,419 @@ onMounted(load);
 </script>
 
 <style>
-.sc-page { height: 100%; display: flex; flex-direction: column; }
+.sc-page {
+  display: flex;
+  flex-direction: column;
+}
+
 .bg-bar {
-  display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
-  padding: 14px 16px; border: 1px solid var(--el-border-color-lighter, #ebeef5);
-  border-radius: 10px; background: var(--el-bg-color, #fff); margin-bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-radius: 10px;
+  background: var(--el-bg-color, #fff);
+  margin-bottom: 14px;
 }
-.bg-field { display: flex; flex-direction: column; gap: 5px; }
-.bg-lab { font-size: 12px; color: var(--el-text-color-secondary, #909399); line-height: 1.4; }
-.bg-in, .bg-sel {
-  height: 32px; box-sizing: border-box; border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px; background: var(--el-bg-color, #fff); color: var(--el-text-color-primary, #303133);
-  font-size: 13px; font-family: inherit; padding: 0 10px; outline: none; transition: border-color 0.18s ease;
+
+.bg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
-.bg-in:focus, .bg-sel:focus { border-color: var(--el-color-primary, #409eff); }
-.bg-in::placeholder { color: var(--el-text-color-placeholder, #a8abb2); }
+
+.bg-lab {
+  font-size: 12px;
+  color: var(--el-text-color-secondary, #909399);
+  line-height: 1.4;
+}
+
+.bg-in,
+.bg-sel {
+  height: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 6px;
+  background: var(--el-bg-color, #fff);
+  color: var(--el-text-color-primary, #303133);
+  font-size: 13px;
+  font-family: inherit;
+  padding: 0 10px;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+
+.bg-in:focus,
+.bg-sel:focus {
+  border-color: var(--el-color-primary, #409eff);
+}
+
+.bg-in::placeholder {
+  color: var(--el-text-color-placeholder, #a8abb2);
+}
+
 .bg-btn {
-  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px;
-  box-sizing: border-box; border: 1px solid var(--el-border-color, #dcdfe6); border-radius: 6px;
-  background: var(--el-bg-color, #fff); color: var(--el-text-color-regular, #606266);
-  font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 6px;
+  background: var(--el-bg-color, #fff);
+  color: var(--el-text-color-regular, #606266);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
-.bg-btn:hover { color: var(--el-color-primary, #409eff); border-color: var(--el-color-primary, #409eff); }
-.bg-btn-pri { background: var(--el-color-primary, #409eff); border-color: var(--el-color-primary, #409eff); color: #fff; }
-.bg-btn-pri:hover { background: var(--el-color-primary-light-3, #79bbff); border-color: var(--el-color-primary-light-3, #79bbff); color: #fff; }
-.bg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.bg-spacer { flex: 1; }
-.bg-card { border: 1px solid var(--el-border-color-lighter, #ebeef5); border-radius: 10px; background: var(--el-bg-color, #fff); overflow: hidden; }
-.bg-loading { opacity: 0.5; pointer-events: none; }
-.bg-scroll { overflow-x: auto; }
-.bg-tb { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+.bg-btn:hover {
+  color: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
+}
+
+.bg-btn-pri {
+  background: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
+  color: #fff;
+}
+
+.bg-btn-pri:hover {
+  background: var(--el-color-primary-light-3, #79bbff);
+  border-color: var(--el-color-primary-light-3, #79bbff);
+  color: #fff;
+}
+
+.bg-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bg-spacer {
+  flex: 1;
+}
+
+.bg-card {
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-radius: 10px;
+  background: var(--el-bg-color, #fff);
+  overflow: hidden;
+}
+
+.bg-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.bg-scroll {
+  overflow-x: auto;
+}
+
+.bg-tb {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
 .bg-tb th {
-  text-align: left; font-weight: 500; font-size: 12px; color: var(--el-text-color-secondary, #909399);
-  background: var(--el-fill-color-lighter, #f5f7fa); padding: 10px 14px; white-space: nowrap;
+  text-align: left;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--el-text-color-secondary, #909399);
+  background: var(--el-fill-color-lighter, #f5f7fa);
+  padding: 10px 14px;
+  white-space: nowrap;
   border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
+
 .bg-tb td {
-  padding: 12px 14px; border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
-  color: var(--el-text-color-regular, #606266); vertical-align: middle; white-space: nowrap;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
+  color: var(--el-text-color-regular, #606266);
+  vertical-align: middle;
+  white-space: nowrap;
 }
-.bg-tb tbody tr { transition: background 0.15s ease; }
-.bg-tb tbody tr:hover { background: var(--el-fill-color-light, #f5f7fa); }
-.bg-tb tbody tr:last-child td { border-bottom: none; }
-.bg-id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; color: var(--el-text-color-secondary, #909399); }
-.bg-cname { font-weight: 500; color: var(--el-text-color-primary, #303133); }
+
+.bg-tb tbody tr {
+  transition: background 0.15s ease;
+}
+
+.bg-tb tbody tr:hover {
+  background: var(--el-fill-color-light, #f5f7fa);
+}
+
+.bg-tb tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bg-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
+}
+
+.bg-cname {
+  font-weight: 500;
+  color: var(--el-text-color-primary, #303133);
+}
+
 .bg-pill {
-  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px;
-  border-radius: 12px; font-size: 12px; line-height: 1; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
 }
-.st-wait { background: var(--el-fill-color, #f0f2f5); color: var(--el-text-color-regular, #606266); }
-.st-doing { background: #e8f3ff; color: #1d7afb; }
-.st-pass { background: #e8f7ee; color: #18a058; }
-.st-fail { background: #fdecec; color: #d93838; }
-.bg-user { display: flex; align-items: center; gap: 8px; }
+
+.st-wait {
+  background: var(--el-fill-color, #f0f2f5);
+  color: var(--el-text-color-regular, #606266);
+}
+
+.st-doing {
+  background: #e8f3ff;
+  color: #1d7afb;
+}
+
+.st-pass {
+  background: #e8f7ee;
+  color: #18a058;
+}
+
+.st-fail {
+  background: #fdecec;
+  color: #d93838;
+}
+
+.bg-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .bg-avatar {
-  width: 24px; height: 24px; border-radius: 50%; flex: none;
-  display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
 }
-.bg-time { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; color: var(--el-text-color-secondary, #909399); }
+
+.bg-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
+}
+
 .bg-cases {
-  display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 5px;
-  background: var(--el-fill-color, #f0f2f5); color: var(--el-text-color-regular, #606266);
-  font-size: 12px; border: 1px solid var(--el-border-color-lighter, #ebeef5);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 5px;
+  background: var(--el-fill-color, #f0f2f5);
+  color: var(--el-text-color-regular, #606266);
+  font-size: 12px;
+  border: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
-.bg-cases b { color: var(--el-color-primary, #409eff); font-weight: 600; }
-.bg-ops { display: flex; align-items: center; gap: 10px; }
-.bg-op { background: none; border: none; padding: 0; font-size: 13px; font-family: inherit; cursor: pointer; color: var(--el-color-primary, #409eff); }
-.bg-op:hover { opacity: 0.75; }
-.bg-op-del { color: var(--el-color-danger, #f56c6c); }
-.bg-op-run { color: #18a058; }
-.bg-state { padding: 52px 16px; text-align: center; color: var(--el-text-color-secondary, #909399); font-size: 13.5px; }
-.bg-state svg { width: 34px; height: 34px; margin-bottom: 10px; color: var(--el-border-color, #dcdfe6); }
+
+.bg-cases b {
+  color: var(--el-color-primary, #409eff);
+  font-weight: 600;
+}
+
+.bg-ops {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bg-op {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--el-color-primary, #409eff);
+}
+
+.bg-op:hover {
+  opacity: 0.75;
+}
+
+.bg-op-del {
+  color: var(--el-color-danger, #f56c6c);
+}
+
+.bg-op-run {
+  color: #18a058;
+}
+
+.bg-state {
+  padding: 52px 16px;
+  text-align: center;
+  color: var(--el-text-color-secondary, #909399);
+  font-size: 13.5px;
+}
+
+.bg-state svg {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 10px;
+  color: var(--el-border-color, #dcdfe6);
+}
+
 .bg-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 12px 16px; border-top: 1px solid var(--el-border-color-lighter, #ebeef5); flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
+  flex-wrap: wrap;
 }
-.bg-total { font-size: 12.5px; color: var(--el-text-color-secondary, #909399); }
-.bg-pager { display: flex; align-items: center; gap: 6px; }
+
+.bg-total {
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
+}
+
+.bg-pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .bg-pg {
-  min-width: 30px; height: 30px; padding: 0 8px; box-sizing: border-box;
-  border: 1px solid var(--el-border-color, #dcdfe6); border-radius: 6px; background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266); font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.18s ease;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 6px;
+  background: var(--el-bg-color, #fff);
+  color: var(--el-text-color-regular, #606266);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
-.bg-pg:hover:not(:disabled) { color: var(--el-color-primary, #409eff); border-color: var(--el-color-primary, #409eff); }
-.bg-pg:disabled { opacity: 0.45; cursor: not-allowed; }
-.bg-pg.on { background: var(--el-color-primary, #409eff); border-color: var(--el-color-primary, #409eff); color: #fff; }
-.bg-size { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--el-text-color-secondary, #909399); }
+
+.bg-pg:hover:not(:disabled) {
+  color: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
+}
+
+.bg-pg:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bg-pg.on {
+  background: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
+  color: #fff;
+}
+
+.bg-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--el-text-color-secondary, #909399);
+}
+
 .bg-mask {
-  position: fixed; inset: 0; z-index: 1900; background: rgba(0, 0, 0, 0.45);
-  display: flex; align-items: center; justify-content: center; animation: bg-fade 0.16s ease;
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bg-fade 0.16s ease;
 }
-@keyframes bg-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes bg-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .bg-modal {
-  width: 560px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); overflow: auto;
-  background: var(--el-bg-color, #fff); border-radius: 12px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18); padding: 22px 24px;
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  overflow: auto;
+  background: var(--el-bg-color, #fff);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  padding: 22px 24px;
 }
-.bg-modal h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; color: var(--el-text-color-primary, #303133); }
-.bg-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.bg-row { display: flex; flex-direction: column; gap: 6px; }
-.bg-row label { font-size: 13px; color: var(--el-text-color-regular, #606266); }
-.bg-row label em { color: var(--el-color-danger, #f56c6c); font-style: normal; margin-left: 2px; }
-.bg-row input, .bg-row select {
-  height: 34px; box-sizing: border-box; border: 1px solid var(--el-border-color, #dcdfe6); border-radius: 6px;
-  background: var(--el-bg-color, #fff); color: var(--el-text-color-primary, #303133);
-  font-size: 13px; font-family: inherit; padding: 0 10px; outline: none; width: 100%; transition: border-color 0.18s ease;
+
+.bg-modal h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary, #303133);
 }
-.bg-row input:focus, .bg-row select:focus { border-color: var(--el-color-primary, #409eff); }
-.bg-row .err { font-size: 12px; color: var(--el-color-danger, #f56c6c); }
-.bg-full { grid-column: 1 / -1; }
-.bg-modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+.bg-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.bg-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bg-row label {
+  font-size: 13px;
+  color: var(--el-text-color-regular, #606266);
+}
+
+.bg-row label em {
+  color: var(--el-color-danger, #f56c6c);
+  font-style: normal;
+  margin-left: 2px;
+}
+
+.bg-row .err {
+  font-size: 12px;
+  color: var(--el-color-danger, #f56c6c);
+}
+
+.bg-full {
+  grid-column: 1 / -1;
+}
+
+.bg-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
 </style>

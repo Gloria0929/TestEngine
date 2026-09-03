@@ -6,7 +6,7 @@ import { now } from "@/utils/format";
 import type { PageQuery } from "@/types";
 import type { Bug } from "@/types/models";
 
-let bugs = createBugs();
+export let bugs = createBugs();
 
 export const bugHandlers = [
   http.get("/api/bug/list", ({ request }) => {
@@ -29,6 +29,10 @@ export const bugHandlers = [
     const b = { ...body, id: "b-" + Date.now(), createTime };
     bugs.unshift(b);
     return HttpResponse.json(ok(b));
+  }),
+  http.get("/api/test-plan/:id/bugs", ({ params }) => {
+    const planId = params.id as string;
+    return HttpResponse.json(ok(bugs.filter((b) => b.planId === planId)));
   }),
   http.put("/api/bug/:id", async ({ params, request }) => {
     const body = (await request.json()) as Partial<Bug>;

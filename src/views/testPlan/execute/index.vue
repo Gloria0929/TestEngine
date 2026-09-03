@@ -9,117 +9,72 @@
       </div>
       <div class="title-row">
         <div class="title-left">
-          <el-tag
-            :type="planStatusType"
-            size="small"
-            effect="light"
-            class="status-tag"
-          >
+          <el-tag :type="planStatusType" effect="light" class="status-tag">
             {{ planStatusLabel }}
           </el-tag>
           <h1 class="plan-title">[1] {{ planName }}</h1>
         </div>
         <div class="title-actions">
-          <el-button link type="primary" :icon="Edit">编辑</el-button>
-          <el-button link type="primary" :icon="Document">生成报告</el-button>
+          <el-button link type="primary" :icon="Edit" @click="openPlanEdit">编辑</el-button>
+          <el-button link type="primary" :icon="Document" @click="onGenerateReport">生成报告</el-button>
         </div>
       </div>
       <div class="stat-row">
-        <span class="stat-item"
-          >已执行 <strong>{{ doneCount }} / {{ rows.length }}</strong></span
-        >
-        <span class="stat-item"
-          >通过率 <strong>{{ passRate }}%</strong></span
-        >
-        <el-progress
-          :percentage="percent"
-          :show-text="false"
-          :color="progressColors"
-          class="progress-bar"
-        />
+        <span class="stat-item">已执行 <strong>{{ doneCount }} / {{ rows.length }}</strong></span>
+        <span class="stat-item">通过率 <strong>{{ passRate }}%</strong></span>
+        <span class="stat-item">缺陷 <strong>{{ bugUnresolved }}</strong> / {{ bugTotal }}</span>
+        <span class="stat-item">执行记录 <strong>{{ historyTotal }}</strong></span>
+        <el-progress :percentage="percent" :show-text="false" :color="progressColors" class="progress-bar" />
       </div>
     </div>
 
     <!-- Tab -->
-    <el-tabs v-model="activeTab" class="detail-tabs">
+    <el-tabs v-model="activeTab">
       <el-tab-pane label="功能用例" name="case">
         <template #label>
           <span>功能用例</span>
-          <el-tag size="small" type="info" effect="plain" class="tab-count">{{
+          <el-tag type="info" effect="plain" class="tab-count">{{
             rows.length
           }}</el-tag>
         </template>
       </el-tab-pane>
-      <el-tab-pane label="缺陷列表" name="bug" />
-      <el-tab-pane label="执行历史" name="history" />
+      <el-tab-pane name="bug">
+        <template #label>
+          <span>缺陷列表</span>
+          <el-tag type="info" effect="plain" class="tab-count">{{ bugTotal }}</el-tag>
+        </template>
+      </el-tab-pane>
+      <el-tab-pane name="history">
+        <template #label>
+          <span>执行历史</span>
+          <el-tag type="info" effect="plain" class="tab-count">{{ historyTotal }}</el-tag>
+        </template>
+      </el-tab-pane>
     </el-tabs>
 
     <!-- 功能用例内容 -->
     <div v-if="activeTab === 'case'" class="case-workspace">
-      <!-- 左侧树 -->
-      <div class="case-tree">
-        <el-radio-group v-model="treeMode" size="small" class="tree-mode">
-          <el-radio-button value="point">测试点</el-radio-button>
-          <el-radio-button value="module">模块</el-radio-button>
-        </el-radio-group>
-        <el-input
-          v-model="treeKeyword"
-          placeholder="请输入名称"
-          size="small"
-          clearable
-          class="tree-search"
-        />
-        <el-tree
-          :data="treeData"
-          :props="{ label: 'name', children: 'children' }"
-          :default-expand-all="true"
-          :highlight-current="true"
-          node-key="id"
-          @node-click="onTreeNodeClick"
-        />
-      </div>
-
-      <!-- 右侧表格 -->
+      <!-- 测试用例列表 -->
       <div class="case-main">
         <div class="toolbar">
-          <el-input
-            v-model="keyword"
-            placeholder="通过 ID/名称搜索"
-            clearable
-            size="small"
-            style="width: 240px"
-            @change="loadCases"
-            @keyup.enter="loadCases"
-          >
-            <template #prefix
-              ><el-icon><Search /></el-icon
-            ></template>
+          <el-input v-model="keyword" placeholder="通过 ID/名称搜索" clearable style="width: 240px" @change="loadCases"
+            @keyup.enter="loadCases">
+            <template #prefix><el-icon>
+                <Search />
+              </el-icon></template>
           </el-input>
           <div class="toolbar-right">
-            <el-button size="small" :icon="Filter">筛选</el-button>
-            <el-button size="small" :icon="RefreshRight" @click="loadCases"
-              >刷新</el-button
-            >
-            <el-button
-              type="primary"
-              size="small"
-              :icon="Plus"
-              @click="linkVisible = true"
-              >关联用例</el-button
-            >
+            <el-button :icon="RefreshRight" @click="loadCases">刷新</el-button>
+            <el-button type="primary" :icon="Plus" @click="linkVisible = true">关联用例</el-button>
           </div>
         </div>
 
-        <el-table
-          :data="rows"
-          v-loading="loading"
-          @selection-change="(s: CaseRow[]) => (selectedRows = s)"
-        >
+        <el-table :data="rows" v-loading="loading" @selection-change="(s: CaseRow[]) => (selectedRows = s)">
           <el-table-column type="selection" width="48" />
-          <el-table-column prop="id" label="ID" sortable width="90" />
+          <el-table-column prop="id" label="ID" sortable min-width="90" />
           <el-table-column prop="name" label="用例名称" min-width="220" />
           <el-table-column prop="testPoint" label="测试点" min-width="160" />
-          <el-table-column label="用例等级" width="110">
+          <el-table-column label="用例等级" min-width="110">
             <template #default="{ row }">
               <span :class="['level-dot', row.level.toLowerCase()]">●</span>
               {{ row.level }}
@@ -128,155 +83,143 @@
           <el-table-column label="标签" min-width="140">
             <template #default="{ row }">
               <span v-if="!row.tags.length">-</span>
-              <el-tag
-                v-for="tag in row.tags.slice(0, 2)"
-                :key="tag"
-                size="small"
-                effect="plain"
-                class="case-tag"
-                >{{ tag }}</el-tag
-              >
+              <el-tag v-for="tag in row.tags.slice(0, 2)" :key="tag" effect="plain" class="case-tag">{{ tag
+              }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="操作" min-width="150" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="openExecute(row)"
-                >执行</el-button
-              >
-              <el-button link type="primary" @click="unlinkCase(row)"
-                >取消关联</el-button
-              >
+              <el-button link type="primary" @click="goCaseExecute(row)">执行</el-button>
+              <el-button link type="primary" @click="unlinkCase(row)">取消关联</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
     </div>
 
-    <!-- 其他 Tab 占位 -->
-    <div v-else class="tab-placeholder">
-      {{
-        { plan: "测试规划内容", bug: "缺陷列表内容", history: "执行历史内容" }[
-          activeTab
-        ]
-      }}
+    <!-- 缺陷列表 -->
+    <div v-else-if="activeTab === 'bug'" class="case-workspace">
+      <div class="case-main">
+        <el-table v-loading="bugLoading" :data="bugList" style="width: 100%">
+          <el-table-column prop="id" label="ID" min-width="100" />
+          <el-table-column prop="title" label="缺陷标题" min-width="240" />
+          <el-table-column label="严重程度" min-width="110">
+            <template #default="{ row }">
+              <span class="bg-pill" :class="severityCls(row.severity)">{{ severityLabel(row.severity) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" min-width="100">
+            <template #default="{ row }">
+              <span class="bg-pill" :class="statusCls(row.status)">{{ statusLabel(row.status) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="assignee" label="受理人" min-width="120">
+            <template #default="{ row }">
+              <span>{{ row.assignee || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="reporter" label="报告人" min-width="120" />
+          <el-table-column prop="createTime" label="创建时间" min-width="160" />
+        </el-table>
+        <div v-if="!bugLoading && !bugList.length" class="empty-state">暂无缺陷</div>
+      </div>
     </div>
 
-    <!-- 执行结果抽屉 -->
-    <el-drawer v-model="executeVisible" title="执行用例" size="640px">
-      <div v-if="currentRow" class="execute-form">
-        <!-- 用例基本信息 -->
-        <div class="case-info-box">
-          <div class="info-row">
-            <span class="info-label">用例名称</span>
-            <span>{{ currentRow.name }}</span>
-          </div>
-          <div class="info-row" v-if="currentRow.precondition">
-            <span class="info-label">前置条件</span>
-            <span>{{ currentRow.precondition }}</span>
-          </div>
-        </div>
+    <!-- 执行历史 -->
+    <div v-else-if="activeTab === 'history'" class="case-workspace">
+      <div class="case-main">
+        <el-table v-loading="historyLoading" :data="historyList" style="width: 100%">
+          <el-table-column type="index" label="序号" width="60" />
+          <el-table-column label="执行结果" min-width="100">
+            <template #default="{ row }">
+              <span class="bg-pill" :class="resultCls(row.result)">{{ resultLabel(row.result) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="actual" label="实际结果/备注" min-width="260">
+            <template #default="{ row }">
+              <span style="white-space: pre-wrap">{{ row.actual || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="executor" label="执行人" min-width="120" />
+          <el-table-column prop="executeTime" label="执行时间" min-width="160" />
+        </el-table>
+        <div v-if="!historyLoading && !historyList.length" class="empty-state">暂无执行历史</div>
+      </div>
+    </div>
 
-        <!-- 整体执行结果 -->
-        <div class="form-section">
-          <div class="section-label">执行结果</div>
-          <div class="result-btns">
-            <el-button
-              v-for="s in states"
-              :key="s.value"
-              size="default"
-              :type="executeForm.result === s.value ? s.type : 'default'"
-              :plain="executeForm.result !== s.value"
-              @click="executeForm.result = s.value"
-              >{{ s.label }}</el-button
-            >
-          </div>
+    <!-- 编辑测试计划弹窗 -->
+    <el-dialog v-model="editVisible" width="520px" :close-on-click-modal="false">
+      <template #header>
+        <h3>编辑测试计划</h3>
+      </template>
+      <div class="tp-form">
+        <div class="tp-row">
+          <label>计划名称<em>*</em></label>
+          <el-input v-model="editForm.name" maxlength="60" placeholder="请输入计划名称" style="width:100%" />
+          <div v-if="editErr.name" class="err">{{ editErr.name }}</div>
         </div>
-
-        <!-- 步骤执行表格 -->
-        <div class="form-section" v-if="currentRow.steps.length">
-          <div class="section-label">步骤执行</div>
-          <el-table
-            :data="currentRow.steps"
-            border
-            size="small"
-            class="step-table"
-          >
-            <el-table-column type="index" label="序号" width="52" />
-            <el-table-column
-              prop="description"
-              label="用例步骤"
-              min-width="140"
-            />
-            <el-table-column prop="expected" label="预期结果" min-width="140" />
-            <el-table-column label="实际结果" min-width="160">
-              <template #default="{ row: step }">
-                <el-input
-                  v-model="stepForm[step.id].actual"
-                  placeholder="请输入实际"
-                  size="small"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="步骤执行结果" width="110">
-              <template #default="{ row: step }">
-                <el-select
-                  v-model="stepForm[step.id].result"
-                  placeholder="请选择"
-                  size="small"
-                >
-                  <el-option
-                    v-for="s in stepStates"
-                    :key="s.value"
-                    :label="s.label"
-                    :value="s.value"
-                  />
-                </el-select>
-              </template>
-            </el-table-column>
-          </el-table>
+        <div class="tp-row">
+          <label>所属模块</label>
+          <el-select v-model="editForm.group" style="width:100%">
+            <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
+          </el-select>
         </div>
-
-        <!-- 底部操作 -->
-        <div class="form-footer">
-          <el-switch v-model="autoNext" active-text="自动下一条" size="small" />
-          <div class="footer-btns">
-            <el-button @click="executeVisible = false">取消</el-button>
-            <el-button type="primary" :loading="saving" @click="onExecuteSubmit"
-              >提交结果</el-button
-            >
-          </div>
+        <div class="tp-row">
+          <label>创建人<em>*</em></label>
+          <el-input v-model="editForm.owner" maxlength="20" placeholder="请输入创建人" style="width:100%" />
+          <div v-if="editErr.owner" class="err">{{ editErr.owner }}</div>
+        </div>
+        <div class="tp-row">
+          <label>开始时间</label>
+          <el-date-picker v-model="editForm.startTime" type="date" value-format="YYYY-MM-DD" placeholder="选择开始日期"
+            style="width:100%" />
+        </div>
+        <div class="tp-row">
+          <label>结束时间</label>
+          <el-date-picker v-model="editForm.endTime" type="date" value-format="YYYY-MM-DD" placeholder="选择结束日期"
+            style="width:100%" />
+        </div>
+        <div class="tp-row">
+          <label>状态</label>
+          <el-select v-model="editForm.status" style="width:100%">
+            <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
+          </el-select>
         </div>
       </div>
-    </el-drawer>
+      <template #footer>
+        <div class="tp-modal-foot">
+          <el-button @click="editVisible = false">取消</el-button>
+          <el-button type="primary" :disabled="editSaving" @click="savePlanEdit">{{ editSaving ? '保存中…' : '保存'
+            }}</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <PlanCaseDialog v-model="linkVisible" @linked="loadCases" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   Edit,
   Document,
-  DocumentCopy,
-  Star,
-  MoreFilled,
   Search,
-  Filter,
   RefreshRight,
   Plus,
 } from "@element-plus/icons-vue";
 import PlanCaseDialog from "../list/components/PlanCaseDialog.vue";
-import { fetchPlanCases, submitCaseResult } from "@/api/testPlan";
-import { fetchModuleTree } from "@/api/testCase";
-import type {
-  TestCase,
-  ExecuteResult,
-  ModuleNode,
-  PlanCaseResult,
-} from "@/types/models";
+import {
+  fetchPlan,
+  fetchPlanCases,
+  updatePlan,
+  exportPlanReport,
+  fetchPlanBugs,
+  fetchPlanExecuteHistory,
+} from "@/api/testPlan";
+import type { TestCase, ExecuteResult, Bug, BugSeverity, BugStatus, CaseExecuteHistory } from "@/types/models";
 
 interface CaseRow extends TestCase {
   result: ExecuteResult | null;
@@ -290,27 +233,38 @@ const planStatus = computed(() => String(route.query.status ?? "RUNNING"));
 
 const activeTab = ref("case");
 const loading = ref(false);
-const saving = ref(false);
 const rows = ref<CaseRow[]>([]);
 const selectedRows = ref<CaseRow[]>([]);
 const keyword = ref("");
-const treeMode = ref<"point" | "module">("point");
-const treeKeyword = ref("");
-const treeData = ref<ModuleNode[]>([]);
-const currentModuleId = ref("");
-const currentTestPoint = ref("");
 const linkVisible = ref(false);
 
-const executeVisible = ref(false);
-const currentRow = ref<CaseRow | null>(null);
-const executeForm = reactive<{ result: ExecuteResult | ""; actual: string }>({
-  result: "",
-  actual: "",
+const planInfo = ref<Partial<import("@/types/models").TestPlan>>({});
+
+// 缺陷列表
+const bugList = ref<Bug[]>([]);
+const bugLoading = ref(false);
+// 执行历史
+const historyList = ref<CaseExecuteHistory[]>([]);
+const historyLoading = ref(false);
+
+// 编辑弹窗
+const editVisible = ref(false);
+const editSaving = ref(false);
+const editForm = reactive({
+  name: "",
+  group: "订单中心",
+  owner: "",
+  startTime: "",
+  endTime: "",
+  status: "DRAFT" as "DRAFT" | "RUNNING" | "DONE",
 });
-const stepForm = reactive<
-  Record<string, { actual: string; result: ExecuteResult | "" }>
->({});
-const autoNext = ref(false);
+const editErr = reactive({ name: "", owner: "" });
+const MODULES = ["订单中心", "支付中台", "用户中心", "商品模块", "营销活动", "权限中心"];
+const STATUSES = [
+  { v: "DRAFT", t: "未开始" },
+  { v: "RUNNING", t: "进行中" },
+  { v: "DONE", t: "已完成" },
+];
 
 const planStatusLabel = computed(() => {
   return (
@@ -326,6 +280,9 @@ const planStatusType = computed(() => {
   );
 });
 
+const bugTotal = computed(() => bugList.value.length);
+const bugUnresolved = computed(() => bugList.value.filter((b) => !["CLOSED", "FIXED"].includes(b.status)).length);
+const historyTotal = computed(() => historyList.value.length);
 const doneCount = computed(() => rows.value.filter((r) => r.result).length);
 const percent = computed(() =>
   rows.value.length
@@ -345,85 +302,29 @@ const progressColors = [
   { color: "#f59e0b", percentage: 0 },
 ];
 
-const states: {
-  value: ExecuteResult;
-  label: string;
-  type: "success" | "danger" | "warning" | "info";
-}[] = [
-  { value: "PASS", label: "成功", type: "success" },
-  { value: "FAIL", label: "失败", type: "danger" },
-  { value: "BLOCK", label: "阻塞", type: "warning" },
-  { value: "SKIP", label: "跳过", type: "info" },
-];
-
-const stepStates: { value: ExecuteResult; label: string }[] = [
-  { value: "PASS", label: "成功" },
-  { value: "FAIL", label: "失败" },
-  { value: "BLOCK", label: "阻塞" },
-  { value: "SKIP", label: "跳过" },
-];
-
 function goBack() {
   router.push("/test-plan/list");
 }
-function onTreeNodeClick(node: ModuleNode) {
-  if (treeMode.value === "module") {
-    if (currentModuleId.value === node.id) {
-      currentModuleId.value = "";
-    } else {
-      currentModuleId.value = node.id;
-    }
-    currentTestPoint.value = "";
-  } else {
-    if (node.id === "__all__" || currentTestPoint.value === node.id) {
-      currentTestPoint.value = "";
-    } else {
-      currentTestPoint.value = node.id;
-    }
-    currentModuleId.value = "";
-  }
-  loadCases();
+
+function goCaseExecute(row: CaseRow) {
+  router.push({
+    path: `/test-plan/case-execute/${planId.value}/${row.id}`,
+    query: { name: planName.value },
+  });
 }
 
-async function loadTree() {
-  if (treeMode.value === "module") {
-    treeData.value = await fetchModuleTree("p-1");
-  } else {
-    const all = await fetchPlanCases(planId.value);
-    const countMap = all.reduce(
-      (acc, c) => {
-        acc[c.testPoint] = (acc[c.testPoint] ?? 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-    const points = Array.from(
-      new Set(all.map((c) => c.testPoint).filter(Boolean)),
-    );
-    treeData.value = [
-      {
-        id: "__all__",
-        name: `全部功能用例 (${all.length})`,
-        children: points.map((p) => ({
-          id: p,
-          name: `${p} (${countMap[p]})`,
-          children: [] as ModuleNode[],
-        })),
-      },
-    ];
+async function loadPlan() {
+  try {
+    planInfo.value = await fetchPlan(planId.value);
+  } catch {
+    planInfo.value = {};
   }
 }
+
 async function loadCases() {
   loading.value = true;
   try {
-    const params: { moduleId?: string; testPoint?: string; keyword?: string } =
-      {};
-    if (treeMode.value === "module" && currentModuleId.value) {
-      params.moduleId = currentModuleId.value;
-    }
-    if (treeMode.value === "point" && currentTestPoint.value) {
-      params.testPoint = currentTestPoint.value;
-    }
+    const params: { keyword?: string } = {};
     if (keyword.value) params.keyword = keyword.value;
     rows.value = await fetchPlanCases(planId.value, params);
   } finally {
@@ -431,52 +332,66 @@ async function loadCases() {
   }
 }
 
-function openExecute(row: CaseRow) {
-  currentRow.value = row;
-  executeForm.result = row.result ?? "PASS";
-  executeForm.actual = "";
-  // 初始化步骤表单
-  Object.keys(stepForm).forEach((k) => delete stepForm[k]);
-  for (const step of row.steps) {
-    stepForm[step.id] = { actual: "", result: "" };
+async function loadBugs() {
+  bugLoading.value = true;
+  try {
+    bugList.value = await fetchPlanBugs(planId.value);
+  } catch {
+    bugList.value = [];
+  } finally {
+    bugLoading.value = false;
   }
-  executeVisible.value = true;
 }
 
-async function onExecuteSubmit() {
-  if (!currentRow.value || !executeForm.result) return;
-  saving.value = true;
-  const stepResults = currentRow.value.steps.map((s) => ({
-    stepId: s.id,
-    result: (stepForm[s.id]?.result ?? "") as ExecuteResult | "",
-    actual: stepForm[s.id]?.actual ?? "",
-  }));
-  const existing = rows.value
-    .filter((r) => r.result && r.id !== currentRow.value!.id)
-    .map(
-      (r) =>
-        ({ caseId: r.id, result: r.result!, actual: "" }) as PlanCaseResult,
-    );
-  await submitCaseResult(planId.value, [
-    ...existing,
-    {
-      caseId: currentRow.value.id,
-      result: executeForm.result,
-      actual: executeForm.actual,
-      stepResults,
-    },
-  ]);
-  saving.value = false;
-  currentRow.value.result = executeForm.result;
-  const submittedId = currentRow.value.id;
-  executeVisible.value = false;
-  ElMessage.success("已保存执行结果");
+async function loadHistory() {
+  historyLoading.value = true;
+  try {
+    historyList.value = await fetchPlanExecuteHistory(planId.value);
+  } catch {
+    historyList.value = [];
+  } finally {
+    historyLoading.value = false;
+  }
+}
 
-  if (autoNext.value) {
-    const idx = rows.value.findIndex((r) => r.id === submittedId);
-    if (idx >= 0 && idx < rows.value.length - 1) {
-      nextTick(() => openExecute(rows.value[idx + 1]));
-    }
+function openPlanEdit() {
+  const p = planInfo.value;
+  editForm.name = p.name ?? planName.value ?? "";
+  editForm.group = p.group ?? MODULES[0];
+  editForm.owner = p.owner ?? "";
+  editForm.startTime = p.startTime ?? "";
+  editForm.endTime = p.endTime ?? "";
+  editForm.status = (p.status as any) ?? "DRAFT";
+  editErr.name = "";
+  editErr.owner = "";
+  editVisible.value = true;
+}
+
+async function savePlanEdit() {
+  editErr.name = editForm.name.trim() ? "" : "请输入计划名称";
+  editErr.owner = editForm.owner.trim() ? "" : "请输入创建人";
+  if (!editForm.name.trim() || !editForm.owner.trim()) return;
+  editSaving.value = true;
+  try {
+    await updatePlan(planId.value, { ...editForm });
+    ElMessage.success("已保存");
+    editVisible.value = false;
+    await loadPlan();
+  } finally {
+    editSaving.value = false;
+  }
+}
+
+async function onGenerateReport() {
+  try {
+    await exportPlanReport(planId.value);
+    ElMessage.success("报告生成成功");
+    router.push({
+      path: `/test-plan/report/${planId.value}`,
+      query: { name: planName.value },
+    });
+  } catch {
+    ElMessage.error("报告生成失败");
   }
 }
 
@@ -488,16 +403,34 @@ async function unlinkCase(row: CaseRow) {
   ElMessage.success("已取消关联");
 }
 
-watch(treeMode, () => {
-  currentModuleId.value = "";
-  currentTestPoint.value = "";
-  loadTree();
-  loadCases();
-});
+const severityLabelMap: Record<BugSeverity, string> = {
+  BLOCKER: "阻塞", CRITICAL: "严重", MAJOR: "主要", MINOR: "次要", TRIVIAL: "轻微",
+};
+const severityClsMap: Record<BugSeverity, string> = {
+  BLOCKER: "sv-blocker", CRITICAL: "sv-critical", MAJOR: "sv-major", MINOR: "sv-minor", TRIVIAL: "sv-trivial",
+};
+function severityLabel(s: BugSeverity) { return severityLabelMap[s] ?? s; }
+function severityCls(s: BugSeverity) { return severityClsMap[s] ?? "sv-minor"; }
+
+const statusLabelMap: Record<BugStatus, string> = {
+  NEW: "新建", ASSIGNED: "已指派", FIXING: "修复中", FIXED: "已解决", CLOSED: "已关闭", REOPEN: "重新打开",
+};
+const statusClsMap: Record<BugStatus, string> = {
+  NEW: "st-new", ASSIGNED: "st-assigned", FIXING: "st-fixing", FIXED: "st-fixed", CLOSED: "st-closed", REOPEN: "st-reopen",
+};
+function statusLabel(s: BugStatus) { return statusLabelMap[s] ?? s; }
+function statusCls(s: BugStatus) { return statusClsMap[s] ?? "st-new"; }
+
+const resultLabelMap: Record<string, string> = { PASS: "成功", FAIL: "失败", BLOCK: "阻塞", SKIP: "跳过" };
+const resultClsMap: Record<string, string> = { PASS: "rs-pass", FAIL: "rs-fail", BLOCK: "rs-block", SKIP: "rs-none" };
+function resultLabel(r: ExecuteResult) { return resultLabelMap[r] ?? r; }
+function resultCls(r: ExecuteResult) { return resultClsMap[r] ?? "rs-none"; }
 
 onMounted(() => {
-  loadTree();
+  loadPlan();
   loadCases();
+  loadBugs();
+  loadHistory();
 });
 </script>
 
@@ -508,68 +441,84 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
 }
+
 .detail-header {
   margin-bottom: 12px;
 }
+
 .breadcrumb {
   font-size: 13px;
   color: var(--text-3);
   margin-bottom: 12px;
 }
+
 .bc-link {
   color: var(--el-color-primary);
   cursor: pointer;
 }
+
 .bc-link:hover {
   text-decoration: underline;
 }
+
 .bc-sep {
   margin: 0 6px;
 }
+
 .title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
+
 .title-left {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .status-tag {
   font-weight: 600;
 }
+
 .plan-title {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: var(--text-1);
 }
+
 .title-actions {
   display: flex;
   gap: 4px;
 }
+
 .stat-row {
   display: flex;
   align-items: center;
   gap: 24px;
 }
+
 .stat-item {
   font-size: 13px;
   color: var(--text-2);
 }
+
 .stat-item strong {
   color: var(--text-1);
   font-weight: 600;
 }
+
 .progress-bar {
   flex: 1;
   max-width: 480px;
 }
+
 .detail-tabs {
   flex-shrink: 0;
 }
+
 .tab-count {
   margin-left: 6px;
   font-size: 11px;
@@ -577,6 +526,7 @@ onMounted(() => {
   height: 18px;
   line-height: 16px;
 }
+
 .case-workspace {
   display: flex;
   gap: 16px;
@@ -584,72 +534,49 @@ onMounted(() => {
   min-height: 0;
   overflow: hidden;
 }
-.case-tree {
-  width: 240px;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border);
-  padding-right: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-}
-.tree-mode {
-  width: 100%;
-  display: flex;
-}
-.tree-mode :deep(.el-radio-button) {
-  flex: 1;
-}
-.tree-mode :deep(.el-radio-button__inner) {
-  width: 100%;
-  border-radius: 0;
-  transition: all 0.2s;
-  font-size: 13px;
-  padding: 5px 0;
-}
-.tree-mode :deep(.el-radio-button:first-child .el-radio-button__inner) {
-  border-radius: 4px 0 0 4px;
-}
-.tree-mode :deep(.el-radio-button:last-child .el-radio-button__inner) {
-  border-radius: 0 4px 4px 0;
-}
-.tree-search {
-  width: 100%;
-}
+
 .case-main {
   flex: 1;
   min-width: 0;
   overflow: auto;
 }
+
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
+
 .toolbar-right {
   display: flex;
   gap: 8px;
 }
+
 .level-dot {
   margin-right: 4px;
 }
+
 .level-dot.p0 {
   color: #ef4444;
 }
+
 .level-dot.p1 {
   color: #f59e0b;
 }
+
 .level-dot.p2 {
   color: #3b82f6;
 }
+
 .level-dot.p3 {
   color: #94a3b8;
 }
+
 .case-tag {
   margin-right: 4px;
 }
+
 .tab-placeholder {
   flex: 1;
   display: flex;
@@ -657,56 +584,128 @@ onMounted(() => {
   justify-content: center;
   color: var(--text-3);
 }
-.execute-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.case-info-box {
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.info-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-.info-label {
+
+.empty-state {
+  padding: 40px 0;
+  text-align: center;
   color: var(--text-3);
-  white-space: nowrap;
-  min-width: 56px;
 }
-.form-section {
+
+.bg-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.rs-pass {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.rs-fail {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.rs-block {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.rs-none {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.sv-blocker {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.sv-critical {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.sv-major {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.sv-minor {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.sv-trivial {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.st-new {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.st-assigned {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+.st-fixing {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.st-fixed {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.st-closed {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.st-reopen {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.tp-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
-.section-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-1);
-}
-.result-btns {
+
+.tp-row {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
 }
-.step-table :deep(.el-table__cell) {
-  padding: 6px 0;
+
+.tp-row label {
+  font-size: 13px;
+  color: var(--text-2);
 }
-.form-footer {
+
+.tp-row label em {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.tp-row .err {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.tp-modal-foot {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 12px;
-}
-.footer-btns {
-  display: flex;
   gap: 10px;
 }
 </style>

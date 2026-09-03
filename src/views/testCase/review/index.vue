@@ -9,15 +9,15 @@
       <el-table-column label="评审人" min-width="160">
         <template #default="{ row }">{{ row.reviewers.join('、') }}</template>
       </el-table-column>
-      <el-table-column label="状态" width="100">
+      <el-table-column label="状态" min-width="100">
         <template #default="{ row }"><el-tag :type="statusMap[row.status as ReviewStatus].type" size="small">{{
           statusMap[row.status as ReviewStatus].text }}</el-tag></template>
       </el-table-column>
-      <el-table-column prop="caseCount" label="用例数" width="80" />
-      <el-table-column label="起止时间" width="260">
+      <el-table-column prop="caseCount" label="用例数" min-width="80" />
+      <el-table-column label="起止时间" min-width="260">
         <template #default="{ row }">{{ row.startTime }} ~ {{ row.endTime }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100" fixed="right">
+      <el-table-column label="操作" min-width="100" fixed="right">
         <template #default="{ row }"><el-button link type="primary" @click="openDrawer(row)">评审</el-button></template>
       </el-table-column>
     </el-table>

@@ -1,10 +1,13 @@
 // src/api/testPlan.ts
 import { request } from '@/utils/request'
 import type { PageQuery, PageResult } from '@/types'
-import type { TestPlan, TestCase, ExecuteResult, PlanCaseResult, PlanReport } from '@/types/models'
+import type { TestPlan, TestCase, ExecuteResult, PlanCaseResult, PlanReport, CaseExecuteHistory, Bug } from '@/types/models'
 
 export function fetchPlans(query: PageQuery): Promise<PageResult<TestPlan>> {
   return request({ url: '/api/test-plan/list', method: 'get', params: query })
+}
+export function fetchPlan(id: string): Promise<TestPlan> {
+  return request({ url: `/api/test-plan/${id}`, method: 'get' })
 }
 export function createPlan(data: Partial<TestPlan>): Promise<TestPlan> {
   return request({ url: '/api/test-plan', method: 'post', data })
@@ -23,6 +26,15 @@ export function fetchPlanCases(planId: string, params?: { moduleId?: string; tes
 }
 export function submitCaseResult(planId: string, results: PlanCaseResult[]): Promise<null> {
   return request({ url: `/api/test-plan/${planId}/results`, method: 'post', data: results })
+}
+export function fetchCaseExecuteHistory(planId: string, caseId: string): Promise<CaseExecuteHistory[]> {
+  return request({ url: `/api/test-plan/${planId}/cases/${caseId}/history`, method: 'get' })
+}
+export function fetchPlanExecuteHistory(planId: string): Promise<CaseExecuteHistory[]> {
+  return request({ url: `/api/test-plan/${planId}/history`, method: 'get' })
+}
+export function fetchPlanBugs(planId: string): Promise<Bug[]> {
+  return request({ url: `/api/test-plan/${planId}/bugs`, method: 'get' })
 }
 export function fetchPlanReport(planId: string): Promise<PlanReport> {
   return request({ url: `/api/test-plan/${planId}/report`, method: 'get' })

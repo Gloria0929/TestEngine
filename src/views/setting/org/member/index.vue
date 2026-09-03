@@ -4,13 +4,13 @@
       <el-button type="primary" @click="openAdd">添加成员</el-button>
     </div>
     <el-table :data="members" v-loading="loading">
-      <el-table-column prop="name" label="姓名" width="160" />
+      <el-table-column prop="name" label="姓名" min-width="160" />
       <el-table-column prop="email" label="邮箱" min-width="220" />
-      <el-table-column prop="role" label="角色" width="140" />
-      <el-table-column label="用户组" width="140">
+      <el-table-column prop="role" label="角色" min-width="140" />
+      <el-table-column label="用户组" min-width="140">
         <template #default="{ row }">{{ groupLabel(row.groupId) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作" min-width="100">
         <template #default="{ row }">
           <el-button link type="danger" @click="onRemove(row)">移除</el-button>
         </template>
