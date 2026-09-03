@@ -17,26 +17,26 @@
       <el-tabs v-model="tab" @tab-change="onTabChange">
         <el-tab-pane label="测试计划" name="plan">
           <div class="tp-bar">
-            <div class="tp-field"><label class="tp-lab">关键词</label>
+            <div class="tp-field"><el-text class="tp-lab">关键词</el-text>
               <el-input style="width:240px" v-model="flt.keyword" placeholder="搜索 ID 或计划名称" @keyup.enter="search" />
             </div>
-            <div class="tp-field"><label class="tp-lab">状态</label>
+            <div class="tp-field"><el-text class="tp-lab">状态</el-text>
               <el-select style="width:130px" v-model="flt.status" @change="search">
                 <el-option label="全部" value="" />
                 <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
               </el-select>
             </div>
-            <div class="tp-field"><label class="tp-lab">所属模块</label>
+            <div class="tp-field"><el-text class="tp-lab">所属模块</el-text>
               <el-select style="width:140px" v-model="flt.group" @change="search">
                 <el-option label="全部" value="" />
                 <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
               </el-select>
             </div>
             <div class="tp-spacer" />
-            <div class="tp-field"><label class="tp-lab">&nbsp;</label>
+            <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
               <el-button type="primary" @click="search">查询</el-button>
             </div>
-            <div class="tp-field"><label class="tp-lab">&nbsp;</label>
+            <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
               <el-button @click="reset">重置</el-button>
             </div>
           </div>
@@ -250,28 +250,28 @@
           <h3>{{ editingId ? '编辑测试计划' : '新建测试计划' }}</h3>
         </template>
         <div class="tp-form">
-          <div class="tp-row"><label>计划名称<em>*</em></label>
+          <div class="tp-row"><el-text>计划名称<em>*</em></el-text>
             <el-input v-model="form.name" maxlength="60" placeholder="请输入计划名称" style="width:100%" />
             <div v-if="err.name" class="err">{{ err.name }}</div>
           </div>
-          <div class="tp-row"><label>所属模块</label>
+          <div class="tp-row"><el-text>所属模块</el-text>
             <el-select v-model="form.group" style="width:100%">
               <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
             </el-select>
           </div>
-          <div class="tp-row"><label>创建人<em>*</em></label>
+          <div class="tp-row"><el-text>创建人<em>*</em></el-text>
             <el-input v-model="form.owner" maxlength="20" placeholder="请输入创建人" style="width:100%" />
             <div v-if="err.owner" class="err">{{ err.owner }}</div>
           </div>
-          <div class="tp-row"><label>开始时间</label>
+          <div class="tp-row"><el-text>开始时间</el-text>
             <el-date-picker v-model="form.startTime" type="date" value-format="YYYY-MM-DD" placeholder="选择开始日期"
               style="width:100%" />
           </div>
-          <div class="tp-row"><label>结束时间</label>
+          <div class="tp-row"><el-text>结束时间</el-text>
             <el-date-picker v-model="form.endTime" type="date" value-format="YYYY-MM-DD" placeholder="选择结束日期"
               style="width:100%" />
           </div>
-          <div class="tp-row"><label>状态</label>
+          <div class="tp-row"><el-text>状态</el-text>
             <el-select v-model="form.status" style="width:100%">
               <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
             </el-select>
@@ -389,7 +389,7 @@ function onExecute(row: TestPlan) {
 function handleCommand(cmd: string, plan: any) {
   if (cmd === "copy") onCopy(plan);
   else if (cmd === "archive") onArchive(plan);
-  else if (cmd === "timer") onCreateTimer(plan);
+  else if (cmd === "timer") onCreateTimer();
   else if (cmd === "delete") onDelete(plan);
 }
 
@@ -405,7 +405,7 @@ async function onArchive(plan: any) {
   load();
 }
 
-function onCreateTimer(plan: any) {
+function onCreateTimer() {
   ElMessage.success("已创建定时任务：每日 02:00 自动执行");
 }
 
@@ -508,6 +508,7 @@ onMounted(() => {
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
   line-height: 1.4;
+  align-self: auto;
 }
 
 .tp-spacer {
@@ -528,11 +529,6 @@ onMounted(() => {
 
 .tp-scroll {
   overflow-x: auto;
-}
-
-.tp-tb {
-  width: 100%;
-  font-size: 13px;
 }
 
 .tp-id {
@@ -752,12 +748,6 @@ onMounted(() => {
   color: var(--el-text-color-secondary, #909399);
 }
 
-.tp-pager {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .tp-form {
   display: flex;
   flex-direction: column;
@@ -770,12 +760,13 @@ onMounted(() => {
   gap: 6px;
 }
 
-.tp-row label {
+.tp-row .el-text {
   font-size: 13px;
   color: var(--el-text-color-regular, #606266);
+  align-self: auto;
 }
 
-.tp-row label em {
+.tp-row .el-text em {
   color: var(--el-color-danger, #f56c6c);
   font-style: normal;
   margin-left: 2px;
@@ -791,10 +782,6 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
-}
-
-.tp-tabs {
-  margin-bottom: 16px;
 }
 
 .tp-rname {

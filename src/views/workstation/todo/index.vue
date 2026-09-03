@@ -2,7 +2,7 @@
   <el-card shadow="never">
     <template #header>
       <div class="head">
-        <span>{{ '工作台' }} · {{ '待办' }}</span>
+        <span>工作台 · 待办</span>
         <el-select v-model="type" clearable placeholder="全部类型" style="width: 160px">
           <el-option label="计划" value="计划" /><el-option label="评审" value="评审" /><el-option label="缺陷" value="缺陷" />
         </el-select>

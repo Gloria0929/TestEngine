@@ -59,7 +59,7 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
-import { reactive, ref, computed } from "vue";
+import { reactive, ref } from "vue";
 import { ElMessage, type FormInstance } from "element-plus";
 import { createCase, updateCase } from "@/api/testCase";
 import type { TestCase, CaseStep } from "@/types/models";

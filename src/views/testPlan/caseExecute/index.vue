@@ -31,7 +31,7 @@
           <span>缺陷列表</span>
           <el-tag type="info" effect="plain" class="tab-count">{{
             bugList.length
-            }}</el-tag>
+          }}</el-tag>
         </template>
       </el-tab-pane>
       <el-tab-pane name="history">
@@ -39,7 +39,7 @@
           <span>执行历史</span>
           <el-tag type="info" effect="plain" class="tab-count">{{
             historyList.length
-            }}</el-tag>
+          }}</el-tag>
         </template>
       </el-tab-pane>
     </el-tabs>
@@ -63,7 +63,7 @@
               <span class="info-label">测试点</span>
               <span class="info-value">{{
                 currentCase?.testPoint ?? "-"
-                }}</span>
+              }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">用例等级</span>
@@ -84,7 +84,7 @@
               <span class="info-value">
                 <span v-if="!currentCase?.tags.length">-</span>
                 <el-tag v-for="tag in currentCase?.tags.slice(0, 3)" :key="tag" effect="plain" class="case-tag">{{ tag
-                  }}</el-tag>
+                }}</el-tag>
               </span>
             </div>
             <div class="info-item info-item-wide">
@@ -95,9 +95,9 @@
               <span class="info-label">附件</span>
               <span class="info-value">
                 <span v-if="!currentCase?.attachments?.length">-</span>
-                <a v-for="url in currentCase?.attachments" :key="url" :href="url" target="_blank"
-                  class="attachment-link">{{
-                    url.split("/").pop() }}</a>
+                <el-link v-for="url in currentCase?.attachments" :key="url" :href="url" target="_blank"
+                  class="attachment-link" :underline="false">{{
+                    url.split("/").pop() }}</el-link>
               </span>
             </div>
           </div>
@@ -154,8 +154,9 @@
             <span>暂无附件</span>
           </div>
           <div v-else class="section-content">
-            <a v-for="url in currentCase?.attachments" :key="url" :href="url" target="_blank" class="attachment-link">{{
-              url.split("/").pop() }}</a>
+            <el-link v-for="url in currentCase?.attachments" :key="url" :href="url" target="_blank"
+              class="attachment-link" :underline="false">{{
+                url.split("/").pop() }}</el-link>
           </div>
         </div>
       </div>
@@ -171,14 +172,14 @@
               <template #default="{ row }">
                 <span class="bg-pill" :class="bugStatusCls(row.status)">{{
                   bugStatusLabel(row.status)
-                  }}</span>
+                }}</span>
               </template>
             </el-table-column>
             <el-table-column label="优先级" min-width="100">
               <template #default="{ row }">
                 <span class="bg-pill" :class="bugPrioCls(row.severity)">{{
                   bugPrioLabel(row.severity)
-                  }}</span>
+                }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -196,14 +197,14 @@
               <template #default="{ row }">
                 <span class="bg-pill" :class="resultCls(row.result)">{{
                   resultLabel(row.result)
-                  }}</span>
+                }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="actual" label="实际结果/备注" min-width="240">
               <template #default="{ row }">
                 <span style="white-space: pre-wrap">{{
                   row.actual || "-"
-                  }}</span>
+                }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="executor" label="执行人" min-width="120" />
@@ -220,27 +221,27 @@
     <div class="ce-footer">
       <div class="footer-top">
         <div class="footer-left">
-          <label class="result-radio" :class="{ active: executeForm.result === 'PASS' }"
+          <el-text class="result-radio" :class="{ active: executeForm.result === 'PASS' }"
             @click="executeForm.result = 'PASS'">
             <span class="radio-dot pass">
               <Check v-if="executeForm.result === 'PASS'" />
             </span>
             <span>成功</span>
-          </label>
-          <label class="result-radio" :class="{ active: executeForm.result === 'BLOCK' }"
+          </el-text>
+          <el-text class="result-radio" :class="{ active: executeForm.result === 'BLOCK' }"
             @click="executeForm.result = 'BLOCK'">
             <span class="radio-dot block">
               <Minus v-if="executeForm.result === 'BLOCK'" />
             </span>
             <span>阻塞</span>
-          </label>
-          <label class="result-radio" :class="{ active: executeForm.result === 'FAIL' }"
+          </el-text>
+          <el-text class="result-radio" :class="{ active: executeForm.result === 'FAIL' }"
             @click="executeForm.result = 'FAIL'">
             <span class="radio-dot fail">
               <Close v-if="executeForm.result === 'FAIL'" />
             </span>
             <span>失败</span>
-          </label>
+          </el-text>
         </div>
         <div class="footer-center">
           <el-switch v-model="autoNext" active-text="自动下一条" />
@@ -259,41 +260,41 @@
       </template>
       <div class="case-edit-form">
         <div class="case-edit-row">
-          <label>用例名称<em>*</em></label>
+          <el-text>用例名称<em>*</em></el-text>
           <el-input v-model="caseEditForm.name" maxlength="60" placeholder="请输入用例名称" />
           <div v-if="caseEditErr.name" class="err">{{ caseEditErr.name }}</div>
         </div>
         <div class="case-edit-row">
-          <label>测试点</label>
+          <el-text>测试点</el-text>
           <el-input v-model="caseEditForm.testPoint" maxlength="60" placeholder="请输入测试点" />
         </div>
         <div class="case-edit-row">
-          <label>用例等级</label>
+          <el-text>用例等级</el-text>
           <el-select v-model="caseEditForm.level" style="width: 100%">
             <el-option v-for="l in LEVELS" :key="l.v" :value="l.v" :label="l.t" />
           </el-select>
         </div>
         <div class="case-edit-row">
-          <label>状态</label>
+          <el-text>状态</el-text>
           <el-select v-model="caseEditForm.status" style="width: 100%">
             <el-option v-for="s in STATUSES" :key="s.v" :value="s.v" :label="s.t" />
           </el-select>
         </div>
         <div class="case-edit-row">
-          <label>前置条件</label>
+          <el-text>前置条件</el-text>
           <el-input v-model="caseEditForm.precondition" type="textarea" :rows="3" maxlength="300"
             placeholder="请输入前置条件" />
         </div>
         <div class="case-edit-row">
-          <label>标签</label>
+          <el-text>标签</el-text>
           <el-input v-model="caseEditForm.tags" maxlength="100" placeholder="多个标签用逗号分隔" />
         </div>
         <div class="case-edit-row">
-          <label>备注</label>
+          <el-text>备注</el-text>
           <el-input v-model="caseEditForm.remark" type="textarea" :rows="3" maxlength="500" placeholder="请输入备注" />
         </div>
         <div class="case-edit-row">
-          <label>附件</label>
+          <el-text>附件</el-text>
           <el-upload action="/api/upload" :file-list="attachmentFiles" :on-success="onAttachmentSuccess"
             :on-remove="onAttachmentRemove" :limit="5" multiple class="case-edit-upload">
             <el-button type="primary">点击上传</el-button>
@@ -320,30 +321,30 @@
       </template>
       <div class="bug-form">
         <div class="bug-row bug-full">
-          <label>缺陷名称<em>*</em></label>
+          <el-text>缺陷名称<em>*</em></el-text>
           <el-input v-model="bugForm.title" maxlength="80" placeholder="请输入缺陷名称" />
           <div v-if="bugErr.title" class="err">{{ bugErr.title }}</div>
         </div>
         <div class="bug-row">
-          <label>状态</label>
+          <el-text>状态</el-text>
           <el-select v-model="bugForm.status" style="width: 100%">
             <el-option v-for="s in bugStatusOptions" :key="s.v" :value="s.v" :label="s.t" />
           </el-select>
         </div>
         <div class="bug-row">
-          <label>优先级</label>
+          <el-text>优先级</el-text>
           <el-select v-model="bugForm.priority" style="width: 100%">
             <el-option v-for="p in bugPriorityOptions" :key="p.v" :value="p.v" :label="p.t" />
           </el-select>
         </div>
         <div class="bug-row">
-          <label>受理人</label>
+          <el-text>受理人</el-text>
           <el-select v-model="bugForm.assignee" placeholder="请选择受理人" style="width: 100%" clearable>
             <el-option v-for="u in userOptions" :key="u" :label="u" :value="u" />
           </el-select>
         </div>
         <div class="bug-row bug-full">
-          <label>描述</label>
+          <el-text>描述</el-text>
           <el-input v-model="bugForm.desc" type="textarea" maxlength="300" :rows="3" placeholder="缺陷现象、复现步骤等（选填）" />
         </div>
       </div>
@@ -1084,12 +1085,13 @@ onMounted(() => {
   gap: 6px;
 }
 
-.case-edit-row label {
+.case-edit-row .el-text {
   font-size: 13px;
   color: var(--text-2, #4b5563);
+  align-self: auto;
 }
 
-.case-edit-row label em {
+.case-edit-row .el-text em {
   color: #ef4444;
   margin-left: 2px;
 }
@@ -1144,12 +1146,13 @@ onMounted(() => {
   grid-column: 1 / -1;
 }
 
-.bug-row label {
+.bug-row .el-text {
   font-size: 13px;
   color: var(--text-2, #4b5563);
+  align-self: auto;
 }
 
-.bug-row label em {
+.bug-row .el-text em {
   color: #ef4444;
   margin-left: 2px;
 }

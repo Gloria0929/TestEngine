@@ -1,31 +1,43 @@
 <template>
   <div class="def-page">
+    <!-- 头部 -->
+    <div class="bg-head">
+      <div></div>
+      <el-button type="primary" @click="openModal(null)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        新建接口
+      </el-button>
+    </div>
+
     <!-- 搜索栏 -->
     <div class="bg-bar">
       <div class="bg-field">
-        <label class="bg-lab">关键词</label>
+        <el-text class="bg-lab">关键词</el-text>
         <el-input v-model="filter.keyword" style="width:220px" placeholder="搜索接口名称 / 路径 / ID" clearable
           @keydown.enter="search" @clear="search" />
       </div>
       <div class="bg-field">
-        <label class="bg-lab">请求方式</label>
+        <el-text class="bg-lab">请求方式</el-text>
         <el-select v-model="filter.method" style="width:120px" placeholder="全部" clearable @change="search">
           <el-option v-for="m in methods" :key="m" :label="m" :value="m" />
         </el-select>
       </div>
       <div class="bg-field">
-        <label class="bg-lab">状态</label>
+        <el-text class="bg-lab">状态</el-text>
         <el-select v-model="filter.status" style="width:110px" placeholder="全部" clearable @change="search">
           <el-option v-for="s in statuses" :key="s" :label="s" :value="s" />
         </el-select>
       </div>
       <div class="bg-spacer" />
       <div class="bg-field">
-        <label class="bg-lab">&nbsp;</label>
+        <el-text class="bg-lab">&nbsp;</el-text>
         <el-button type="primary" @click="search">查询</el-button>
       </div>
       <div class="bg-field">
-        <label class="bg-lab">&nbsp;</label>
+        <el-text class="bg-lab">&nbsp;</el-text>
         <el-button @click="reset">重置</el-button>
       </div>
     </div>
@@ -116,48 +128,48 @@
     <el-dialog v-model="modalVisible" :title="editingId ? '编辑接口' : '新建接口'" width="560px" destroy-on-close>
       <div class="bg-form">
         <div class="bg-row bg-full">
-          <label>接口名称<em>*</em></label>
+          <el-text>接口名称<em>*</em></el-text>
           <el-input v-model="form.name" maxlength="80" placeholder="如：查询用户列表" />
           <div v-if="err.name" class="err">{{ err.name }}</div>
         </div>
         <div class="bg-row">
-          <label>请求方式<em>*</em></label>
+          <el-text>请求方式<em>*</em></el-text>
           <el-select v-model="form.method">
             <el-option v-for="m in methods" :key="m" :label="m" :value="m" />
           </el-select>
         </div>
         <div class="bg-row">
-          <label>协议</label>
+          <el-text>协议</el-text>
           <el-select v-model="form.protocol">
             <el-option label="HTTP" value="HTTP" />
             <el-option label="HTTPS" value="HTTPS" />
           </el-select>
         </div>
         <div class="bg-row bg-full">
-          <label>请求路径<em>*</em></label>
+          <el-text>请求路径<em>*</em></el-text>
           <el-input v-model="form.path" maxlength="160" placeholder="如：/api/v1/users" />
           <div v-if="err.path" class="err">{{ err.path }}</div>
         </div>
         <div class="bg-row">
-          <label>状态</label>
+          <el-text>状态</el-text>
           <el-select v-model="form.status">
             <el-option v-for="s in statuses" :key="s" :label="s" :value="s" />
           </el-select>
         </div>
         <div class="bg-row">
-          <label>责任人</label>
+          <el-text>责任人</el-text>
           <el-input v-model="form.responsible" maxlength="20" placeholder="选择或输入责任人" />
         </div>
         <div class="bg-row">
-          <label>用例数</label>
+          <el-text>用例数</el-text>
           <el-input v-model.number="form.caseCount" type="number" :min="0" :max="999" />
         </div>
         <div class="bg-row">
-          <label>标签</label>
+          <el-text>标签</el-text>
           <el-input v-model="form.tags" maxlength="60" placeholder="多个用逗号分隔" />
         </div>
         <div class="bg-row bg-full">
-          <label>描述</label>
+          <el-text>描述</el-text>
           <el-input v-model="form.desc" type="textarea" :rows="3" maxlength="300" placeholder="接口用途、依赖等（选填）" />
         </div>
       </div>
@@ -319,70 +331,6 @@ onMounted(load);
   line-height: 1.4;
 }
 
-.bg-in,
-.bg-sel {
-  height: 32px;
-  box-sizing: border-box;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-primary, #303133);
-  font-size: 13px;
-  font-family: inherit;
-  padding: 0 10px;
-  outline: none;
-  transition: border-color 0.18s ease;
-}
-
-.bg-in:focus,
-.bg-sel:focus {
-  border-color: var(--el-color-primary, #409eff);
-}
-
-.bg-in::placeholder {
-  color: var(--el-text-color-placeholder, #a8abb2);
-}
-
-.bg-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 14px;
-  box-sizing: border-box;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  font-size: 13px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
-
-.bg-btn:hover {
-  color: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-}
-
-.bg-btn-pri {
-  background: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-  color: #fff;
-}
-
-.bg-btn-pri:hover {
-  background: var(--el-color-primary-light-3, #79bbff);
-  border-color: var(--el-color-primary-light-3, #79bbff);
-  color: #fff;
-}
-
-.bg-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .bg-spacer {
   flex: 1;
 }
@@ -401,43 +349,6 @@ onMounted(load);
 
 .bg-scroll {
   overflow-x: auto;
-}
-
-.bg-tb {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.bg-tb th {
-  text-align: left;
-  font-weight: 500;
-  font-size: 12px;
-  color: var(--el-text-color-secondary, #909399);
-  background: var(--el-fill-color-lighter, #f5f7fa);
-  padding: 10px 14px;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
-}
-
-.bg-tb td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
-  color: var(--el-text-color-regular, #606266);
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.bg-tb tbody tr {
-  transition: background 0.15s ease;
-}
-
-.bg-tb tbody tr:hover {
-  background: var(--el-fill-color-light, #f5f7fa);
-}
-
-.bg-tb tbody tr:last-child td {
-  border-bottom: none;
 }
 
 .bg-cname {
@@ -594,24 +505,6 @@ onMounted(load);
   gap: 10px;
 }
 
-.bg-op {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 13px;
-  font-family: inherit;
-  cursor: pointer;
-  color: var(--el-color-primary, #409eff);
-}
-
-.bg-op:hover {
-  opacity: 0.75;
-}
-
-.bg-op-del {
-  color: var(--el-color-danger, #f56c6c);
-}
-
 .bg-state {
   padding: 52px 16px;
   text-align: center;
@@ -641,90 +534,6 @@ onMounted(load);
   color: var(--el-text-color-secondary, #909399);
 }
 
-.bg-pager {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bg-pg {
-  min-width: 30px;
-  height: 30px;
-  padding: 0 8px;
-  box-sizing: border-box;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  font-size: 13px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.bg-pg:hover:not(:disabled) {
-  color: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-}
-
-.bg-pg:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.bg-pg.on {
-  background: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-  color: #fff;
-}
-
-.bg-size {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--el-text-color-secondary, #909399);
-}
-
-.bg-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 1900;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: bg-fade 0.16s ease;
-}
-
-@keyframes bg-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.bg-modal {
-  width: 560px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 64px);
-  overflow: auto;
-  background: var(--el-bg-color, #fff);
-  border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
-  padding: 22px 24px;
-}
-
-.bg-modal h3 {
-  margin: 0 0 16px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary, #303133);
-}
-
 .bg-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -737,12 +546,13 @@ onMounted(load);
   gap: 6px;
 }
 
-.bg-row label {
+.bg-row .el-text {
   font-size: 13px;
   color: var(--el-text-color-regular, #606266);
+  align-self: auto;
 }
 
-.bg-row label em {
+.bg-row .el-text em {
   color: var(--el-color-danger, #f56c6c);
   font-style: normal;
   margin-left: 2px;
@@ -755,13 +565,6 @@ onMounted(load);
 
 .bg-full {
   grid-column: 1 / -1;
-}
-
-.bg-modal-foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
 }
 
 .at-path {

@@ -14,12 +14,6 @@ export function fetchProjects(params: { orgId: string }): Promise<Project[]> {
 export function createProject(data: Partial<Project>): Promise<Project> {
   return request({ url: '/api/project', method: 'post', data })
 }
-export function fetchProject(id: string): Promise<Project> {
-  return request({ url: `/api/project/${id}`, method: 'get' })
-}
-export function updateProject(id: string, data: Partial<Project>): Promise<null> {
-  return request({ url: `/api/project/${id}`, method: 'put', data })
-}
 export function fetchPermissionTree(): Promise<PermissionNode[]> {
   return request({ url: '/api/project/permission-tree', method: 'get' })
 }

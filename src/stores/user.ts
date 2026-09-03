@@ -6,10 +6,19 @@ import { login as loginApi, logout as logoutApi } from '@/api/auth'
 import type { LoginPayload } from '@/types/api'
 import type { User } from '@/types/api'
 
+// 默认会话：应用免登录运行，直接以管理员身份访问
+const DEFAULT_USER: User = {
+  id: 'u-1',
+  username: 'Administrator',
+  name: '系统管理员',
+  email: 'admin@testengine.io',
+  role: '系统管理员',
+}
+
 export const useUserStore = defineStore('user', () => {
-  const token = ref<string>(storage.get('token') ?? '')
-  const user = ref<User | null>(storage.get<User>('user'))
-  const permissions = ref<string[]>(storage.get<string[]>('permissions') ?? [])
+  const token = ref<string>(storage.get('token') ?? 'local-token')
+  const user = ref<User | null>(storage.get<User>('user') ?? DEFAULT_USER)
+  const permissions = ref<string[]>(storage.get<string[]>('permissions') ?? ['*'])
 
   const isLoggedIn = computed(() => !!token.value)
 

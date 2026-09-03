@@ -161,17 +161,4 @@ watch(
 .at-kv-row .bg-in {
   width: 100%;
 }
-
-.at-kv-del {
-  min-height: auto !important;
-  height: 24px !important;
-  width: 24px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  color: var(--el-text-color-placeholder, #a8abb2) !important;
-}
-
-.at-kv-del:hover {
-  color: var(--el-color-danger, #f56c6c) !important;
-}
 </style>

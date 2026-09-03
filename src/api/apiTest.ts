@@ -11,21 +11,8 @@ import type {
 export function fetchDebugRequests(): Promise<DebugRequest[]> {
   return request({ url: "/api/api-test/debug", method: "get" });
 }
-export function saveDebugRequest(data: DebugRequest): Promise<DebugRequest> {
-  return request({ url: "/api/api-test/debug", method: "post", data });
-}
 export function executeRequest(data: DebugRequest): Promise<ExecuteResponse> {
   return request({ url: "/api/api-test/execute", method: "post", data });
-}
-export function importCurl(text: string): Promise<DebugRequest> {
-  return request({
-    url: "/api/api-test/import-curl",
-    method: "post",
-    data: { text },
-  });
-}
-export function fetchApiDefinitions(): Promise<ApiDefinition[]> {
-  return request({ url: "/api/api-test/definitions", method: "get" });
 }
 export interface DefinitionPageQuery {
   pageNum: number;
@@ -68,9 +55,6 @@ export function importDefinition(text: string): Promise<{ count: number }> {
     data: { text },
   });
 }
-export function fetchScenarios(): Promise<Scenario[]> {
-  return request({ url: "/api/api-test/scenarios", method: "get" });
-}
 export interface ScenarioPageQuery {
   pageNum: number;
   pageSize: number;
@@ -94,9 +78,6 @@ export function updateScenario(
   data: Partial<Scenario>,
 ): Promise<Scenario> {
   return request({ url: `/api/api-test/scenarios/${id}`, method: "put", data });
-}
-export function saveScenario(data: Scenario): Promise<Scenario> {
-  return request({ url: "/api/api-test/scenarios", method: "post", data });
 }
 export function executeScenario(id: string): Promise<Record<string, unknown>> {
   return request({

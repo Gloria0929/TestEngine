@@ -73,7 +73,7 @@
         <!-- Authorization -->
         <div v-show="seg === 'auth'" class="at-auth">
           <div class="at-auth-row">
-            <label>Type</label>
+            <el-text>Type</el-text>
             <el-select v-model="activeTab.authType" style="width:160px">
               <el-option label="No Auth" value="none" />
               <el-option label="Basic Auth" value="basic" />
@@ -83,20 +83,20 @@
           </div>
           <template v-if="activeTab.authType === 'basic'">
             <div class="at-auth-row">
-              <label>Username</label>
+              <el-text>Username</el-text>
               <el-input v-model="activeTab.authUser" style="flex:1" placeholder="用户名" />
             </div>
             <div class="at-auth-row">
-              <label>Password</label>
+              <el-text>Password</el-text>
               <el-input v-model="activeTab.authPass" style="flex:1" type="password" placeholder="密码" show-password />
             </div>
           </template>
           <div v-if="activeTab.authType === 'bearer'" class="at-auth-row">
-            <label>Token</label>
+            <el-text>Token</el-text>
             <el-input v-model="activeTab.authToken" style="flex:1" placeholder="Bearer token" />
           </div>
           <div v-if="activeTab.authType === 'cookie'" class="at-auth-row">
-            <label>Cookie</label>
+            <el-text>Cookie</el-text>
             <el-input v-model="activeTab.authCookie" style="flex:1" placeholder="Cookie 字符串" />
           </div>
         </div>
@@ -512,52 +512,10 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.at-tab-close {
-  min-height: auto !important;
-  height: 20px !important;
-  width: 20px !important;
-  padding: 0 !important;
-  color: var(--el-text-color-placeholder, #a8abb2) !important;
-}
-
-.at-tab-close:hover {
-  color: var(--el-color-danger, #f56c6c) !important;
-  background: rgba(245, 108, 108, 0.1) !important;
-}
-
-.at-tab-add {
-  min-height: auto !important;
-  height: 28px !important;
-  padding: 4px 8px !important;
-  font-size: 16px !important;
-  color: var(--el-text-color-secondary, #909399) !important;
-  border: 1px solid var(--el-border-color, #dcdfe6) !important;
-  border-radius: 6px 6px 0 0 !important;
-  border-bottom: none !important;
-}
-
-.at-tab-add:hover {
-  color: var(--el-color-primary, #409eff) !important;
-  border-color: var(--el-color-primary, #409eff) !important;
-  background: var(--el-fill-color-light, #fafafa) !important;
-}
-
 .at-reqline {
   display: flex;
   gap: 8px;
   align-items: center;
-}
-
-.at-method-sel {
-  width: 118px;
-}
-
-.at-url-in {
-  flex: 1;
-}
-
-.at-send {
-  gap: 6px;
 }
 
 .at-dbg-cols {
@@ -657,19 +615,6 @@ onMounted(() => {
   width: 100%;
 }
 
-.at-kv-del {
-  min-height: auto !important;
-  height: 24px !important;
-  width: 24px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  color: var(--el-text-color-placeholder, #a8abb2) !important;
-}
-
-.at-kv-del:hover {
-  color: var(--el-color-danger, #f56c6c) !important;
-}
-
 /* Authorization */
 .at-auth {
   padding: 12px;
@@ -684,19 +629,11 @@ onMounted(() => {
   gap: 10px;
 }
 
-.at-auth-row label {
+.at-auth-row .el-text {
   width: 72px;
   font-size: 12.5px;
   color: var(--el-text-color-secondary, #909399);
   flex-shrink: 0;
-}
-
-.at-auth-sel {
-  width: 160px;
-}
-
-.at-auth-in {
-  flex: 1;
 }
 
 /* Body editor wrap */

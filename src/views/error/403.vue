@@ -2,10 +2,8 @@
 <template>
   <div class="error-page">
     <h1>403</h1>
-    <p>{{ "无权限访问该页面" }}</p>
-    <el-button type="primary" @click="router.push('/')">{{
-      "返回首页"
-    }}</el-button>
+    <p>无权限访问该页面</p>
+    <el-button type="primary" @click="router.push('/')">返回首页</el-button>
   </div>
 </template>
 <script setup lang="ts">

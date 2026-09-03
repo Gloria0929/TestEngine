@@ -1,6 +1,7 @@
 // src/mocks/handlers/testCase.ts
+
 import { http, HttpResponse } from 'msw'
-import { ok, page, fail } from '../utils'
+import { ok, page } from '../utils'
 import { createModules, createCases, createReviews } from '../seed/testCase'
 import type { PageQuery } from '@/types'
 import type { TestCase, Review } from '@/types/models'

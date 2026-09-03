@@ -7,30 +7,30 @@
       <div>
         <div class="log-bar">
           <div class="log-field">
-            <label class="log-lab">操作范围</label>
+            <el-text class="log-lab">操作范围</el-text>
             <el-select style="width:140px" v-model="flt.scope" @change="onFilter">
               <el-option label="全部" value="" />
               <el-option v-for="s in SCOPES" :key="s" :label="s" :value="s" />
             </el-select>
           </div>
           <div class="log-field">
-            <label class="log-lab">操作类型</label>
+            <el-text class="log-lab">操作类型</el-text>
             <el-select style="width:100px" v-model="flt.action" @change="onFilter">
               <el-option label="全部" value="" />
               <el-option v-for="a in ACTIONS" :key="a" :label="a" :value="a" />
             </el-select>
           </div>
           <div class="log-field">
-            <label class="log-lab">操作人</label>
+            <el-text class="log-lab">操作人</el-text>
             <el-input style="width:140px" v-model="flt.user" placeholder="输入操作人" @keyup.enter="onFilter" />
           </div>
           <div class="log-field">
-            <label class="log-lab">对象 / 名称</label>
+            <el-text class="log-lab">对象 / 名称</el-text>
             <el-input v-model="flt.object" placeholder="搜索操作对象或名称" @keyup.enter="onFilter" @input="debouncedFilter" />
           </div>
           <div class="log-spacer" />
           <div class="log-field">
-            <label class="log-lab">&nbsp;</label>
+            <el-text class="log-lab">&nbsp;</el-text>
             <el-button type="primary" @click="onFilter">查询</el-button>
           </div>
         </div>
@@ -171,6 +171,7 @@ onMounted(load);
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
   line-height: 1.4;
+  align-self: auto;
 }
 
 .log-spacer {

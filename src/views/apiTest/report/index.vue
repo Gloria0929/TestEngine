@@ -3,23 +3,23 @@
     <!-- 搜索栏 -->
     <div class="bg-bar">
       <div class="bg-field">
-        <label class="bg-lab">关键词</label>
+        <el-text class="bg-lab">关键词</el-text>
         <el-input v-model="filter.keyword" style="width:220px" placeholder="搜索报告名称 / ID" clearable
           @keydown.enter="search" @clear="search" />
       </div>
       <div class="bg-field">
-        <label class="bg-lab">报告类型</label>
+        <el-text class="bg-lab">报告类型</el-text>
         <el-select v-model="filter.type" style="width:130px" placeholder="全部" clearable @change="search">
           <el-option v-for="t in reportTypes" :key="t" :label="t" :value="t" />
         </el-select>
       </div>
       <div class="bg-spacer" />
       <div class="bg-field">
-        <label class="bg-lab">&nbsp;</label>
+        <el-text class="bg-lab">&nbsp;</el-text>
         <el-button type="primary" @click="search">查询</el-button>
       </div>
       <div class="bg-field">
-        <label class="bg-lab">&nbsp;</label>
+        <el-text class="bg-lab">&nbsp;</el-text>
         <el-button @click="reset">重置</el-button>
       </div>
     </div>

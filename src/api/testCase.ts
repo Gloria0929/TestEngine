@@ -6,9 +6,6 @@ import type { TestCase, ModuleNode, Review, ReviewDetail } from '@/types/models'
 export function fetchModuleTree(projectId: string): Promise<ModuleNode[]> {
   return request({ url: '/api/test-case/modules', method: 'get', params: { projectId } })
 }
-export function createModule(data: { name: string; parentId?: string }): Promise<ModuleNode> {
-  return request({ url: '/api/test-case/modules', method: 'post', data })
-}
 export function fetchCaseList(query: PageQuery): Promise<PageResult<TestCase>> {
   return request({ url: '/api/test-case/list', method: 'get', params: query })
 }

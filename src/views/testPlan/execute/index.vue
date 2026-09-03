@@ -154,33 +154,33 @@
       </template>
       <div class="tp-form">
         <div class="tp-row">
-          <label>计划名称<em>*</em></label>
+          <el-text>计划名称<em>*</em></el-text>
           <el-input v-model="editForm.name" maxlength="60" placeholder="请输入计划名称" style="width:100%" />
           <div v-if="editErr.name" class="err">{{ editErr.name }}</div>
         </div>
         <div class="tp-row">
-          <label>所属模块</label>
+          <el-text>所属模块</el-text>
           <el-select v-model="editForm.group" style="width:100%">
             <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
           </el-select>
         </div>
         <div class="tp-row">
-          <label>创建人<em>*</em></label>
+          <el-text>创建人<em>*</em></el-text>
           <el-input v-model="editForm.owner" maxlength="20" placeholder="请输入创建人" style="width:100%" />
           <div v-if="editErr.owner" class="err">{{ editErr.owner }}</div>
         </div>
         <div class="tp-row">
-          <label>开始时间</label>
+          <el-text>开始时间</el-text>
           <el-date-picker v-model="editForm.startTime" type="date" value-format="YYYY-MM-DD" placeholder="选择开始日期"
             style="width:100%" />
         </div>
         <div class="tp-row">
-          <label>结束时间</label>
+          <el-text>结束时间</el-text>
           <el-date-picker v-model="editForm.endTime" type="date" value-format="YYYY-MM-DD" placeholder="选择结束日期"
             style="width:100%" />
         </div>
         <div class="tp-row">
-          <label>状态</label>
+          <el-text>状态</el-text>
           <el-select v-model="editForm.status" style="width:100%">
             <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
           </el-select>
@@ -515,10 +515,6 @@ onMounted(() => {
   max-width: 480px;
 }
 
-.detail-tabs {
-  flex-shrink: 0;
-}
-
 .tab-count {
   margin-left: 6px;
   font-size: 11px;
@@ -575,14 +571,6 @@ onMounted(() => {
 
 .case-tag {
   margin-right: 4px;
-}
-
-.tab-placeholder {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-3);
 }
 
 .empty-state {
@@ -688,12 +676,13 @@ onMounted(() => {
   gap: 6px;
 }
 
-.tp-row label {
+.tp-row .el-text {
   font-size: 13px;
   color: var(--text-2);
+  align-self: auto;
 }
 
-.tp-row label em {
+.tp-row .el-text em {
   color: #ef4444;
   margin-left: 2px;
 }

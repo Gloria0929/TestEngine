@@ -1,18 +1,12 @@
 <template>
   <div class="topnav-wrap">
-    <el-menu
-      mode="horizontal"
-      router
-      :default-active="activeMenu"
-      background-color="transparent"
-      text-color="var(--text-1)"
-      active-text-color="var(--accent)"
-      :ellipsis="false"
-      class="topnav"
-    >
+    <el-menu mode="horizontal" router :default-active="activeMenu" background-color="transparent"
+      text-color="var(--text-1)" active-text-color="var(--accent)" :ellipsis="false" class="topnav">
       <template v-for="item in visibleMenus" :key="item.key">
         <el-menu-item :index="item.path">
-          <el-icon><component :is="item.icon" /></el-icon>
+          <el-icon>
+            <component :is="item.icon" />
+          </el-icon>
           <span>{{ item.label }}</span>
         </el-menu-item>
       </template>
@@ -20,13 +14,8 @@
 
     <!-- 二级导航：横向展开 -->
     <div v-if="subItems.length" class="subnav">
-      <router-link
-        v-for="child in subItems"
-        :key="child.key"
-        :to="child.path"
-        class="subnav-item"
-        :class="{ on: isSubActive(child.path) }"
-      >
+      <router-link v-for="child in subItems" :key="child.key" :to="child.path" class="subnav-item"
+        :class="{ on: isSubActive(child.path) }">
         {{ child.label }}
       </router-link>
     </div>
@@ -37,7 +26,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { menuTree, type MenuItem } from "@/config/menu";
+import { menuTree } from "@/config/menu";
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -108,6 +97,7 @@ function isSubActive(path: string) {
 .topnav-wrap {
   width: 100%;
 }
+
 .subnav {
   display: flex;
   align-items: center;
@@ -116,6 +106,7 @@ function isSubActive(path: string) {
   padding: 0 4px;
   border-top: 1px solid var(--border);
 }
+
 .subnav-item {
   display: inline-flex;
   align-items: center;
@@ -128,10 +119,12 @@ function isSubActive(path: string) {
   transition: all 0.18s ease;
   white-space: nowrap;
 }
+
 .subnav-item:hover {
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.06);
 }
+
 .subnav-item.on {
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.1);

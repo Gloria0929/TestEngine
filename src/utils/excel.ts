@@ -2,17 +2,6 @@
 import * as XLSX from 'xlsx'
 import type { TestCase } from '@/types/models'
 
-export function exportCases(rows: TestCase[], filename = 'cases.xlsx') {
-  const data = rows.map((c) => ({
-    用例名称: c.name, 等级: c.level, 模块: c.moduleId, 前置条件: c.precondition,
-    步骤: c.steps.map((s) => `${s.description}->${s.expected}`).join('\n'), 标签: c.tags.join(','),
-  }))
-  const ws = XLSX.utils.json_to_sheet(data)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, '用例')
-  XLSX.writeFile(wb, filename)
-}
-
 export function parseCases(file: File): Promise<Partial<TestCase>[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

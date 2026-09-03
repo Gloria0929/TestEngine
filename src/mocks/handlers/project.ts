@@ -1,10 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { ok, page } from "../utils";
-import type {
-  Project,
-  MessageConfig,
-  FileItem,
-} from "@/types/models";
+import type { Project, MessageConfig, FileItem } from "@/types/models";
 import type { PageQuery } from "@/types";
 import {
   createProjects,

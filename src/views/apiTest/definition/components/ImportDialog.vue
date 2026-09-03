@@ -13,7 +13,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { importDefinition } from '@/api/apiTest'
 
-const props = defineProps<{ modelValue: boolean }>()
+defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: boolean): void; (e: 'imported'): void }>()
 const text = ref('')
 const importing = ref(false)

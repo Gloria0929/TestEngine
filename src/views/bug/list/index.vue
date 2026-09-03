@@ -16,18 +16,18 @@
       <!-- 筛选栏 -->
       <div class="bg-bar">
         <div class="bg-field">
-          <label class="bg-lab">关键词</label>
+          <el-text class="bg-lab">关键词</el-text>
           <el-input style="width:220px" v-model="flt.keyword" placeholder="搜索 ID 或缺陷名称" @keyup.enter="search" />
         </div>
         <div class="bg-field">
-          <label class="bg-lab">状态</label>
+          <el-text class="bg-lab">状态</el-text>
           <el-select style="width:110px" v-model="flt.status" @change="search">
             <el-option value="" label="全部" />
             <el-option v-for="s in statusOptions" :key="s.v" :value="s.v" :label="s.t" />
           </el-select>
         </div>
         <div class="bg-field">
-          <label class="bg-lab">优先级</label>
+          <el-text class="bg-lab">优先级</el-text>
           <el-select style="width:110px" v-model="flt.priority" @change="search">
             <el-option value="" label="全部" />
             <el-option v-for="p in priorityOptions" :key="p.v" :value="p.v" :label="p.t" />
@@ -35,11 +35,11 @@
         </div>
         <div class="bg-spacer" />
         <div class="bg-field">
-          <label class="bg-lab">&nbsp;</label>
+          <el-text class="bg-lab">&nbsp;</el-text>
           <el-button type="primary" @click="search">查询</el-button>
         </div>
         <div class="bg-field">
-          <label class="bg-lab">&nbsp;</label>
+          <el-text class="bg-lab">&nbsp;</el-text>
           <el-button @click="reset">重置</el-button>
         </div>
       </div>
@@ -139,32 +139,32 @@
       </template>
       <div class="bg-form">
         <div class="bg-row bg-full">
-          <label>缺陷名称<em>*</em></label>
+          <el-text>缺陷名称<em>*</em></el-text>
           <el-input v-model="form.title" maxlength="80" placeholder="请输入缺陷名称" />
           <div v-if="formErr.title" class="err">{{ formErr.title }}</div>
         </div>
         <div class="bg-row">
-          <label>状态</label>
+          <el-text>状态</el-text>
           <el-select v-model="form.status">
             <el-option v-for="s in statusOptions" :key="s.v" :value="s.v" :label="s.t" />
           </el-select>
         </div>
         <div class="bg-row">
-          <label>优先级</label>
+          <el-text>优先级</el-text>
           <el-select v-model="form.priority">
             <el-option v-for="p in priorityOptions" :key="p.v" :value="p.v" :label="p.t" />
           </el-select>
         </div>
         <div class="bg-row">
-          <label>受理人</label>
+          <el-text>受理人</el-text>
           <el-input v-model="form.assignee" maxlength="20" list="bg-users" placeholder="选择或输入受理人" />
         </div>
         <div class="bg-row">
-          <label>用例数</label>
+          <el-text>用例数</el-text>
           <el-input v-model.number="form.caseCount" type="number" min="0" max="999" />
         </div>
         <div class="bg-row bg-full">
-          <label>描述</label>
+          <el-text>描述</el-text>
           <el-input v-model="form.desc" type="textarea" maxlength="300" :rows="3" placeholder="缺陷现象、复现步骤等（选填）" />
         </div>
       </div>
@@ -571,72 +571,6 @@ onMounted(load);
   color: var(--el-text-color-secondary, #909399);
 }
 
-.bg-pager {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bg-pg {
-  min-width: 30px;
-  height: 30px;
-  padding: 0 8px;
-  box-sizing: border-box;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  font-size: 13px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.bg-pg:hover:not(:disabled) {
-  color: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-}
-
-.bg-pg:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.bg-pg.on {
-  background: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
-  color: #fff;
-}
-
-.bg-size {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--el-text-color-secondary, #909399);
-}
-
-.bg-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 1900;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: bg-fade 0.16s ease;
-}
-
-@keyframes bg-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
 .bg-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -649,12 +583,13 @@ onMounted(load);
   gap: 6px;
 }
 
-.bg-row label {
+.bg-row .el-text {
   font-size: 13px;
   color: var(--el-text-color-regular, #606266);
+  align-self: auto;
 }
 
-.bg-row label em {
+.bg-row .el-text em {
   color: var(--el-color-danger, #f56c6c);
   font-style: normal;
   margin-left: 2px;

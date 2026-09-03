@@ -97,9 +97,4 @@ watch(
 .col-action:hover {
   color: var(--el-color-danger);
 }
-
-.kv-add {
-  flex-shrink: 0;
-  margin-left: auto;
-}
 </style>

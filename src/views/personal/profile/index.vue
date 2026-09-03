@@ -55,52 +55,6 @@
           </el-form-item>
         </el-form>
       </el-tab-pane>
-
-      <!-- <el-tab-pane label="AI 模型" name="ai">
-        <el-form label-width="120px" style="max-width: 560px">
-          <el-form-item label="模型服务商">
-            <el-select v-model="aiModel.provider" style="width: 100%">
-              <el-option value="openai" label="OpenAI" />
-              <el-option value="azure" label="Azure OpenAI" />
-              <el-option value="custom" label="自定义" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="模型名称">
-            <el-input v-model="aiModel.model" placeholder="如 gpt-4o" />
-          </el-form-item>
-          <el-form-item label="API Key">
-            <el-input
-              v-model="aiModel.key"
-              type="password"
-              show-password
-              placeholder="仅保存在本地浏览器"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onSaveAiModel"
-              >保存模型配置</el-button
-            >
-          </el-form-item>
-        </el-form>
-      </el-tab-pane> -->
-
-      <!-- <el-tab-pane label="表格设置" name="table">
-        <el-form label-width="120px" style="max-width: 480px">
-          <el-form-item label="默认每页条数">
-            <el-select v-model="pageSize" style="width: 200px">
-              <el-option :value="10" label="10 条/页" />
-              <el-option :value="20" label="20 条/页" />
-              <el-option :value="50" label="50 条/页" />
-              <el-option :value="100" label="100 条/页" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onSavePageSize"
-              >保存表格设置</el-button
-            >
-          </el-form-item>
-        </el-form>
-      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>
@@ -122,12 +76,6 @@ const pwdForm = reactive({
   confirmPassword: "",
 });
 const execUrl = ref<string>(storage.get<string>("execUrl") ?? "");
-const pageSize = ref<number>(storage.get<number>("pageSize") ?? 10);
-const aiModel = reactive({
-  provider: storage.get<string>("aiProvider") ?? "openai",
-  model: storage.get<string>("aiModel") ?? "",
-  key: storage.get<string>("aiKey") ?? "",
-});
 
 const avatarText = computed(() => userStore.user?.name?.slice(0, 1) || "?");
 
@@ -173,18 +121,6 @@ function onSaveExecUrl() {
   storage.set("execUrl", execUrl.value);
   ElMessage.success("已保存");
 }
-
-// function onSavePageSize() {
-//   storage.set("pageSize", pageSize.value);
-//   ElMessage.success("已保存");
-// }
-
-// function onSaveAiModel() {
-//   storage.set("aiProvider", aiModel.provider);
-//   storage.set("aiModel", aiModel.model);
-//   storage.set("aiKey", aiModel.key);
-//   ElMessage.success("模型配置已保存");
-// }
 </script>
 
 <style scoped>

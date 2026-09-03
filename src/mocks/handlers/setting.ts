@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { ok } from '../utils'
-import type { SysUser, SysParam, Plugin, Organization, ProjectMember, UserGroup, Integration } from '@/types/models'
+import type { SysUser, SysParam, Plugin, Organization, ProjectMember } from '@/types/models'
 import { createSysUsers, createSysParams, createPlugins, createSysOrgs, createOrgMembers, createOrgGroups, createIntegrations } from '../seed/setting'
 
 let sysUsers = createSysUsers()

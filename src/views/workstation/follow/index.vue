@@ -5,7 +5,7 @@
         <div class="f-type">{{ f.type }}</div>
         <div class="f-name">{{ f.name }}</div>
         <div class="f-meta">{{ f.owner }} · {{ f.updateTime }}</div>
-        <el-button link type="danger" @click="unfollow(f.id)">{{ '取消关注' }}</el-button>
+        <el-button link type="danger" @click="unfollow(f.id)">取消关注</el-button>
       </el-card>
     </el-col>
   </el-row>

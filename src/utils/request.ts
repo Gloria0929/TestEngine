@@ -39,7 +39,6 @@ service.interceptors.response.use(
       if (res.code === 401) {
         storage.remove('token')
         storage.remove('user')
-        window.location.hash = '/login'
       }
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message))

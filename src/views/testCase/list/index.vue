@@ -4,13 +4,16 @@
       <!-- 头部 -->
       <div class="tc-head">
         <div></div>
-        <el-button type="primary" @click="tab === 'case' ? openCaseModal(null) : openReviewModal(null)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            stroke-linecap="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          {{ tab === "case" ? "新建用例" : "新建评审" }}
-        </el-button>
+        <div style="display: flex; gap: 10px">
+          <el-button v-if="tab === 'case'" @click="importVisible = true">导入用例</el-button>
+          <el-button type="primary" @click="tab === 'case' ? openCaseModal(null) : openReviewModal(null)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            {{ tab === "case" ? "新建用例" : "新建评审" }}
+          </el-button>
+        </div>
       </div>
 
       <!-- 标签页 -->
@@ -19,33 +22,33 @@
           <div class="tc-pane">
             <div class="tc-bar">
               <div class="tc-field">
-                <label class="tc-lab">关键词</label>
+                <el-text class="tc-lab">关键词</el-text>
                 <el-input style="width: 220px" v-model="flt.keyword" placeholder="搜索 ID 或用例名称"
                   @keyup.enter="searchCases" />
               </div>
               <div class="tc-field">
-                <label class="tc-lab">用例等级</label>
+                <el-text class="tc-lab">用例等级</el-text>
                 <el-select style="width: 110px" v-model="flt.level" @change="searchCases">
                   <el-option value="" label="全部" />
                   <el-option v-for="l in levels" :key="l.v" :value="l.v" :label="l.t" />
                 </el-select>
               </div>
               <div class="tc-field">
-                <label class="tc-lab">评审结果</label>
+                <el-text class="tc-lab">评审结果</el-text>
                 <el-select style="width: 120px" v-model="flt.review" @change="searchCases">
                   <el-option value="" label="全部" />
                   <el-option v-for="r in reviewLabels" :key="r.v" :value="r.v" :label="r.t" />
                 </el-select>
               </div>
               <div class="tc-field">
-                <label class="tc-lab">执行结果</label>
+                <el-text class="tc-lab">执行结果</el-text>
                 <el-select style="width: 120px" v-model="flt.result" @change="searchCases">
                   <el-option value="" label="全部" />
                   <el-option v-for="r in resultLabels" :key="r.v" :value="r.v" :label="r.t" />
                 </el-select>
               </div>
               <div class="tc-field">
-                <label class="tc-lab">所属模块</label>
+                <el-text class="tc-lab">所属模块</el-text>
                 <el-select style="width: 130px" v-model="flt.module" @change="searchCases">
                   <el-option value="" label="全部" />
                   <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
@@ -53,13 +56,13 @@
               </div>
               <div class="tc-spacer" />
               <div class="tc-field">
-                <label class="tc-lab">&nbsp;</label>
+                <el-text class="tc-lab">&nbsp;</el-text>
                 <el-button type="primary" @click="searchCases">
                   查询
                 </el-button>
               </div>
               <div class="tc-field">
-                <label class="tc-lab">&nbsp;</label>
+                <el-text class="tc-lab">&nbsp;</el-text>
                 <el-button @click="resetCases">重置</el-button>
               </div>
             </div>
@@ -123,7 +126,7 @@
                       <span class="tc-time">{{ row.updateTime || "-" }}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="创建人" min-width="130">
+                  <el-table-column label="创建人" min-width="160">
                     <template #default="{ row }">
                       <div class="tc-user">
                         <span class="tc-avatar" :style="{
@@ -138,7 +141,7 @@
                       <span class="tc-time">{{ row.createTime || "-" }}</span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作" min-width="110">
+                  <el-table-column label="操作" min-width="140">
                     <template #default="{ row }">
                       <div class="tc-ops">
                         <el-button type="primary" link @click="openCaseModal(row)">
@@ -170,12 +173,12 @@
           <div class="tc-pane">
             <div class="tc-bar">
               <div class="tc-field">
-                <label class="tc-lab">关键词</label>
+                <el-text class="tc-lab">关键词</el-text>
                 <el-input style="width: 220px" v-model="rvFlt.keyword" placeholder="搜索评审 ID 或名称"
                   @keyup.enter="searchReviews" />
               </div>
               <div class="tc-field">
-                <label class="tc-lab">评审状态</label>
+                <el-text class="tc-lab">评审状态</el-text>
                 <el-select style="width: 120px" v-model="rvFlt.status" @change="searchReviews">
                   <el-option value="" label="全部" />
                   <el-option v-for="s in rvStatuses" :key="s.v" :value="s.v" :label="s.t" />
@@ -183,13 +186,13 @@
               </div>
               <div class="tc-spacer" />
               <div class="tc-field">
-                <label class="tc-lab">&nbsp;</label>
+                <el-text class="tc-lab">&nbsp;</el-text>
                 <el-button type="primary" @click="searchReviews">
                   查询
                 </el-button>
               </div>
               <div class="tc-field">
-                <label class="tc-lab">&nbsp;</label>
+                <el-text class="tc-lab">&nbsp;</el-text>
                 <el-button @click="resetReviews">重置</el-button>
               </div>
             </div>
@@ -326,24 +329,24 @@
     <el-dialog v-model="caseModalVisible" :title="editingCaseId ? '编辑用例' : '新建用例'" width="520px">
       <div class="tc-form">
         <div class="tc-row">
-          <label>用例名称<em>*</em></label>
+          <el-text>用例名称<em>*</em></el-text>
           <el-input v-model="caseForm.name" maxlength="60" placeholder="请输入用例名称" />
           <div v-if="caseErr.name" class="err">{{ caseErr.name }}</div>
         </div>
         <div class="tc-row">
-          <label>用例等级</label>
+          <el-text>用例等级</el-text>
           <el-select v-model="caseForm.level">
             <el-option v-for="l in levels" :key="l.v" :value="l.v" :label="l.t" />
           </el-select>
         </div>
         <div class="tc-row">
-          <label>所属模块</label>
+          <el-text>所属模块</el-text>
           <el-select v-model="caseForm.module">
             <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
           </el-select>
         </div>
         <div class="tc-row">
-          <label>{{ editingCaseId ? "负责人" : "创建人" }}<em>*</em></label>
+          <el-text>{{ editingCaseId ? "负责人" : "创建人" }}<em>*</em></el-text>
           <el-input v-model="caseForm.creator" maxlength="20" placeholder="请输入负责人" />
           <div v-if="caseErr.creator" class="err">{{ caseErr.creator }}</div>
         </div>
@@ -363,35 +366,35 @@
       class="tc-modal tc-modal-rv">
       <div class="tc-form">
         <div class="tc-row">
-          <label>评审名称<em>*</em></label>
+          <el-text>评审名称<em>*</em></el-text>
           <el-input v-model="reviewForm.name" maxlength="60" placeholder="例如：登录鉴权-用例评审" />
           <div v-if="reviewErr.name" class="err">{{ reviewErr.name }}</div>
         </div>
         <div class="tc-row">
-          <label>评审人<em>*</em></label>
+          <el-text>评审人<em>*</em></el-text>
           <el-input v-model="reviewForm.reviewersStr" maxlength="60" placeholder="多个评审人用逗号分隔，例如：张伟,李娜" />
           <div v-if="reviewErr.reviewers" class="err">
             {{ reviewErr.reviewers }}
           </div>
         </div>
         <div class="tc-row">
-          <label>用例数量</label>
+          <el-text>用例数量</el-text>
           <el-input v-model.number="reviewForm.caseCount" type="number" min="1" max="99" />
         </div>
         <div class="tc-row">
-          <label>评审模式</label>
+          <el-text>评审模式</el-text>
           <el-select v-model="reviewForm.mode">
             <el-option v-for="m in rvModes" :key="m.v" :value="m.v" :label="m.t" />
           </el-select>
         </div>
         <div class="tc-row">
-          <label>所属模块</label>
+          <el-text>所属模块</el-text>
           <el-select v-model="reviewForm.module">
             <el-option v-for="m in modules" :key="m" :value="m" :label="m" />
           </el-select>
         </div>
         <div class="tc-row">
-          <label>评审周期</label>
+          <el-text>评审周期</el-text>
           <div style="display: flex; gap: 8px; align-items: center">
             <el-date-picker v-model="reviewForm.startDate" type="date" value-format="YYYY-MM-DD" placeholder="开始日期"
               style="flex: 1" />
@@ -401,7 +404,7 @@
           </div>
         </div>
         <div class="tc-row tc-full">
-          <label>描述</label>
+          <el-text>描述</el-text>
           <el-input v-model="reviewForm.desc" type="textarea" :rows="3" maxlength="200" placeholder="评审范围、关注点等（选填）" />
         </div>
       </div>
@@ -424,6 +427,9 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 导入用例弹窗 -->
+    <ImportDialog v-model="importVisible" @imported="loadCases" />
   </div>
 </template>
 
@@ -431,7 +437,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchCaseList, deleteCase } from "@/api/testCase";
-import type { TestCase } from "@/types/models";
+import ImportDialog from "./components/ImportDialog.vue";
 
 // 常量
 const levels = [
@@ -663,7 +669,7 @@ function resetCases() {
   st.pageSize = 10;
   loadCases();
 }
-function onCaseSizeChange(val: number) {
+function onCaseSizeChange() {
   st.pageNum = 1;
   loadCases();
 }
@@ -679,7 +685,7 @@ function resetReviews() {
   rvSt.pageSize = 10;
   loadReviews();
 }
-function onRvSizeChange(val: number) {
+function onRvSizeChange() {
   rvSt.pageNum = 1;
   loadReviews();
 }
@@ -688,6 +694,7 @@ function onRvSizeChange(val: number) {
 const caseModalVisible = ref(false);
 const editingCaseId = ref("");
 const caseSaving = ref(false);
+const importVisible = ref(false);
 const caseForm = reactive({
   name: "",
   level: "P2",
@@ -844,44 +851,6 @@ onMounted(loadCases);
   /* margin-bottom: 12px; */
 }
 
-.tc-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 14px;
-  height: 32px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 6px;
-  background: var(--el-bg-color, #fff);
-  color: var(--el-text-color-regular, #606266);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tc-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.tc-btn-pri {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.tc-btn-pri:hover {
-  background: var(--accent-hover);
-  color: #fff;
-}
-
-.tc-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--el-border-color-light, #e4e7ed);
-  margin-bottom: 16px;
-}
-
 .tc-pane {
   flex: 1;
   display: flex;
@@ -911,6 +880,7 @@ onMounted(loadCases);
   font-size: 12px;
   color: var(--el-text-color-secondary, #909399);
   line-height: 1.4;
+  align-self: auto;
 }
 
 .tc-spacer {
@@ -1057,23 +1027,6 @@ onMounted(loadCases);
   gap: 10px;
 }
 
-.tc-op {
-  border: none;
-  background: none;
-  color: var(--accent);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.tc-op:hover {
-  text-decoration: underline;
-}
-
-.tc-op-del {
-  color: var(--el-color-danger, #f56c6c);
-}
-
 .tc-foot {
   display: flex;
   align-items: center;
@@ -1094,11 +1047,6 @@ onMounted(loadCases);
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.tc-size {
-  font-size: 12px;
-  color: var(--el-text-color-secondary, #909399);
 }
 
 /* 等级色 */
@@ -1280,13 +1228,14 @@ onMounted(loadCases);
   gap: 4px;
 }
 
-.tc-row label {
+.tc-row .el-text {
   font-size: 13px;
   color: var(--el-text-color-regular, #606266);
   font-weight: 500;
+  align-self: auto;
 }
 
-.tc-row label em {
+.tc-row .el-text em {
   color: var(--el-color-danger, #f56c6c);
   font-style: normal;
   margin-left: 2px;

@@ -15,8 +15,8 @@
       <TrendChart :data="trend" />
     </el-card>
     <el-card shadow="never" class="todos">
-      <template #header>{{ "工作台" }} · {{ "待办" }}</template>
-      <div v-if="todos.length === 0" class="empty">{{ "暂无数据" }}</div>
+      <template #header>工作台 · 待办</template>
+      <div v-if="todos.length === 0" class="empty">暂无数据</div>
       <div
         v-for="td in todos"
         :key="td.id"
