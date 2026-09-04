@@ -622,6 +622,40 @@ public class ApiTestController {
     /** 6.16 删除报告（行内"删除"） */
     @DeleteMapping("/reports/{id}")
     public Result<Void> deleteReport(@PathVariable String id) { ... }
+
+    // ===== 调试收藏夹（文件夹 + 已保存接口） =====
+
+    /** 6.17 收藏夹列表（调试页左侧栏，文件夹含已保存接口） */
+    @GetMapping("/debug-collections")
+    public Result<List<DebugFolderVO>> collectionList() { ... }
+
+    /** 6.18 新建文件夹 */
+    @PostMapping("/debug-collections")
+    public Result<DebugFolderVO> createFolder(@RequestBody FolderNameDTO dto) { ... }
+
+    /** 6.19 重命名文件夹 */
+    @PutMapping("/debug-collections/{id}")
+    public Result<Void> renameFolder(@PathVariable String id, @RequestBody FolderNameDTO dto) { ... }
+
+    /** 6.20 删除文件夹（其中的已保存接口一并删除） */
+    @DeleteMapping("/debug-collections/{id}")
+    public Result<Void> deleteFolder(@PathVariable String id) { ... }
+
+    /** 6.21 保存接口到文件夹（body 为完整 DebugRequestDTO，服务端生成 id） */
+    @PostMapping("/debug-collections/{id}/items")
+    public Result<DebugRequestVO> saveItem(@PathVariable String id,
+                                           @RequestBody DebugRequestDTO dto) { ... }
+
+    /** 6.22 重命名文件夹内接口 */
+    @PutMapping("/debug-collections/{folderId}/items/{itemId}")
+    public Result<Void> renameItem(@PathVariable String folderId,
+                                   @PathVariable String itemId,
+                                   @RequestBody FolderNameDTO dto) { ... }
+
+    /** 6.23 删除文件夹内接口 */
+    @DeleteMapping("/debug-collections/{folderId}/items/{itemId}")
+    public Result<Void> deleteItem(@PathVariable String folderId,
+                                   @PathVariable String itemId) { ... }
 }
 ```
 
@@ -756,6 +790,30 @@ body 为 `ApiDefinitionDTO`（`ApiDefinitionVO` 子集），返回同类型对�
 - 6.15 详情：路径 `id`，返回 `ApiReportVO`（含 steps）；
 - 6.16 删除：路径 `id`，返回 `Result<Void>`。
 
+### 6.17 ~ 6.23 调试收藏夹
+
+**`DebugFolderVO`**（6.17 返回 `List<DebugFolderVO>`，6.18 返回单个）：
+
+| 字段 | Java 类型 | 说明 |
+| --- | --- | --- |
+| id | String | 文件夹 ID |
+| name | String | 文件夹名称 |
+| items | List\<DebugRequestVO\> | 文件夹内已保存的调试请求（结构同 6.1） |
+
+**`FolderNameDTO`**（6.18/6.19/6.22 请求 body）：`{ name: String }`。
+
+| 编号 | 路径与方法 | 说明 |
+| --- | --- | --- |
+| 6.17 | `GET /api/api-test/debug-collections` | 返回全部文件夹及其中接口 |
+| 6.18 | `POST /api/api-test/debug-collections` | 新建文件夹，返回新建的 `DebugFolderVO` |
+| 6.19 | `PUT /api/api-test/debug-collections/{id}` | 重命名文件夹 |
+| 6.20 | `DELETE /api/api-test/debug-collections/{id}` | 删除文件夹（级联删除其中接口） |
+| 6.21 | `POST /api/api-test/debug-collections/{id}/items` | 保存接口到文件夹，body 为完整 `DebugRequestDTO`，返回生成 id 后的 `DebugRequestVO` |
+| 6.22 | `PUT /api/api-test/debug-collections/{folderId}/items/{itemId}` | 重命名文件夹内接口 |
+| 6.23 | `DELETE /api/api-test/debug-collections/{folderId}/items/{itemId}` | 删除文件夹内接口 |
+
+> 调试记录（历史）由前端 localStorage 持久化，不走后端接口。
+
 ---
 
 ## 7. 缺陷管理 BugController
@@ -827,7 +885,7 @@ body 为 `BugDTO`（`BugVO` 子集：title、severity、status、assignee、desc
 | 用例执行页 | `/test-plan/case-execute/:planId/:caseId` | 计划详情 5.2、用例详情 4.3、提交结果 5.8、用例历史 5.9、计划缺陷 5.11、新建缺陷 7.2、附件上传 5.17 |
 | 计划报告 | `/test-plan/report/:id` | 报告 5.12、导出 5.13、分享 5.14、新建缺陷 7.2 |
 | 接口定义 | `/api-test/definition` | 定义分页 6.3、新建 6.4、更新 6.5、删除 6.6、导入 6.7 |
-| 接口调试 | `/api-test/debug` | 调试配置 6.1、发送请求 6.2 |
+| 接口调试 | `/api-test/debug` | 调试配置 6.1、发送请求 6.2、收藏夹 6.17~6.23 |
 | 场景管理 | `/api-test/scenario` | 场景分页 6.8、新建 6.9、执行 6.12、删除 6.13 |
 | 场景编辑 | `/api-test/scenario/edit/:id` | 场景详情 6.10、更新 6.11（刷新同 6.10） |
 | 接口报告 | `/api-test/report` | 报告分页 6.14、详情 6.15、删除 6.16 |

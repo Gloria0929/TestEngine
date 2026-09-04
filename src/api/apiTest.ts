@@ -2,6 +2,7 @@
 import { request } from "@/utils/request";
 import type {
   DebugRequest,
+  DebugFolder,
   ExecuteResponse,
   ApiDefinition,
   Scenario,
@@ -13,6 +14,28 @@ export function fetchDebugRequests(): Promise<DebugRequest[]> {
 }
 export function executeRequest(data: DebugRequest): Promise<ExecuteResponse> {
   return request({ url: "/api/api-test/execute", method: "post", data });
+}
+/** 收藏夹（文件夹 + 已保存接口） */
+export function fetchDebugCollections(): Promise<DebugFolder[]> {
+  return request({ url: "/api/api-test/debug-collections", method: "get" });
+}
+export function createDebugFolder(name: string): Promise<DebugFolder> {
+  return request({ url: "/api/api-test/debug-collections", method: "post", data: { name } });
+}
+export function renameDebugFolder(id: string, name: string): Promise<null> {
+  return request({ url: `/api/api-test/debug-collections/${id}`, method: "put", data: { name } });
+}
+export function deleteDebugFolder(id: string): Promise<null> {
+  return request({ url: `/api/api-test/debug-collections/${id}`, method: "delete" });
+}
+export function saveDebugItem(folderId: string, item: Partial<DebugRequest>): Promise<DebugRequest> {
+  return request({ url: `/api/api-test/debug-collections/${folderId}/items`, method: "post", data: item });
+}
+export function renameDebugItem(folderId: string, itemId: string, name: string): Promise<null> {
+  return request({ url: `/api/api-test/debug-collections/${folderId}/items/${itemId}`, method: "put", data: { name } });
+}
+export function deleteDebugItem(folderId: string, itemId: string): Promise<null> {
+  return request({ url: `/api/api-test/debug-collections/${folderId}/items/${itemId}`, method: "delete" });
 }
 export interface DefinitionPageQuery {
   pageNum: number;

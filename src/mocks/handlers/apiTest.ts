@@ -3,24 +3,83 @@ import { http, HttpResponse } from "msw";
 import { ok } from "../utils";
 import {
   createDebugRequests,
+  createDebugFolders,
   createApiDefinitions,
   createScenarios,
   createApiReports,
 } from "../seed/apiTest";
 import type {
   DebugRequest,
+  DebugFolder,
   ExecuteResponse,
   ApiDefinition,
   Scenario,
 } from "@/types/models";
 
 let debugRequests = createDebugRequests();
+let debugFolders = createDebugFolders();
 let definitions = createApiDefinitions();
 let scenarios = createScenarios();
 let reports = createApiReports();
 
 export const apiTestHandlers = [
   http.get("/api/api-test/debug", () => HttpResponse.json(ok(debugRequests))),
+  // ===== 调试收藏夹（文件夹 + 已保存接口） =====
+  http.get("/api/api-test/debug-collections", () =>
+    HttpResponse.json(ok(debugFolders)),
+  ),
+  http.post("/api/api-test/debug-collections", async ({ request }) => {
+    const { name } = (await request.json()) as { name: string };
+    const folder: DebugFolder = {
+      id: `df-${Date.now()}`,
+      name: name || "新建文件夹",
+      items: [],
+    };
+    debugFolders.push(folder);
+    return HttpResponse.json(ok(folder));
+  }),
+  http.put("/api/api-test/debug-collections/:id", async ({ request, params }) => {
+    const { name } = (await request.json()) as { name: string };
+    const f = debugFolders.find((x) => x.id === params.id);
+    if (f) f.name = name;
+    return HttpResponse.json(ok(null));
+  }),
+  http.delete("/api/api-test/debug-collections/:id", ({ params }) => {
+    debugFolders = debugFolders.filter((x) => x.id !== params.id);
+    return HttpResponse.json(ok(null));
+  }),
+  http.post("/api/api-test/debug-collections/:id/items", async ({ request, params }) => {
+    const item = (await request.json()) as Partial<DebugRequest>;
+    const f = debugFolders.find((x) => x.id === params.id);
+    const saved: DebugRequest = {
+      id: `d-${Date.now()}`,
+      name: item.name || "未命名接口",
+      method: item.method || "GET",
+      url: item.url || "",
+      protocol: item.protocol || "HTTP",
+      headers: item.headers || [],
+      query: item.query || [],
+      bodyType: item.bodyType || "none",
+      body: item.body || "",
+      bodyParams: item.bodyParams || [],
+      authType: item.authType || "none",
+      auth: item.auth || {},
+    };
+    f?.items.push(saved);
+    return HttpResponse.json(ok(saved));
+  }),
+  http.put("/api/api-test/debug-collections/:fid/items/:iid", async ({ request, params }) => {
+    const { name } = (await request.json()) as { name: string };
+    const f = debugFolders.find((x) => x.id === params.fid);
+    const item = f?.items.find((x) => x.id === params.iid);
+    if (item) item.name = name;
+    return HttpResponse.json(ok(null));
+  }),
+  http.delete("/api/api-test/debug-collections/:fid/items/:iid", ({ params }) => {
+    const f = debugFolders.find((x) => x.id === params.fid);
+    if (f) f.items = f.items.filter((x) => x.id !== params.iid);
+    return HttpResponse.json(ok(null));
+  }),
   http.post("/api/api-test/execute", async ({ request }) => {
     const req = (await request.json()) as DebugRequest;
     await new Promise((r) => setTimeout(r, 250));

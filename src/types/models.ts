@@ -163,6 +163,11 @@ export interface ExecuteResponse {
   body: string;
   console: string[];
 }
+export interface DebugFolder {
+  id: string;
+  name: string;
+  items: DebugRequest[];
+}
 export interface ReportStep {
   name: string;
   method: string;
