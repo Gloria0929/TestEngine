@@ -94,7 +94,7 @@
                 <el-table-column label="执行结果" min-width="120">
                   <template #default="{ row }">
                     <span class="tp-pill" :class="resultCls((row as any).result)">{{ (row as any).result || '未执行'
-                    }}</span>
+                      }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="所属模块" min-width="110">
@@ -282,7 +282,7 @@
           <div class="tp-modal-foot">
             <el-button @click="modalVisible = false">取消</el-button>
             <el-button type="primary" :disabled="saving" @click="saveModal">{{ saving ? '保存中…' : '保存'
-            }}</el-button>
+              }}</el-button>
           </div>
         </template>
       </el-dialog>
