@@ -221,6 +221,31 @@
         </div>
       </div>
     </div>
+
+    <!-- 保存接口弹窗 -->
+    <el-dialog v-model="saveVisible" title="保存接口" width="440px" append-to-body>
+      <div class="save-form">
+        <div class="sf-row">
+          <label>文件夹</label>
+          <el-select v-model="saveFolderId" style="flex: 1" placeholder="选择文件夹">
+            <el-option v-for="f in folders" :key="f.id" :label="f.name" :value="f.id" />
+            <el-option label="＋ 新建文件夹…" value="__new__" />
+          </el-select>
+        </div>
+        <div v-if="saveFolderId === '__new__'" class="sf-row">
+          <label>新文件夹名</label>
+          <el-input v-model="saveNewFolder" placeholder="如：用户模块" />
+        </div>
+        <div class="sf-row">
+          <label>接口名称</label>
+          <el-input v-model="saveName" placeholder="如：查询用户列表" />
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="saveVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="!saveFolderId || !saveName.trim()" @click="confirmSave">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
