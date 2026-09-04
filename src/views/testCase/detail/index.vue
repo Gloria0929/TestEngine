@@ -38,8 +38,8 @@
             <el-descriptions-item label="用例 ID"><span class="cd-mono">{{ detail.id }}</span></el-descriptions-item>
             <el-descriptions-item label="用例名称" :span="2">{{ detail.name }}</el-descriptions-item>
             <el-descriptions-item label="所属模块">{{ moduleName(detail.moduleId) }}</el-descriptions-item>
-            <el-descriptions-item label="用例等级"><span class="cd-level" :class="'lv-' + detail.level.toLowerCase()">{{
-              detail.level }}</span></el-descriptions-item>
+            <el-descriptions-item label="用例等级"><el-tag :type="levelType(detail.level)" round>{{
+              detail.level }}</el-tag></el-descriptions-item>
             <el-descriptions-item label="创建人">{{ detail.createUser }}</el-descriptions-item>
             <el-descriptions-item label="用例状态">{{ statusLabel(detail.status) }}</el-descriptions-item>
             <el-descriptions-item label="负责人">{{ detail.executor || '-' }}</el-descriptions-item>
@@ -230,7 +230,7 @@
           <el-table-column prop="title" label="缺陷名称" min-width="260" />
           <el-table-column label="缺陷状态" min-width="110">
             <template #default="{ row }">
-              <span class="cd-pill" :class="bugCls(row.status)">{{ bugLabel(row.status) }}</span>
+              <el-tag :type="bugType(row.status)" round>{{ bugLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="reporter" label="创建人" min-width="120" />
@@ -297,7 +297,7 @@
           <el-table-column prop="name" label="评审名称" min-width="240" sortable />
           <el-table-column label="评审状态" min-width="110">
             <template #default="{ row }">
-              <span class="cd-pill" :class="rvCls(row.status)">{{ rvLabel(row.status) }}</span>
+              <el-tag :type="rvType(row.status)" round>{{ rvLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="评审结果" min-width="110">
@@ -520,14 +520,19 @@ function statusLabel(s: CaseStatus): string {
 function bugLabel(s: BugStatus): string {
   return ({ NEW: '新建', ASSIGNED: '已指派', FIXING: '修复中', FIXED: '已解决', CLOSED: '已关闭', REOPEN: '重新打开' } as Record<BugStatus, string>)[s] || s;
 }
-function bugCls(s: BugStatus): string {
-  return ({ NEW: 'st-new', ASSIGNED: 'st-assigned', FIXING: 'st-fixing', FIXED: 'st-fixed', CLOSED: 'st-closed', REOPEN: 'st-reopen' } as Record<BugStatus, string>)[s] || 'st-new';
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function levelType(l: string): TagType {
+  const map: Record<string, TagType> = { P0: 'danger', P1: 'warning', P2: 'primary', P3: 'info' };
+  return map[l] || 'primary';
+}
+function bugType(s: BugStatus): TagType {
+  return ({ NEW: 'info', ASSIGNED: 'primary', FIXING: 'warning', FIXED: 'success', CLOSED: 'info', REOPEN: 'danger' } as Record<BugStatus, TagType>)[s] || 'info';
 }
 function rvLabel(s: Review['status']): string {
   return ({ PENDING: '待评审', PASSED: '通过', REJECTED: '未通过' } as Record<Review['status'], string>)[s] || s;
 }
-function rvCls(s: Review['status']): string {
-  return ({ PENDING: 'rv-pending', PASSED: 'rv-passed', REJECTED: 'rv-rejected' } as Record<Review['status'], string>)[s] || 'rv-pending';
+function rvType(s: Review['status']): TagType {
+  return ({ PENDING: 'warning', PASSED: 'success', REJECTED: 'danger' } as Record<Review['status'], TagType>)[s] || 'warning';
 }
 
 async function load() {
@@ -765,26 +770,6 @@ onMounted(load);
   color: var(--el-text-color-secondary, #909399);
 }
 
-.cd-level {
-  font-weight: 600;
-}
-
-.lv-p0 {
-  color: #d93838;
-}
-
-.lv-p1 {
-  color: #d67f1b;
-}
-
-.lv-p2 {
-  color: #1d7afb;
-}
-
-.lv-p3 {
-  color: #909399;
-}
-
 .cd-tag {
   margin-right: 6px;
 }
@@ -967,62 +952,6 @@ onMounted(load);
   height: 34px;
   margin-bottom: 10px;
   color: var(--el-border-color, #dcdfe6);
-}
-
-/* 状态胶囊 */
-.cd-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.st-new {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-assigned {
-  background: #f0ebff;
-  color: #7c3aed;
-}
-
-.st-fixing {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.st-fixed {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.st-closed {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-secondary, #909399);
-}
-
-.st-reopen {
-  background: #fdecec;
-  color: #d93838;
-}
-
-.rv-pending {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.rv-passed {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.rv-rejected {
-  background: #fdecec;
-  color: #d93838;
 }
 
 /* 新建缺陷表单 */

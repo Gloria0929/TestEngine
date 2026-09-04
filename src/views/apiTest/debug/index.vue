@@ -32,7 +32,7 @@
             </div>
             <template v-if="openedFolders.has(f.id)">
               <div v-for="item in f.items" :key="item.id" class="item-row" @click="openSaved(item)">
-                <span class="m-badge" :class="item.method.toLowerCase()">{{ item.method }}</span>
+                <el-tag size="small" :type="methodType(item.method)" round>{{ item.method }}</el-tag>
                 <span class="row-name" :title="item.name || item.url">{{ item.name || item.url }}</span>
                 <span class="row-ops">
                   <el-icon title="重命名" @click.stop="onRenameItem(f, item)">
@@ -59,7 +59,7 @@
         </div>
         <div class="side-body">
           <div v-for="h in history" :key="h.id" class="item-row" @click="openHistory(h)">
-            <span class="m-badge" :class="h.method.toLowerCase()">{{ h.method }}</span>
+            <el-tag size="small" :type="methodType(h.method)" round>{{ h.method }}</el-tag>
             <span class="row-name" :title="h.url">{{ h.url || "未命名" }}</span>
           </div>
           <div v-if="!history.length" class="side-hint">发送请求后自动记录</div>
@@ -310,6 +310,11 @@ interface ExecuteResult {
   mockName?: string | null;
 }
 
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function methodType(m: string): TagType {
+  const map: Record<string, TagType> = { GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger', PATCH: 'warning', HEAD: 'info', OPTIONS: 'info' };
+  return map[m] || 'info';
+}
 const methods: HttpMethod[] = [
   "GET",
   "POST",
@@ -484,7 +489,7 @@ function buildRequest(tab: TabData): DebugRequest {
 function loadToTab(tab: TabData, r: DebugRequest) {
   tab.id = r.id;
   tab.name = r.name;
-  tab.method = r.method;
+  tab.method = r.method as HttpMethod;
   tab.url = r.url;
   tab.query = r.query.map((q) => ({ key: q.key, value: q.value, desc: "" }));
   if (!tab.query.length) tab.query.push({ key: "", value: "", desc: "" });
@@ -856,47 +861,6 @@ onMounted(() => {
 
 .arrow.open {
   transform: rotate(90deg);
-}
-
-.m-badge {
-  font-size: 10px;
-  font-weight: 700;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  padding: 1px 4px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  letter-spacing: 0.3px;
-}
-
-.m-badge.get {
-  color: #2e7d32;
-  background: #e8f5e9;
-}
-
-.m-badge.post {
-  color: #e65100;
-  background: #fff3e0;
-}
-
-.m-badge.put {
-  color: #1565c0;
-  background: #e3f2fd;
-}
-
-.m-badge.delete {
-  color: #c62828;
-  background: #fce4ec;
-}
-
-.m-badge.patch {
-  color: #6a1b9a;
-  background: #f3e5f5;
-}
-
-.m-badge.options,
-.m-badge.head {
-  color: #546e7a;
-  background: #eceff1;
 }
 
 .row-name {

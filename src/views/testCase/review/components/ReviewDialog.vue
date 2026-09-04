@@ -8,8 +8,12 @@
           <el-option v-for="u in presetReviewers" :key="u" :label="u" :value="u" />
         </el-select>
       </el-form-item>
-      <el-form-item prop="startTime" label="开始时间"><el-input v-model="form.startTime" placeholder="如 2026-08-27 10:00" /></el-form-item>
-      <el-form-item prop="endTime" label="结束时间"><el-input v-model="form.endTime" placeholder="如 2026-08-28 10:00" /></el-form-item>
+      <el-form-item prop="startTime" label="开始时间">
+        <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" value-format="YYYY-MM-DD HH:mm" style="width: 100%" />
+      </el-form-item>
+      <el-form-item prop="endTime" label="结束时间">
+        <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" value-format="YYYY-MM-DD HH:mm" style="width: 100%" />
+      </el-form-item>
       <el-form-item prop="caseIds" label="关联用例">
         <el-select v-model="form.caseIds" multiple filterable style="width: 100%">
           <el-option v-for="c in caseOptions" :key="c.id" :label="c.name" :value="c.id" />

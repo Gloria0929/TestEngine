@@ -14,6 +14,7 @@ export function createPlans(): TestPlan[] {
       progress: 0,
       passRate: 0,
       group: "订单中心",
+      folderId: undefined,
     },
     {
       id: "tp-2",
@@ -26,6 +27,7 @@ export function createPlans(): TestPlan[] {
       progress: 100,
       passRate: 92,
       group: "用户中心",
+      folderId: "tp-f1",
     },
     {
       id: "tp-3",
@@ -38,6 +40,7 @@ export function createPlans(): TestPlan[] {
       progress: 100,
       passRate: 100,
       group: "用户中心",
+      folderId: "tp-f2",
     },
     {
       id: "tp-4",

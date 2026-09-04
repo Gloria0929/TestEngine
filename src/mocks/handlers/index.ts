@@ -5,6 +5,7 @@ import { testCaseHandlers } from "./testCase";
 import { apiTestHandlers } from "./apiTest";
 import { testPlanHandlers } from "./testPlan";
 import { bugHandlers } from "./bug";
+import { collectionsHandlers } from "./collections";
 export const handlers = [
   ...workstationHandlers,
   ...projectHandlers,
@@ -12,4 +13,5 @@ export const handlers = [
   ...apiTestHandlers,
   ...testPlanHandlers,
   ...bugHandlers,
+  ...collectionsHandlers,
 ];

@@ -33,11 +33,13 @@
   color: var(--text-2);
   font-weight: 600;
   font-size: 13px;
+  text-align: center !important;
 }
 .el-table td.el-table__cell {
   color: var(--text-2);
   font-size: 14px;
   transition: background-color 0.15s var(--ease);
+  text-align: center !important;
 }
 .el-table .el-button--small {
   padding: 2px 6px;

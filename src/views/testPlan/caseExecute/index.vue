@@ -31,7 +31,7 @@
           <span>缺陷列表</span>
           <el-tag type="info" effect="plain" class="tab-count">{{
             bugList.length
-          }}</el-tag>
+            }}</el-tag>
         </template>
       </el-tab-pane>
       <el-tab-pane name="history">
@@ -39,7 +39,7 @@
           <span>执行历史</span>
           <el-tag type="info" effect="plain" class="tab-count">{{
             historyList.length
-          }}</el-tag>
+            }}</el-tag>
         </template>
       </el-tab-pane>
     </el-tabs>
@@ -63,7 +63,7 @@
               <span class="info-label">测试点</span>
               <span class="info-value">{{
                 currentCase?.testPoint ?? "-"
-              }}</span>
+                }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">用例等级</span>
@@ -84,7 +84,7 @@
               <span class="info-value">
                 <span v-if="!currentCase?.tags.length">-</span>
                 <el-tag v-for="tag in currentCase?.tags.slice(0, 3)" :key="tag" effect="plain" class="case-tag">{{ tag
-                }}</el-tag>
+                  }}</el-tag>
               </span>
             </div>
             <div class="info-item info-item-wide">
@@ -170,16 +170,16 @@
             <el-table-column prop="title" label="缺陷名称" min-width="240" />
             <el-table-column label="状态" min-width="100">
               <template #default="{ row }">
-                <span class="bg-pill" :class="bugStatusCls(row.status)">{{
+                <el-tag :type="bugStatusType(row.status)" round>{{
                   bugStatusLabel(row.status)
-                }}</span>
+                  }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="优先级" min-width="100">
               <template #default="{ row }">
-                <span class="bg-pill" :class="bugPrioCls(row.severity)">{{
+                <el-tag :type="bugPrioType(row.severity)" round>{{
                   bugPrioLabel(row.severity)
-                }}</span>
+                }}</el-tag>
               </template>
             </el-table-column>
           </el-table>
@@ -195,16 +195,16 @@
             <el-table-column type="index" label="序号" width="60" />
             <el-table-column label="执行结果" min-width="100">
               <template #default="{ row }">
-                <span class="bg-pill" :class="resultCls(row.result)">{{
+                <el-tag :type="resultType(row.result)" round>{{
                   resultLabel(row.result)
-                }}</span>
+                  }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="actual" label="实际结果/备注" min-width="240">
               <template #default="{ row }">
                 <span style="white-space: pre-wrap">{{
                   row.actual || "-"
-                }}</span>
+                  }}</span>
               </template>
             </el-table-column>
             <el-table-column prop="executor" label="执行人" min-width="120" />
@@ -529,19 +529,20 @@ const statusLabelMap: Record<string, string> = {
   REOPEN: "重新打开",
   CLOSED: "已关闭",
 };
-const statusClsMap: Record<string, string> = {
-  新建: "st-new",
-  已指派: "st-assigned",
-  修复中: "st-fixing",
-  已解决: "st-resolved",
-  重新打开: "st-reopen",
-  已关闭: "st-closed",
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const statusTypeMap: Record<string, TagType> = {
+  新建: "info",
+  已指派: "primary",
+  修复中: "warning",
+  已解决: "success",
+  重新打开: "danger",
+  已关闭: "info",
 };
 function bugStatusLabel(s: BugStatus) {
   return statusLabelMap[s] ?? s;
 }
-function bugStatusCls(s: BugStatus) {
-  return statusClsMap[bugStatusLabel(s)] ?? "st-new";
+function bugStatusType(s: BugStatus): TagType {
+  return statusTypeMap[bugStatusLabel(s)] ?? "info";
 }
 
 const prioLabelMap: Record<string, string> = {
@@ -551,18 +552,18 @@ const prioLabelMap: Record<string, string> = {
   MINOR: "次要",
   TRIVIAL: "轻微",
 };
-const prioClsMap: Record<string, string> = {
-  阻塞: "pv-block",
-  严重: "pv-crit",
-  主要: "pv-major",
-  次要: "pv-minor",
-  轻微: "pv-trivial",
+const prioTypeMap: Record<string, TagType> = {
+  阻塞: "danger",
+  严重: "danger",
+  主要: "warning",
+  次要: "primary",
+  轻微: "info",
 };
 function bugPrioLabel(s: BugSeverity) {
   return prioLabelMap[s] ?? s;
 }
-function bugPrioCls(s: BugSeverity) {
-  return prioClsMap[bugPrioLabel(s)] ?? "pv-minor";
+function bugPrioType(s: BugSeverity): TagType {
+  return prioTypeMap[bugPrioLabel(s)] ?? "info";
 }
 
 const resultLabelMap: Record<string, string> = {
@@ -571,17 +572,17 @@ const resultLabelMap: Record<string, string> = {
   BLOCK: "阻塞",
   SKIP: "跳过",
 };
-const resultClsMap: Record<string, string> = {
-  PASS: "rs-pass",
-  FAIL: "rs-fail",
-  BLOCK: "rs-block",
-  SKIP: "rs-none",
+const resultTypeMap: Record<string, TagType> = {
+  PASS: "success",
+  FAIL: "danger",
+  BLOCK: "warning",
+  SKIP: "info",
 };
 function resultLabel(r: ExecuteResult) {
   return resultLabelMap[r] ?? r;
 }
-function resultCls(r: ExecuteResult) {
-  return resultClsMap[r] ?? "rs-none";
+function resultType(r: ExecuteResult): TagType {
+  return resultTypeMap[r] ?? "info";
 }
 
 function goBack() {
@@ -1168,90 +1169,6 @@ onMounted(() => {
   gap: 10px;
 }
 
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 11px;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.rs-pass {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.rs-fail {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.rs-block {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.rs-none {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.st-new {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.st-assigned {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.st-fixing {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.st-resolved {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.st-reopen {
-  background: #fff7ed;
-  color: #9a3412;
-}
-
-.st-closed {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.pv-block {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.pv-crit {
-  background: #fff7ed;
-  color: #9a3412;
-}
-
-.pv-major {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.pv-minor {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.pv-trivial {
-  background: #f3f4f6;
-  color: #374151;
-}
 </style>
 
 <style>

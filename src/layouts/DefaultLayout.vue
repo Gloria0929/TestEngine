@@ -16,18 +16,36 @@
         </el-tooltip>
       </div>
     </el-header>
-    <el-main class="content"><router-view /></el-main>
+    <el-main class="content">
+      <div v-if="folderConfig" class="content-row">
+        <ModuleFolderSidenav :config="folderConfig" />
+        <div class="content-main"><router-view /></div>
+      </div>
+      <router-view v-else />
+    </el-main>
   </el-container>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { Moon, Sunny } from "@element-plus/icons-vue";
 import { useAppStore } from "@/stores/app";
 import TopNavMenu from "./components/TopNavMenu.vue";
+import ModuleFolderSidenav from "./components/ModuleFolderSidenav.vue";
+import { MODULE_FOLDER_CONFIGS } from "@/config/moduleFolders";
 
 const appStore = useAppStore();
+const route = useRoute();
 onMounted(() => appStore.applyTheme());
+
+const folderConfig = computed(() =>
+  MODULE_FOLDER_CONFIGS.find(
+    (c) =>
+      route.path.startsWith(c.prefix) &&
+      !(c.exclude ?? []).some((p) => route.path.startsWith(p)),
+  ),
+);
 </script>
 
 <style scoped>
@@ -77,6 +95,21 @@ onMounted(() => appStore.applyTheme());
   padding: 20px;
   overflow: auto;
   flex: 1;
+}
+
+/* 带侧边导航的模块：左目录 + 右内容 */
+.content-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-height: 100%;
+}
+
+.content-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 导航行：菜单占满，主题切换按钮靠右并与一级菜单行垂直居中 */

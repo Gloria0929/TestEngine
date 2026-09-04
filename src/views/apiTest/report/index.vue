@@ -45,12 +45,12 @@
           </el-table-column>
           <el-table-column label="报告类型" min-width="110">
             <template #default="{ row }">
-              <span class="bg-pill st-doing">{{ row.type || '接口定义' }}</span>
+              <el-tag type="primary" round>{{ row.type || '接口定义' }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="执行结果" min-width="100">
             <template #default="{ row }">
-              <span class="bg-pill" :class="resultCls(row.result)">{{ row.result || '—' }}</span>
+              <el-tag :type="resultType(row.result)" round>{{ row.result || '—' }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="通过率" min-width="150">
@@ -83,10 +83,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" min-width="160" class-name="bg-time" />
-          <el-table-column label="操作" min-width="110">
+          <el-table-column label="操作" min-width="180">
             <template #default="{ row }">
               <div class="bg-ops">
                 <el-button link style="color:#18a058" @click="viewDetail(row)">查看</el-button>
+                <el-button link type="primary" @click="onMove(row)">移动</el-button>
                 <el-button link type="danger" @click="onDelete(row)">删除</el-button>
               </div>
             </template>
@@ -140,7 +141,7 @@
             </el-table-column>
             <el-table-column label="方法" min-width="90">
               <template #default="{ row }">
-                <span class="m-badge" :class="methodBadgeCls(row.method)">{{ row.method }}</span>
+                <el-tag :type="methodType(row.method)" round>{{ row.method }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="路径" min-width="240">
@@ -150,7 +151,7 @@
             </el-table-column>
             <el-table-column label="结果" min-width="90">
               <template #default="{ row }">
-                <span class="bg-pill" :class="row.result === '成功' ? 'st-pass' : 'st-fail'">{{ row.result }}</span>
+                <el-tag :type="row.result === '成功' ? 'success' : 'danger'" round>{{ row.result }}</el-tag>
               </template>
             </el-table-column>
             <el-table-column label="耗时" min-width="100">
@@ -164,13 +165,26 @@
       <div v-else class="bg-state">加载报告详情失败</div>
     </el-dialog>
   </div>
+  <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingRow?.folderId" @confirm="confirmMove" />
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchApiReportPage, fetchApiReport, deleteApiReport } from '@/api/apiTest'
+import { fetchApiReportPage, fetchApiReport, deleteApiReport, updateApiReport } from '@/api/apiTest'
+import { useFolders } from '@/composables/useFolders'
+import { useCollectionsStore } from '@/stores/collections'
+import MoveFolderDialog from '@/layouts/components/MoveFolderDialog.vue'
 import type { ApiReport } from '@/types/models'
+
+const collectionsStore = useCollectionsStore()
+
+// 目录过滤与移动
+const { folders, loadFolders, folderFilter } = useFolders('api-test')
+watch(folderFilter, () => {
+  pageNum.value = 1
+  load()
+})
 
 const reportTypes = ['接口定义', '接口场景', '批量测试']
 const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#6366f1', '#ec4899']
@@ -188,9 +202,10 @@ const detailLoading = ref(false)
 
 const pages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 
-function resultCls(result: string): string {
-  const map: Record<string, string> = { '成功': 'st-pass', '失败': 'st-fail', '部分成功': 'st-part' }
-  return map[result] || 'st-wait'
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function resultType(result: string): TagType {
+  const map: Record<string, TagType> = { '成功': 'success', '失败': 'danger', '部分成功': 'warning' }
+  return map[result] || 'info'
 }
 
 function rateCls(v: number | undefined): string {
@@ -198,9 +213,9 @@ function rateCls(v: number | undefined): string {
   return rate >= 90 ? 'rt-good' : rate >= 60 ? 'rt-mid' : 'rt-bad'
 }
 
-function methodBadgeCls(method: string): string {
-  const map: Record<string, string> = { GET: 'm-get', POST: 'm-post', PUT: 'm-put', DELETE: 'm-del', PATCH: 'm-patch', HEAD: 'm-head', OPTIONS: 'm-opt' }
-  return map[method] || 'm-get'
+function methodType(method: string): TagType {
+  const map: Record<string, TagType> = { GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger', PATCH: 'warning', HEAD: 'info', OPTIONS: 'info' }
+  return map[method] || 'success'
 }
 
 function rateColor(v: number | undefined): string {
@@ -220,6 +235,7 @@ async function load() {
     const res = await fetchApiReportPage({
       pageNum: pageNum.value, pageSize: pageSize.value,
       keyword: filter.keyword.trim(), type: filter.type,
+      folderId: folderFilter.value || undefined,
     })
     list.value = res.list ?? []
     total.value = res.total ?? 0
@@ -270,7 +286,25 @@ async function onDelete(row: ApiReport) {
   load()
 }
 
-onMounted(load)
+// 移动到目录
+const moveVisible = ref(false)
+const movingRow = ref<ApiReport | null>(null)
+function onMove(row: ApiReport) {
+  movingRow.value = row
+  moveVisible.value = true
+}
+async function confirmMove(folderId: string) {
+  if (!movingRow.value) return
+  await updateApiReport(movingRow.value.id, { folderId: folderId || undefined } as any)
+  ElMessage.success('已移动')
+  collectionsStore.notifyChange()
+  load()
+}
+
+onMounted(() => {
+  load()
+  loadFolders()
+})
 </script>
 
 <style>

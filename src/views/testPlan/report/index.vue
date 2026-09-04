@@ -49,10 +49,10 @@
           <template #default="{ row }">
             <el-tag :type="resultTag(row.result).type" size="small">{{
               resultTag(row.result).label
-            }}</el-tag>
+              }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="90">
+        <el-table-column label="操作" min-width="180">
           <template #default="{ row }">
             <el-button v-if="row.result === 'FAIL' || row.result === 'BLOCK'" type="primary" link
               @click="openBugDialog(row)">

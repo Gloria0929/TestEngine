@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import { ok, page } from "../utils";
 import { createPlans } from "../seed/testPlan";
 import { createCases, createModules } from "../seed/testCase";
+import { registerFolderCleaner } from "../seed/collections";
 import type { PageQuery } from "@/types";
 import type {
   TestPlan,
@@ -15,6 +16,11 @@ import type {
 let plans = createPlans();
 let planCases: Record<string, PlanCaseResult[]> = {};
 let caseHistory: Record<string, CaseExecuteHistory[]> = {};
+
+// 删除目录时，把目录内的计划移回未分类
+registerFolderCleaner("test-plan", (folderId) => {
+  plans = plans.map((p) => (p.folderId === folderId ? { ...p, folderId: undefined } : p));
+});
 
 // 未手动提交过结果时，按计划的 progress/passRate 合成演示执行结果，
 // 保证列表页通过率、详情页执行进度、报告页统计三者数据一致

@@ -3,9 +3,8 @@
     <!-- 头部：状态 + 等级 + 标题 + 收藏/复制 -->
     <div class="se-head">
       <div class="se-head-left">
-        <span class="bg-pill" :class="statusCls(info.status)">{{ info.status }}</span>
-        <span class="se-level" :class="'lv-' + (info.level || 'P1').toLowerCase()">{{
-          info.level || 'P1' }}</span>
+        <el-tag :type="statusType(info.status)" round>{{ info.status }}</el-tag>
+        <el-tag :type="levelType(info.level)" round>{{ info.level || 'P1' }}</el-tag>
         <h1 class="se-title">【{{ info.id }}】{{ info.name }}</h1>
       </div>
       <div class="se-head-right">
@@ -221,9 +220,14 @@ function onStepCmd(cmd: string, i: number) {
   dirty.value = true;
 }
 
-function statusCls(s?: ScenarioStatus): string {
-  const map: Record<ScenarioStatus, string> = { '未执行': 'st-wait', '执行中': 'st-doing', '通过': 'st-pass', '失败': 'st-fail' };
-  return map[s || '未执行'] || 'st-wait';
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function levelType(l?: string): TagType {
+  const map: Record<string, TagType> = { P0: 'danger', P1: 'warning', P2: 'primary', P3: 'info' };
+  return map[l || 'P1'] || 'warning';
+}
+function statusType(s?: ScenarioStatus): TagType {
+  const map: Record<ScenarioStatus, TagType> = { '未执行': 'info', '执行中': 'primary', '通过': 'success', '失败': 'danger' };
+  return map[s || '未执行'] || 'info';
 }
 
 async function load() {
@@ -300,39 +304,6 @@ onMounted(load);
   flex-direction: column;
 }
 
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-  flex: none;
-}
-
-.st-wait {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-}
-
-.st-doing {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-pass {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.st-fail {
-  background: #fdecec;
-  color: #d93838;
-}
-
 .se-head {
   display: flex;
   align-items: center;
@@ -346,38 +317,6 @@ onMounted(load);
   align-items: center;
   gap: 10px;
   min-width: 0;
-}
-
-.se-level {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-
-.se-level::before {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  margin-right: 5px;
-  background: currentColor;
-}
-
-.lv-p0 {
-  color: #d93838;
-}
-
-.lv-p1 {
-  color: #d67f1b;
-}
-
-.lv-p2 {
-  color: #1d7afb;
-}
-
-.lv-p3 {
-  color: #909399;
 }
 
 .se-title {

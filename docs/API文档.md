@@ -223,11 +223,16 @@ public class TestCaseController {
     @PostMapping("/reviews")
     public Result<ReviewVO> createReview(@RequestBody ReviewDTO dto) { ... }
 
-    /** 4.12 评审详情（评审弹窗，逐条评审用例） */
+    /** 4.11a 更新评审（行内"移动到目录"） */
+    @PutMapping("/reviews/{id}")
+    public Result<ReviewVO> updateReview(@PathVariable String id,
+                                         @RequestBody ReviewDTO dto) { ... }
+
+    /** 4.12 评审详情页（关联用例 + 每用例评审结果） */
     @GetMapping("/reviews/{id}")
     public Result<ReviewDetailVO> reviewDetail(@PathVariable String id) { ... }
 
-    /** 4.13 提交评审结果（评审弹窗"提交评审"） */
+    /** 4.13 提交评审结果（用例评审页"提交评审"，支持逐条/批量；合并 results，全部评审完后计算整体状态） */
     @PostMapping("/reviews/{id}/result")
     public Result<ReviewVO> submitReviewResult(@PathVariable String id,
                                                @RequestBody ReviewResultDTO dto) { ... }
@@ -320,12 +325,19 @@ public class TestCaseController {
 | caseCount | Integer | 关联用例数 |
 | caseIds | List\<String\> | 关联用例 ID |
 | startTime / endTime | String | 起止时间 |
+| folderId | String | 所在目录 ID（可空，空 = 未分类） |
 
 ### 4.11 新建评审
 
-**请求参数（body，`ReviewDTO`）**：name、reviewers、caseIds、startTime、endTime。
+**请求参数（body，`ReviewDTO`）**：name、reviewers、caseIds、startTime、endTime（可含 folderId）。
 
 **返回参数**：新建的 `ReviewVO`。
+
+### 4.11a 更新评审（行内"移动到目录"）
+
+**请求参数**：路径 `id`；body `ReviewDTO` 子集（如 `folderId`）。
+
+**返回参数**：更新后的 `ReviewVO`。
 
 ### 4.12 评审详情
 
@@ -619,6 +631,11 @@ public class ApiTestController {
     @GetMapping("/reports/{id}")
     public Result<ApiReportVO> reportDetail(@PathVariable String id) { ... }
 
+    /** 6.15a 更新报告（行内"移动到目录"） */
+    @PutMapping("/reports/{id}")
+    public Result<ApiReportVO> updateReport(@PathVariable String id,
+                                            @RequestBody ApiReportDTO dto) { ... }
+
     /** 6.16 删除报告（行内"删除"） */
     @DeleteMapping("/reports/{id}")
     public Result<Void> deleteReport(@PathVariable String id) { ... }
@@ -706,6 +723,7 @@ public class ApiTestController {
 | keyword | String | 否 | 名称/路径关键词 |
 | method | String | 否 | 请求方法筛选 |
 | status | String | 否 | 状态筛选（未规划/进行中/已完成/已归档） |
+| folderId | String | 否 | 目录过滤；传 `none` 表示仅查未分类 |
 
 **返回**：`{ list: List<ApiDefinitionVO>, total: Long }`，`ApiDefinitionVO`：
 
@@ -722,6 +740,7 @@ public class ApiTestController {
 | tags | List\<String\> | 标签 |
 | updateTime | String | 更新时间 |
 | desc | String | 描述 |
+| folderId | String | 所在目录 ID（空 = 未分类） |
 
 ### 6.4 / 6.5 / 6.6 新建 / 更新 / 删除接口定义
 
@@ -739,7 +758,7 @@ body 为 `ApiDefinitionDTO`（`ApiDefinitionVO` 子集），返回同类型对�
 
 ### 6.8 场景分页列表
 
-**请求参数（query，`ScenarioPageQuery extends PageQuery`）**：pageNum、pageSize（必填），keyword、status（可选）。
+**请求参数（query，`ScenarioPageQuery extends PageQuery`）**：pageNum、pageSize（必填），keyword、status、folderId（可选，传 `none` 表示仅查未分类）。
 
 **返回**：`{ list: List<ScenarioVO>, total: Long }`，`ScenarioVO`：
 
@@ -755,6 +774,7 @@ body 为 `ApiDefinitionDTO`（`ApiDefinitionVO` 子集），返回同类型对�
 | level | String | 等级 P0-P3（可空） |
 | tags | List\<String\> | 标签（可空） |
 | desc | String | 描述（可空） |
+| folderId | String | 所在目录 ID（可空，空 = 未分类） |
 | steps | List\<ScenarioStepVO\> | 步骤（可空）：`{ id, name, expected? }` |
 
 ### 6.9 ~ 6.13 场景 CRUD 与执行
@@ -767,7 +787,7 @@ body 为 `ApiDefinitionDTO`（`ApiDefinitionVO` 子集），返回同类型对�
 
 ### 6.14 接口报告分页
 
-**请求参数（query，`ReportPageQuery extends PageQuery`）**：pageNum、pageSize（必填），keyword、type（可选，接口/场景）。
+**请求参数（query，`ReportPageQuery extends PageQuery`）**：pageNum、pageSize（必填），keyword、type（可选，接口/场景）、folderId（可选，传 `none` 表示仅查未分类）。
 
 **返回**：`{ list: List<ApiReportVO>, total: Long }`，`ApiReportVO`：
 
@@ -781,13 +801,15 @@ body 为 `ApiDefinitionDTO`（`ApiDefinitionVO` 子集），返回同类型对�
 | total / success / fail | Integer | 总数/成功数/失败数 |
 | executor | String | 执行人 |
 | createTime | String | 创建时间 |
+| folderId | String | 所在目录 ID（可空，空 = 未分类） |
 | steps | List\<ReportStepVO\> | 步骤明细（可空） |
 
 `ReportStepVO`：`{ name: String, method: String, path: String, result: String, time: Long }`。
 
-### 6.15 / 6.16 报告详情 / 删除报告
+### 6.15 / 6.15a / 6.16 报告详情 / 更新报告 / 删除报告
 
-- 6.15 详情：路径 `id`，返回 `ApiReportVO`（含 steps）；
+- 6.15 详情：路径 `id`，返回 `ApiReportVO`（含生成的步骤明细）；
+- 6.15a 更新：路径 `id` + body `ApiReportDTO`（`ApiReportVO` 子集，如 `folderId`），返回更新后 `ApiReportVO`；
 - 6.16 删除：路径 `id`，返回 `Result<Void>`。
 
 ### 6.17 ~ 6.23 调试收藏夹
@@ -869,27 +891,88 @@ body 为 `BugDTO`（`BugVO` 子集：title、severity、status、assignee、desc
 
 ---
 
+## 8. 通用目录 CollectionController
+
+测试计划、测试用例、缺陷、操作日志四类业务记录支持**目录管理**：记录通过 `folderId` 归入文件夹（空 = 未分类）。前端在测试计划 / 测试用例 / 缺陷管理 / 操作日志四个模块的左侧目录侧边栏与列表页过滤中调用以下接口。
+
+```java
+@RestController
+@RequestMapping("/api/collections")
+public class CollectionController {
+
+    /** 8.1 目录列表 */
+    @GetMapping("/{module}/folders")
+
+    /** 8.2 新建目录 */
+    @PostMapping("/{module}/folders")
+
+    /** 8.3 重命名目录 */
+    @PutMapping("/{module}/folders/{folderId}")
+
+    /** 8.4 删除目录（目录内记录移回未分类） */
+    @DeleteMapping("/{module}/folders/{folderId}")
+}
+```
+
+`module` 取值：`test-plan` / `test-case` / `bug` / `project`。
+
+### 8.1 目录列表 `GET /api/collections/{module}/folders`
+
+返回 `Result<List<FolderVO>>`：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| id | String | 目录 ID |
+| name | String | 目录名称 |
+
+### 8.2 新建目录 `POST /api/collections/{module}/folders`
+
+body：`{ "name": "版本回归" }`，返回新建的 `FolderVO`。
+
+### 8.3 重命名目录 `PUT /api/collections/{module}/folders/{folderId}`
+
+body：`{ "name": "新名称" }`，返回 `Result<Void>`。
+
+### 8.4 删除目录 `DELETE /api/collections/{module}/folders/{folderId}`
+
+目录内记录的 `folderId` 置空（移回未分类），返回 `Result<Void>`。
+
+### 目录过滤与移动（复用各模块接口）
+
+- **过滤**：各模块分页列表接口（5.1 / 4.2 / 7.1 / 3.1）均支持查询参数 `folderId`：传具体目录 ID 时仅返回该目录下记录；传 `none` 时返回未分类记录；不传返回全部。
+- **移动**：测试计划/用例/缺陷通过各自更新接口（5.4 / 4.5 / 7.3）传 `folderId`；操作日志使用专用接口 `PUT /api/project/logs/{id}/folder`，body：`{ "folderId": "pj-f1" }`（传 `""` 表示移回未分类），返回 `Result<Void>`。
+
+### 关联实体新增字段
+
+`TestPlanVO`、`TestCaseVO`、`BugVO`、`OperationLogVO` 增加可选字段：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| folderId | String | 所在目录 ID，空 = 未分类 |
+
+---
+
 ## 8. 页面与 API 对照表
 
 | 页面 | 路由 | 调用的 API |
 | --- | --- | --- |
 | 工作台首页 | `/workstation/home` | 总览 2.1、趋势 2.2 |
-| 操作日志 | `/project/log` | 日志分页 3.1 |
-| 用例列表 | `/test-case/list` | 用例分页 4.2、新建 4.4、删除 4.6（编辑弹窗另用模块树 4.1、更新 4.5；导入弹窗用 4.4） |
+| 操作日志 | `/project/log` | 日志分页 3.1、移动日志目录 8（`PUT /api/project/logs/{id}/folder`）、目录管理 8.1~8.4 |
+| 用例列表 | `/test-case/list` | 用例分页 4.2、新建 4.4、删除 4.6、移动目录 4.5（编辑弹窗另用模块树 4.1；导入弹窗用 4.4）、目录管理 8.1~8.4 |
 | 用例详情 | `/test-case/detail/:id` | 用例详情 4.3、更新 4.5、缺陷列表 7.1、新建缺陷 7.2、模块树 4.1、评审列表 4.10 |
-| 用例评审 | `/test-case/review` | 评审列表 4.10、新建评审 4.11、用例分页 4.2（关联用例弹窗）、评审详情 4.12、提交结果 4.13 |
+| 用例评审 | `/test-case/review` | 评审列表 4.10、新建评审 4.11、更新评审 4.11a（移动目录）、用例分页 4.2（关联用例弹窗）、评审详情 4.12、提交结果 4.13、目录管理 8.1~8.4 |
 | 用例回收站 | `/test-case/recycle` | 回收站列表 4.7、恢复 4.8、彻底删除 4.9 |
 | 计划列表 | `/test-plan/list` | 计划分页 5.1、新建 5.3、更新 5.4、删除 5.5、复制 5.6、用例分页 4.2（关联用例弹窗） |
 | 测试报告 | `/test-plan/reports` | 报告列表 5.15、删除报告 5.16 |
 | 计划执行详情 | `/test-plan/execute/:id` | 计划详情 5.2、更新 5.4、关联用例 5.7、计划历史 5.10、计划缺陷 5.11、导出 5.13 |
 | 用例执行页 | `/test-plan/case-execute/:planId/:caseId` | 计划详情 5.2、用例详情 4.3、提交结果 5.8、用例历史 5.9、计划缺陷 5.11、新建缺陷 7.2、附件上传 5.17 |
 | 计划报告 | `/test-plan/report/:id` | 报告 5.12、导出 5.13、分享 5.14、新建缺陷 7.2 |
-| 接口定义 | `/api-test/definition` | 定义分页 6.3、新建 6.4、更新 6.5、删除 6.6、导入 6.7 |
+| 接口定义 | `/api-test/definition` | 定义分页 6.3、新建 6.4、更新 6.5、删除 6.6、导入 6.7、目录管理 8.1~8.4 |
 | 接口调试 | `/api-test/debug` | 调试配置 6.1、发送请求 6.2、收藏夹 6.17~6.23 |
-| 场景管理 | `/api-test/scenario` | 场景分页 6.8、新建 6.9、执行 6.12、删除 6.13 |
+| 场景管理 | `/api-test/scenario` | 场景分页 6.8、新建 6.9、更新 6.11（移动目录）、执行 6.12、删除 6.13、目录管理 8.1~8.4 |
 | 场景编辑 | `/api-test/scenario/edit/:id` | 场景详情 6.10、更新 6.11（刷新同 6.10） |
-| 接口报告 | `/api-test/report` | 报告分页 6.14、详情 6.15、删除 6.16 |
-| 缺陷列表 | `/bug/list` | 缺陷分页 7.1、新建 7.2、更新 7.3、删除 7.4 |
+| 接口报告 | `/api-test/report` | 报告分页 6.14、详情 6.15、更新 6.15a（移动目录）、删除 6.16、目录管理 8.1~8.4 |
+| 缺陷列表 | `/bug/list` | 缺陷分页 7.1、新建 7.2、更新 7.3（含移动目录）、删除 7.4、目录管理 8.1~8.4 |
 
 ---
 

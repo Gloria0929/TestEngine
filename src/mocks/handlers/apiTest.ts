@@ -1,6 +1,7 @@
 // src/mocks/handlers/apiTest.ts
 import { http, HttpResponse } from "msw";
 import { ok } from "../utils";
+import { registerFolderCleaner } from "../seed/collections";
 import {
   createDebugRequests,
   createDebugFolders,
@@ -14,6 +15,7 @@ import type {
   ExecuteResponse,
   ApiDefinition,
   Scenario,
+  ApiReport,
 } from "@/types/models";
 
 let debugRequests = createDebugRequests();
@@ -21,6 +23,19 @@ let debugFolders = createDebugFolders();
 let definitions = createApiDefinitions();
 let scenarios = createScenarios();
 let reports = createApiReports();
+
+// 删除目录后，将目录内记录移回未分类
+registerFolderCleaner("api-test", (folderId) => {
+  definitions = definitions.map((d) =>
+    d.folderId === folderId ? { ...d, folderId: undefined } : d,
+  );
+  scenarios = scenarios.map((s) =>
+    s.folderId === folderId ? { ...s, folderId: undefined } : s,
+  );
+  reports = reports.map((r) =>
+    r.folderId === folderId ? { ...r, folderId: undefined } : r,
+  );
+});
 
 export const apiTestHandlers = [
   http.get("/api/api-test/debug", () => HttpResponse.json(ok(debugRequests))),
@@ -118,9 +133,15 @@ export const apiTestHandlers = [
     const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
     const method = url.searchParams.get("method") || "";
     const status = url.searchParams.get("status") || "";
+    const folderId = url.searchParams.get("folderId") || "";
     let list = definitions.filter((d) => {
       if (method && d.method !== method) return false;
       if (status && d.status !== status) return false;
+      if (
+        folderId &&
+        (folderId === "none" ? !!d.folderId : d.folderId !== folderId)
+      )
+        return false;
       if (
         keyword &&
         !`${d.name} ${d.path} ${d.id}`.toLowerCase().includes(keyword)
@@ -162,8 +183,14 @@ export const apiTestHandlers = [
     const pageSize = Number(url.searchParams.get("pageSize")) || 10;
     const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
     const status = url.searchParams.get("status") || "";
+    const folderId = url.searchParams.get("folderId") || "";
     let list = scenarios.filter((d) => {
       if (status && d.status !== status) return false;
+      if (
+        folderId &&
+        (folderId === "none" ? !!d.folderId : d.folderId !== folderId)
+      )
+        return false;
       if (keyword && !`${d.name} ${d.id}`.toLowerCase().includes(keyword))
         return false;
       return true;
@@ -214,8 +241,14 @@ export const apiTestHandlers = [
     const pageSize = Number(url.searchParams.get("pageSize")) || 10;
     const keyword = (url.searchParams.get("keyword") || "").toLowerCase();
     const type = url.searchParams.get("type") || "";
+    const folderId = url.searchParams.get("folderId") || "";
     let list = reports.filter((r) => {
       if (type && r.type !== type) return false;
+      if (
+        folderId &&
+        (folderId === "none" ? !!r.folderId : r.folderId !== folderId)
+      )
+        return false;
       if (keyword && !`${r.name} ${r.id}`.toLowerCase().includes(keyword))
         return false;
       return true;
@@ -224,6 +257,13 @@ export const apiTestHandlers = [
     const start = (pageNum - 1) * pageSize;
     list = list.slice(start, start + pageSize);
     return HttpResponse.json(ok({ list, total }));
+  }),
+  http.put("/api/api-test/reports/:id", async ({ params, request }) => {
+    const body = (await request.json()) as Partial<ApiReport>;
+    reports = reports.map((r) =>
+      r.id === params.id ? { ...r, ...body } : r,
+    );
+    return HttpResponse.json(ok(reports.find((r) => r.id === params.id)));
   }),
   http.get("/api/api-test/reports/:id", ({ params }) => {
     const item = reports.find((r) => r.id === params.id);

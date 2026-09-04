@@ -2,11 +2,17 @@
 import { http, HttpResponse } from "msw";
 import { ok, page } from "../utils";
 import { createBugs } from "../seed/bug";
+import { registerFolderCleaner } from "../seed/collections";
 import { now } from "@/utils/format";
 import type { PageQuery } from "@/types";
 import type { Bug } from "@/types/models";
 
 export let bugs = createBugs();
+
+// 删除目录时，把目录内的缺陷移回未分类
+registerFolderCleaner("bug", (folderId) => {
+  bugs = bugs.map((b) => (b.folderId === folderId ? { ...b, folderId: undefined } : b));
+});
 
 export const bugHandlers = [
   http.get("/api/bug/list", ({ request }) => {

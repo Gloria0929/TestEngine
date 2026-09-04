@@ -12,6 +12,8 @@ export interface TestCase {
   projectId: string;
   moduleId: string;
   name: string;
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
   testPoint: string;
   precondition: string;
   steps: CaseStep[];
@@ -61,6 +63,8 @@ export interface Bug {
   description: string;
   createTime: string;
   moduleId: string;
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
 }
 export type DefinitionStatus = "未规划" | "进行中" | "已完成" | "已归档";
 export interface ApiDefinition {
@@ -75,6 +79,8 @@ export interface ApiDefinition {
   tags: string[];
   updateTime: string;
   desc: string;
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
 }
 export type HttpMethod =
   | "GET"
@@ -104,6 +110,8 @@ export interface Scenario {
   tags?: string[];
   desc?: string;
   steps?: ScenarioStep[];
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
 }
 export interface TestPlan {
   id: string;
@@ -116,11 +124,18 @@ export interface TestPlan {
   progress: number;
   passRate: number;
   group: string;
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
 }
 export interface TrendPoint {
   date: string;
   cases: number;
   apis: number;
+}
+/** 单条用例的评审结果 */
+export interface ReviewCaseResult {
+  passed: boolean;
+  comment: string;
 }
 export interface Review {
   id: string;
@@ -131,6 +146,10 @@ export interface Review {
   caseIds: string[];
   startTime: string;
   endTime: string;
+  /** 所在目录，空 = 未分类 */
+  folderId?: string;
+  /** 每条用例的评审结果（caseId -> 结果），空 = 未评审 */
+  results?: Record<string, ReviewCaseResult>;
 }
 export interface ReviewDetail extends Review {
   cases: TestCase[];
@@ -145,9 +164,9 @@ export type BodyType = "none" | "form-data" | "x-www-form-urlencoded" | "raw";
 export interface DebugRequest {
   id: string;
   name: string;
-  method: HttpMethod;
+  method: string;
   url: string;
-  protocol: "HTTP" | "TCP" | "SQL" | "DUBBO";
+  protocol: string;
   headers: KeyValue[];
   query: KeyValue[];
   bodyType: BodyType;
@@ -155,6 +174,12 @@ export interface DebugRequest {
   bodyParams: KeyValue[];
   authType: "none" | "basic" | "bearer" | "cookie";
   auth: Record<string, string>;
+}
+
+/** 业务模块目录（测试计划/测试用例/缺陷等按目录划分） */
+export interface ModuleFolder {
+  id: string;
+  name: string;
 }
 export interface ExecuteResponse {
   status: number;
@@ -187,6 +212,8 @@ export interface ApiReport {
   executor: string;
   createTime: string;
   steps?: ReportStep[];
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
 }
 export type ExecuteResult = "PASS" | "FAIL" | "BLOCK" | "SKIP";
 export interface StepExecuteResult {
@@ -234,6 +261,8 @@ export interface PlanReport {
 }
 export interface OperationLog {
   id: string;
+  /** 所在目录（空 = 未分类） */
+  folderId?: string;
   scope: string;
   object: string;
   action: string;

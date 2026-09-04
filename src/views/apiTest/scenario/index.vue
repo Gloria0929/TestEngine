@@ -68,7 +68,7 @@
           </el-table-column>
           <el-table-column label="状态" min-width="100">
             <template #default="{ row }">
-              <span class="bg-pill" :class="statusCls(row.status)">{{ row.status }}</span>
+              <el-tag :type="statusType(row.status)" round>{{ row.status }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="责任人" min-width="130">
@@ -93,11 +93,12 @@
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" min-width="160" class-name="bg-time" />
           <el-table-column prop="updateTime" label="更新时间" min-width="160" class-name="bg-time" />
-          <el-table-column label="操作" min-width="160">
+          <el-table-column label="操作" min-width="180">
             <template #default="{ row }">
               <div class="bg-ops">
                 <el-button link type="primary" @click="onEdit(row)">编辑</el-button>
                 <el-button link style="color:#18a058" @click="onExecute(row)">执行</el-button>
+                <el-button link type="primary" @click="onMove(row)">移动</el-button>
                 <el-button link type="danger" @click="onDelete(row)">删除</el-button>
               </div>
             </template>
@@ -138,6 +139,7 @@
       </template>
     </el-dialog>
   </div>
+  <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingRow?.folderId" @confirm="confirmMove" />
 </template>
 
 <script setup lang="ts">
@@ -145,10 +147,21 @@ import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { fetchScenarioPage, createScenario, updateScenario, deleteScenario, executeScenario } from '@/api/apiTest';
+import { useFolders } from '@/composables/useFolders';
+import { useCollectionsStore } from '@/stores/collections';
+import MoveFolderDialog from '@/layouts/components/MoveFolderDialog.vue';
 import type { Scenario, ScenarioStatus } from '@/types/models';
 
 const statuses: ScenarioStatus[] = ['未执行', '执行中', '通过', '失败'];
 const router = useRouter();
+const collectionsStore = useCollectionsStore();
+
+// 目录过滤与移动
+const { folders, loadFolders, folderFilter } = useFolders('api-test');
+watch(folderFilter, () => {
+  pageNum.value = 1;
+  load();
+});
 const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#6366f1', '#ec4899'];
 
 const list = ref<Scenario[]>([]);
@@ -166,9 +179,10 @@ const err = reactive({ name: '' });
 
 const pages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
 
-function statusCls(s: ScenarioStatus): string {
-  const map: Record<ScenarioStatus, string> = { '未执行': 'st-wait', '执行中': 'st-doing', '通过': 'st-pass', '失败': 'st-fail' };
-  return map[s] || 'st-wait';
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function statusType(s: ScenarioStatus): TagType {
+  const map: Record<ScenarioStatus, TagType> = { '未执行': 'info', '执行中': 'primary', '通过': 'success', '失败': 'danger' };
+  return map[s] || 'info';
 }
 function avatarColor(name: string): string {
   let h = 0;
@@ -182,6 +196,7 @@ async function load() {
     const res = await fetchScenarioPage({
       pageNum: pageNum.value, pageSize: pageSize.value,
       keyword: filter.keyword.trim(), status: filter.status,
+      folderId: folderFilter.value || undefined,
     });
     list.value = res.list ?? [];
     total.value = res.total ?? 0;
@@ -257,7 +272,25 @@ async function onDelete(row: Scenario) {
   load();
 }
 
-onMounted(load);
+// 移动到目录
+const moveVisible = ref(false);
+const movingRow = ref<Scenario | null>(null);
+function onMove(row: Scenario) {
+  movingRow.value = row;
+  moveVisible.value = true;
+}
+async function confirmMove(folderId: string) {
+  if (!movingRow.value) return;
+  await updateScenario(movingRow.value.id, { folderId: folderId || undefined } as any);
+  ElMessage.success('已移动');
+  collectionsStore.notifyChange();
+  load();
+}
+
+onMounted(() => {
+  load();
+  loadFolders();
+});
 </script>
 
 <style>
@@ -319,38 +352,6 @@ onMounted(load);
 .bg-cname {
   font-weight: 500;
   color: var(--el-text-color-primary, #303133);
-}
-
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.st-wait {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-}
-
-.st-doing {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-pass {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.st-fail {
-  background: #fdecec;
-  color: #d93838;
 }
 
 .bg-user {

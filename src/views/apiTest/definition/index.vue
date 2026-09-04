@@ -57,7 +57,7 @@
           <el-table-column label="接口名称" min-width="220">
             <template #default="{ row }">
               <div style="display: flex; align-items: center; gap: 8px">
-                <span class="m-badge" :class="methodCls(row.method)">{{ row.method }}</span>
+                <el-tag :type="methodType(row.method)" round>{{ row.method }}</el-tag>
                 <span class="bg-cname" :title="row.name">{{ row.name }}</span>
               </div>
             </template>
@@ -70,7 +70,7 @@
           <el-table-column prop="protocol" label="协议" min-width="80" />
           <el-table-column label="状态" min-width="100">
             <template #default="{ row }">
-              <span class="bg-pill" :class="statusCls(row.status)">{{ row.status }}</span>
+              <el-tag :type="statusType(row.status)" round>{{ row.status }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="责任人" min-width="130">
@@ -104,11 +104,12 @@
             </template>
           </el-table-column>
           <el-table-column prop="updateTime" label="更新时间" min-width="160" class-name="bg-time" />
-          <el-table-column label="操作" min-width="150">
+          <el-table-column label="操作" min-width="180">
             <template #default="{ row }">
               <div class="bg-ops">
                 <el-button link type="success" @click="onExecute(row)">执行</el-button>
                 <el-button link type="primary" @click="openModal(row)">编辑</el-button>
+                <el-button link type="primary" @click="onMove(row)">移动</el-button>
                 <el-button link type="danger" @click="onDelete(row)">删除</el-button>
               </div>
             </template>
@@ -181,6 +182,7 @@
       </template>
     </el-dialog>
   </div>
+  <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingRow?.folderId" @confirm="confirmMove" />
 </template>
 
 <script setup lang="ts">
@@ -188,9 +190,20 @@ import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { fetchApiDefinitionPage, createApiDefinition, updateApiDefinition, deleteApiDefinition } from '@/api/apiTest';
+import { useFolders } from '@/composables/useFolders';
+import { useCollectionsStore } from '@/stores/collections';
+import MoveFolderDialog from '@/layouts/components/MoveFolderDialog.vue';
 import type { ApiDefinition, HttpMethod, DefinitionStatus } from '@/types/models';
 
 const router = useRouter();
+const collectionsStore = useCollectionsStore();
+
+// 目录过滤与移动
+const { folders, loadFolders, folderFilter } = useFolders('api-test');
+watch(folderFilter, () => {
+  pageNum.value = 1;
+  load();
+});
 
 const methods: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD', 'CONNECT'];
 const statuses: DefinitionStatus[] = ['未规划', '进行中', '已完成', '已归档'];
@@ -211,13 +224,14 @@ const err = reactive({ name: '', path: '' });
 
 const pages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
 
-function methodCls(m: HttpMethod): string {
-  const map: Record<string, string> = { GET: 'm-get', POST: 'm-post', PUT: 'm-put', DELETE: 'm-del', PATCH: 'm-patch', HEAD: 'm-head' };
-  return map[m] || 'm-opt';
+function methodType(m: HttpMethod): TagType {
+  const map: Record<string, TagType> = { GET: 'success', POST: 'primary', PUT: 'warning', DELETE: 'danger', PATCH: 'warning', HEAD: 'info' };
+  return map[m] || 'info';
 }
-function statusCls(s: DefinitionStatus): string {
-  const map: Record<DefinitionStatus, string> = { '未规划': 'st-new', '进行中': 'st-doing', '已完成': 'st-done', '已归档': 'st-archived' };
-  return map[s] || 'st-new';
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+function statusType(s: DefinitionStatus): TagType {
+  const map: Record<DefinitionStatus, TagType> = { '未规划': 'info', '进行中': 'primary', '已完成': 'success', '已归档': 'info' };
+  return map[s] || 'info';
 }
 function avatarColor(name: string): string {
   let h = 0;
@@ -231,6 +245,7 @@ async function load() {
     const res = await fetchApiDefinitionPage({
       pageNum: pageNum.value, pageSize: pageSize.value,
       keyword: filter.keyword.trim(), method: filter.method, status: filter.status,
+      folderId: folderFilter.value || undefined,
     });
     list.value = res.list ?? [];
     total.value = res.total ?? 0;
@@ -252,6 +267,21 @@ function onExecute(row: ApiDefinition) {
     path: '/api-test/debug',
     query: { definitionId: row.id, name: row.name, method: row.method, path: row.path },
   });
+}
+
+// 移动到目录
+const moveVisible = ref(false);
+const movingRow = ref<ApiDefinition | null>(null);
+function onMove(row: ApiDefinition) {
+  movingRow.value = row;
+  moveVisible.value = true;
+}
+async function confirmMove(folderId: string) {
+  if (!movingRow.value) return;
+  await updateApiDefinition(movingRow.value.id, { folderId: folderId || undefined } as any);
+  ElMessage.success('已移动');
+  collectionsStore.notifyChange();
+  load();
 }
 function reset() {
   filter.keyword = ''; filter.method = ''; filter.status = '';
@@ -315,7 +345,10 @@ async function onDelete(row: ApiDefinition) {
   load();
 }
 
-onMounted(load);
+onMounted(() => {
+  load();
+  loadFolders();
+});
 </script>
 
 <style>
@@ -366,87 +399,6 @@ onMounted(load);
 .bg-cname {
   font-weight: 500;
   color: var(--el-text-color-primary, #303133);
-}
-
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.m-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 22px;
-  min-width: 52px;
-  padding: 0 8px;
-  border-radius: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  flex: none;
-}
-
-.m-get {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.m-post {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.m-put {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.m-del {
-  background: #fdecec;
-  color: #d93838;
-}
-
-.m-patch {
-  background: #f3e8fd;
-  color: #8b5cf6;
-}
-
-.m-head {
-  background: #fef7e0;
-  color: #b8860b;
-}
-
-.m-opt {
-  background: #e4e7ed;
-  color: #606266;
-}
-
-.st-new {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-}
-
-.st-doing {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-done {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.st-archived {
-  background: #e4e7ed;
-  color: #606266;
 }
 
 .bg-user {

@@ -90,17 +90,17 @@
               </el-table-column>
               <el-table-column label="用例等级" min-width="90">
                 <template #default="{ row }">
-                  <span class="tc-pill" :class="levelCls(row.level)">{{ row.level || "-" }}</span>
+                  <el-tag :type="levelType(row.level)" round>{{ row.level || "-" }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="评审结果" min-width="100">
                 <template #default="{ row }">
-                  <span class="tc-pill" :class="reviewCls(row.review)">{{ row.review || "未评审" }}</span>
+                  <el-tag :type="reviewType(row.review)" round>{{ row.review || "未评审" }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="执行结果" min-width="100">
                 <template #default="{ row }">
-                  <span class="tc-pill" :class="resultCls(row.result)">{{ row.result || "未执行" }}</span>
+                  <el-tag :type="resultType(row.result)" round>{{ row.result || "未执行" }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="所属模块" min-width="120">
@@ -138,11 +138,14 @@
                   <span class="tc-time">{{ row.createTime || "-" }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" min-width="140">
+              <el-table-column label="操作" min-width="180">
                 <template #default="{ row }">
                   <div class="tc-ops">
                     <el-button type="primary" link @click="router.push('/test-case/detail/' + row.id)">
                       编辑
+                    </el-button>
+                    <el-button type="primary" link @click="onMoveCase(row)">
+                      移动
                     </el-button>
                     <el-button type="danger" link @click="onDeleteCase(row)">
                       删除
@@ -175,6 +178,12 @@
           <div v-if="caseErr.name" class="err">{{ caseErr.name }}</div>
         </div>
         <div class="tc-row">
+          <el-text>所在目录</el-text>
+          <el-select v-model="caseForm.folderId" clearable placeholder="未分类">
+            <el-option v-for="f in folders" :key="f.id" :label="f.name" :value="f.id" />
+          </el-select>
+        </div>
+        <div class="tc-row">
           <el-text>用例等级</el-text>
           <el-select v-model="caseForm.level">
             <el-option v-for="l in levels" :key="l.v" :value="l.v" :label="l.t" />
@@ -202,19 +211,29 @@
       </template>
     </el-dialog>
 
+    <!-- 移动到目录弹窗 -->
+    <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingCase?.folderId"
+      @confirm="confirmCaseMove" />
+
     <!-- 导入用例弹窗 -->
     <ImportDialog v-model="importVisible" @imported="loadCases" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { fetchCaseList, deleteCase, createCase } from "@/api/testCase";
+import { fetchCaseList, deleteCase, createCase, updateCase } from "@/api/testCase";
+import { useFolders } from "@/composables/useFolders";
+import { useCollectionsStore } from "@/stores/collections";
+import MoveFolderDialog from "@/layouts/components/MoveFolderDialog.vue";
 import ImportDialog from "./components/ImportDialog.vue";
 
 const router = useRouter();
+const collectionsStore = useCollectionsStore();
+const { folders, loadFolders, folderFilter } = useFolders("test-case");
+watch(folderFilter, loadCases);
 
 // 常量
 const levels = [
@@ -223,14 +242,15 @@ const levels = [
   { v: "P2", t: "P2" },
   { v: "P3", t: "P3" },
 ];
-const levelClsMap: Record<string, string> = {
-  P0: "lv-p0",
-  P1: "lv-p1",
-  P2: "lv-p2",
-  P3: "lv-p3",
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const levelTypeMap: Record<string, TagType> = {
+  P0: "danger",
+  P1: "warning",
+  P2: "primary",
+  P3: "info",
 };
-function levelCls(l: string) {
-  return levelClsMap[l] || "lv-p2";
+function levelType(l: string): TagType {
+  return levelTypeMap[l] || "primary";
 }
 
 const reviewLabels = [
@@ -239,14 +259,14 @@ const reviewLabels = [
   { v: "未评审", t: "未评审" },
   { v: "免评审", t: "免评审" },
 ];
-const reviewClsMap: Record<string, string> = {
-  已通过: "rv-pass",
-  未通过: "rv-fail",
-  未评审: "rv-none",
-  免评审: "rv-free",
+const reviewTypeMap: Record<string, TagType> = {
+  已通过: "success",
+  未通过: "danger",
+  未评审: "info",
+  免评审: "primary",
 };
-function reviewCls(r: string) {
-  return reviewClsMap[r] || "rv-none";
+function reviewType(r: string): TagType {
+  return reviewTypeMap[r] || "info";
 }
 
 const resultLabels = [
@@ -255,14 +275,14 @@ const resultLabels = [
   { v: "阻塞", t: "阻塞" },
   { v: "未执行", t: "未执行" },
 ];
-const resultClsMap: Record<string, string> = {
-  通过: "rs-pass",
-  失败: "rs-fail",
-  阻塞: "rs-block",
-  未执行: "rs-none",
+const resultTypeMap: Record<string, TagType> = {
+  通过: "success",
+  失败: "danger",
+  阻塞: "warning",
+  未执行: "info",
 };
-function resultCls(r: string) {
-  return resultClsMap[r] || "rs-none";
+function resultType(r: string): TagType {
+  return resultTypeMap[r] || "info";
 }
 
 const modules = [
@@ -354,6 +374,7 @@ const caseSaving = ref(false);
 const importVisible = ref(false);
 const caseForm = reactive({
   name: "",
+  folderId: "",
   level: "P2",
   module: modules[0],
   creator: "",
@@ -362,6 +383,7 @@ const caseErr = reactive({ name: "", creator: "" });
 
 function openCaseModal() {
   caseForm.name = "";
+  caseForm.folderId = folderFilter.value;
   caseForm.level = "P2";
   caseForm.module = modules[0];
   caseForm.creator = "";
@@ -379,10 +401,26 @@ async function saveCase() {
     await createCase({ ...caseForm, projectId: "p-1", status: "DRAFT" } as any);
     ElMessage.success("已创建");
     caseModalVisible.value = false;
+    collectionsStore.notifyChange();
     loadCases();
   } finally {
     caseSaving.value = false;
   }
+}
+
+// 移动到目录
+const moveVisible = ref(false);
+const movingCase = ref<any>(null);
+function onMoveCase(row: any) {
+  movingCase.value = row;
+  moveVisible.value = true;
+}
+async function confirmCaseMove(folderId: string) {
+  if (!movingCase.value) return;
+  await updateCase(movingCase.value.id, { folderId: folderId || undefined } as any);
+  ElMessage.success("已移动");
+  collectionsStore.notifyChange();
+  loadCases();
 }
 
 async function onDeleteCase(row: any) {
@@ -399,7 +437,10 @@ async function onDeleteCase(row: any) {
     /* 取消 */
   }
 }
-onMounted(loadCases);
+onMounted(() => {
+  loadFolders();
+  loadCases();
+});
 </script>
 
 <style scoped>
@@ -421,6 +462,8 @@ onMounted(loadCases);
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  /* 拉满整行宽度：向左扩展到目录侧边栏左缘（侧栏 200 + 间距 16） */
+  margin-left: -216px;
 }
 
 .tc-pane {
@@ -509,18 +552,6 @@ onMounted(loadCases);
   text-decoration: underline;
 }
 
-.tc-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
 .tc-mod {
   display: inline-flex;
   height: 22px;
@@ -604,69 +635,6 @@ onMounted(loadCases);
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-/* 等级色 */
-.lv-p0 {
-  color: #ef4444;
-  background: #fef2f2;
-}
-
-.lv-p1 {
-  color: #f59e0b;
-  background: #fffbeb;
-}
-
-.lv-p2 {
-  color: #3b82f6;
-  background: #eff6ff;
-}
-
-.lv-p3 {
-  color: #94a3b8;
-  background: #f8fafc;
-}
-
-/* 评审结果色 */
-.rv-pass {
-  color: #16a34a;
-  background: #f0fdf4;
-}
-
-.rv-fail {
-  color: #ef4444;
-  background: #fef2f2;
-}
-
-.rv-none {
-  color: #94a3b8;
-  background: #f8fafc;
-}
-
-.rv-free {
-  color: #6366f1;
-  background: #eef2ff;
-}
-
-/* 执行结果色 */
-.rs-pass {
-  color: #16a34a;
-  background: #f0fdf4;
-}
-
-.rs-fail {
-  color: #ef4444;
-  background: #fef2f2;
-}
-
-.rs-block {
-  color: #f59e0b;
-  background: #fffbeb;
-}
-
-.rs-none {
-  color: #94a3b8;
-  background: #f8fafc;
 }
 
 .tc-form {

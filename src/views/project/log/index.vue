@@ -57,13 +57,13 @@
               </el-table-column>
               <el-table-column label="操作范围" min-width="160">
                 <template #default="{ row }">
-                  <span class="log-tag scope">{{ row.scope }}</span>
+                  <el-tag type="info" round>{{ row.scope }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="object" label="操作对象" min-width="180" />
               <el-table-column label="操作类型" min-width="140">
                 <template #default="{ row }">
-                  <span class="log-tag" :class="actionCls(row.action)">{{ row.action }}</span>
+                  <el-tag :type="actionType(row.action)" round>{{ row.action }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="名称" min-width="180">
@@ -76,6 +76,11 @@
                   <span class="log-time">{{ row.time }}</span>
                 </template>
               </el-table-column>
+              <el-table-column label="操作" min-width="90">
+                <template #default="{ row }">
+                  <el-button type="primary" link @click="onMoveLog(row)">移动</el-button>
+                </template>
+              </el-table-column>
             </el-table>
           </div>
           <div class="log-foot">
@@ -86,20 +91,32 @@
         </div>
       </div>
     </div>
+
+    <!-- 移动到目录弹窗 -->
+    <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingLog?.folderId"
+      @confirm="confirmLogMove" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted } from "vue";
-import { fetchOperationLogs } from "@/api/project";
+import { ref, reactive, onMounted, watch } from "vue";
+import { ElMessage } from "element-plus";
+import { fetchOperationLogs, moveLog } from "@/api/project";
+import { useFolders } from "@/composables/useFolders";
+import { useCollectionsStore } from "@/stores/collections";
+import MoveFolderDialog from "@/layouts/components/MoveFolderDialog.vue";
+
+const collectionsStore = useCollectionsStore();
+const { folders, loadFolders, folderFilter } = useFolders("project");
 
 const SCOPES = ["用例", "场景", "接口", "缺陷", "项目", "环境"];
 const ACTIONS = ["新增", "删除", "修改", "执行", "评审", "导出"];
-const ACTION_CLS: Record<string, string> = {
-  "新增": "act-add", "修改": "act-edit", "删除": "act-del",
-  "执行": "act-run", "评审": "act-review", "导出": "act-export",
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const ACTION_TYPE: Record<string, TagType> = {
+  "新增": "success", "修改": "primary", "删除": "danger",
+  "执行": "warning", "评审": "warning", "导出": "info",
 };
-function actionCls(a: string) { return ACTION_CLS[a] || "act-export"; }
+function actionType(a: string): TagType { return ACTION_TYPE[a] || "info"; }
 
 const AVATAR_COLORS = ["#3b82f6", "#8b5cf6", "#f59e0b", "#10b981", "#ef4444", "#06b6d4", "#6366f1", "#ec4899"];
 function avatarColor(name: string) {
@@ -128,6 +145,7 @@ async function load() {
       pageNum: st.pageNum, pageSize: st.pageSize,
       scope: flt.scope || undefined, action: flt.action || undefined,
       user: flt.user || undefined, object: flt.object || undefined,
+      folderId: folderFilter.value || undefined,
     } as any);
     st.list = (res as any)?.list ?? [];
     st.total = (res as any)?.total ?? 0;
@@ -136,7 +154,26 @@ async function load() {
   finally { st.loading = false; }
 }
 
-onMounted(load);
+// 移动到目录
+const moveVisible = ref(false);
+const movingLog = ref<any>(null);
+function onMoveLog(row: any) {
+  movingLog.value = row;
+  moveVisible.value = true;
+}
+async function confirmLogMove(folderId: string) {
+  if (!movingLog.value) return;
+  await moveLog(movingLog.value.id, folderId || undefined);
+  ElMessage.success("已移动");
+  collectionsStore.notifyChange();
+  load();
+}
+
+onMounted(() => {
+  loadFolders();
+  load();
+});
+watch(folderFilter, load);
 </script>
 
 <style scoped>
@@ -220,54 +257,6 @@ onMounted(load);
   font-weight: 600;
   color: #fff;
   background: var(--el-color-primary, #409eff);
-}
-
-.log-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 9px;
-  border-radius: 11px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  line-height: 1;
-}
-
-.log-tag.act-add {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.log-tag.act-edit {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.log-tag.act-del {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.log-tag.act-run {
-  background: #f5f3ff;
-  color: #7c3aed;
-}
-
-.log-tag.act-review {
-  background: #fff7ed;
-  color: #ea580c;
-}
-
-.log-tag.act-export {
-  background: #f4f4f5;
-  color: #52525b;
-}
-
-.log-tag.scope {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-  border: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
 
 .log-state {

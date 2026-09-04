@@ -66,8 +66,8 @@
               <template #default="{ row }"><span class="bg-cname" :title="row.title">{{ row.title }}</span></template>
             </el-table-column>
             <el-table-column label="状态" min-width="100">
-              <template #default="{ row }"><span class="bg-pill" :class="statusCls(row.status)">{{
-                statusLabel(row.status) }}</span></template>
+              <template #default="{ row }"><el-tag :type="statusType(row.status)" round>{{
+                statusLabel(row.status) }}</el-tag></template>
             </el-table-column>
             <el-table-column label="受理人" min-width="130">
               <template #default="{ row }">
@@ -109,13 +109,14 @@
               <template #default="{ row }"><span class="bg-time">{{ (row as any).updateTime || '-' }}</span></template>
             </el-table-column>
             <el-table-column label="优先级" min-width="100">
-              <template #default="{ row }"><span class="bg-pill" :class="prioCls(row.severity)">{{
-                prioLabel(row.severity) }}</span></template>
+              <template #default="{ row }"><el-tag :type="prioType(row.severity)" round>{{
+                prioLabel(row.severity) }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="操作" min-width="120">
+            <el-table-column label="操作" min-width="160">
               <template #default="{ row }">
                 <div class="bg-ops">
                   <el-button link type="primary" @click="openModal(row)">编辑</el-button>
+                  <el-button link type="primary" @click="onMoveBug(row)">移动</el-button>
                   <el-button link type="danger" @click="onDelete(row)">删除</el-button>
                 </div>
               </template>
@@ -180,14 +181,25 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 移动到目录弹窗 -->
+    <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingBug?.folderId"
+      @confirm="confirmBugMove" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { fetchBugs, createBug, updateBug, deleteBug } from "@/api/bug";
+import { useFolders } from "@/composables/useFolders";
+import { useCollectionsStore } from "@/stores/collections";
+import MoveFolderDialog from "@/layouts/components/MoveFolderDialog.vue";
 import type { Bug, BugSeverity, BugStatus } from "@/types/models";
+
+const collectionsStore = useCollectionsStore();
+const { folders, loadFolders, folderFilter } = useFolders("bug");
+watch(folderFilter, load);
 
 // 状态映射
 const statusOptions = [
@@ -195,32 +207,33 @@ const statusOptions = [
   { v: "修复中", t: "修复中" }, { v: "已解决", t: "已解决" },
   { v: "重新打开", t: "重新打开" }, { v: "已关闭", t: "已关闭" },
 ];
-const statusClsMap: Record<string, string> = {
-  "新建": "st-new", "已指派": "st-assigned", "修复中": "st-fixing",
-  "已解决": "st-resolved", "重新打开": "st-reopen", "已关闭": "st-closed",
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const statusTypeMap: Record<string, TagType> = {
+  "新建": "info", "已指派": "primary", "修复中": "warning",
+  "已解决": "success", "重新打开": "danger", "已关闭": "info",
 };
 const statusLabelMap: Record<string, string> = {
   NEW: "新建", ASSIGNED: "已指派", FIXING: "修复中",
   FIXED: "已解决", REOPEN: "重新打开", CLOSED: "已关闭",
 };
 function statusLabel(s: BugStatus) { return statusLabelMap[s] ?? s; }
-function statusCls(s: BugStatus) { return statusClsMap[statusLabel(s)] ?? "st-new"; }
+function statusType(s: BugStatus): TagType { return statusTypeMap[statusLabel(s)] ?? "info"; }
 
 // 优先级映射
 const priorityOptions = [
   { v: "阻塞", t: "阻塞" }, { v: "严重", t: "严重" },
   { v: "主要", t: "主要" }, { v: "次要", t: "次要" }, { v: "轻微", t: "轻微" },
 ];
-const prioClsMap: Record<string, string> = {
-  "阻塞": "pv-block", "严重": "pv-crit", "主要": "pv-major",
-  "次要": "pv-minor", "轻微": "pv-trivial",
+const prioTypeMap: Record<string, TagType> = {
+  "阻塞": "danger", "严重": "danger", "主要": "warning",
+  "次要": "primary", "轻微": "info",
 };
 const prioLabelMap: Record<string, string> = {
   BLOCKER: "阻塞", CRITICAL: "严重", MAJOR: "主要",
   MINOR: "次要", TRIVIAL: "轻微",
 };
 function prioLabel(s: BugSeverity) { return prioLabelMap[s] ?? s; }
-function prioCls(s: BugSeverity) { return prioClsMap[prioLabel(s)] ?? "pv-minor"; }
+function prioType(s: BugSeverity): TagType { return prioTypeMap[prioLabel(s)] ?? "info"; }
 
 // 用户列表
 const userOptions = ["张伟", "李娜", "王强", "赵敏", "刘洋", "陈晨", "杨帆", "周杰", "Administrator"];
@@ -356,7 +369,25 @@ async function onDelete(row: Bug) {
   } catch { /* 取消 */ }
 }
 
-onMounted(load);
+// 移动到目录
+const moveVisible = ref(false);
+const movingBug = ref<Bug | null>(null);
+function onMoveBug(row: Bug) {
+  movingBug.value = row;
+  moveVisible.value = true;
+}
+async function confirmBugMove(folderId: string) {
+  if (!movingBug.value) return;
+  await updateBug(movingBug.value.id, { folderId: folderId || undefined } as any);
+  ElMessage.success("已移动");
+  collectionsStore.notifyChange();
+  load();
+}
+
+onMounted(() => {
+  loadFolders();
+  load();
+});
 </script>
 
 <style scoped>
@@ -370,6 +401,8 @@ onMounted(load);
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+  /* 拉满整行宽度：向左扩展到目录侧边栏左缘（侧栏 200 + 间距 16） */
+  margin-left: -216px;
 }
 
 .bg-bar {
@@ -425,72 +458,6 @@ onMounted(load);
 .bg-cname {
   font-weight: 500;
   color: var(--el-text-color-primary, #303133);
-}
-
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.st-new {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-}
-
-.st-assigned {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-fixing {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.st-resolved {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.st-reopen {
-  background: #fdecec;
-  color: #d93838;
-}
-
-.st-closed {
-  background: #e4e7ed;
-  color: #606266;
-}
-
-.pv-block {
-  background: #fdecec;
-  color: #d93838;
-}
-
-.pv-crit {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.pv-major {
-  background: #fef7e0;
-  color: #b8860b;
-}
-
-.pv-minor {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.pv-trivial {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-secondary, #909399);
 }
 
 .bg-user {

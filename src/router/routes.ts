@@ -32,6 +32,18 @@ export const routes: RouteRecordRaw[] = [
         meta: { permission: "testCase:view" },
       },
       {
+        path: "test-case/review/detail/:id",
+        name: "CaseReviewDetail",
+        component: () => import("@/views/testCase/review/detail.vue"),
+        meta: { permission: "testCase:view" },
+      },
+      {
+        path: "test-case/review/detail/:id/case/:caseId",
+        name: "CaseReviewExecute",
+        component: () => import("@/views/testCase/review/caseReview.vue"),
+        meta: { permission: "testCase:view" },
+      },
+      {
         path: "test-case/detail/:id",
         name: "CaseDetail",
         component: () => import("@/views/testCase/detail/index.vue"),

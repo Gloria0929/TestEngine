@@ -43,6 +43,7 @@ export interface DefinitionPageQuery {
   keyword?: string;
   method?: string;
   status?: string;
+  folderId?: string;
 }
 export function fetchApiDefinitionPage(
   query: DefinitionPageQuery,
@@ -83,6 +84,7 @@ export interface ScenarioPageQuery {
   pageSize: number;
   keyword?: string;
   status?: string;
+  folderId?: string;
 }
 export function fetchScenarioPage(
   query: ScenarioPageQuery,
@@ -119,6 +121,7 @@ export interface ReportPageQuery {
   pageSize: number;
   keyword?: string;
   type?: string;
+  folderId?: string;
 }
 export function fetchApiReportPage(
   query: ReportPageQuery,
@@ -131,6 +134,16 @@ export function fetchApiReportPage(
 }
 export function fetchApiReport(id: string): Promise<ApiReport> {
   return request({ url: `/api/api-test/reports/${id}`, method: "get" });
+}
+export function updateApiReport(
+  id: string,
+  data: Partial<ApiReport>,
+): Promise<ApiReport> {
+  return request({
+    url: `/api/api-test/reports/${id}`,
+    method: "put",
+    data,
+  });
 }
 export function deleteApiReport(id: string): Promise<null> {
   return request({ url: `/api/api-test/reports/${id}`, method: "delete" });

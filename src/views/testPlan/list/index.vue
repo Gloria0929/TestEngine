@@ -62,10 +62,10 @@
               </el-table-column>
               <el-table-column label="状态" min-width="100">
                 <template #default="{ row }">
-                  <span class="tp-pill" :class="statusCls(row.status)">
+                  <el-tag :type="statusType(row.status)" round>
                     <i v-if="row.status === 'RUNNING'" class="tp-dot" />
                     {{ statusLabel(row.status) }}
-                  </span>
+                  </el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="创建人" min-width="180">
@@ -91,8 +91,7 @@
               </el-table-column>
               <el-table-column label="执行结果" min-width="120">
                 <template #default="{ row }">
-                  <span class="tp-pill" :class="resultCls((row as any).result)">{{ (row as any).result || '未执行'
-                  }}</span>
+                  <el-tag :type="resultType((row as any).result)" round>{{ (row as any).result || '未执行' }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="所属模块" min-width="110">
@@ -126,6 +125,13 @@
                               <rect x="9" y="9" width="12" height="12" rx="2" />
                               <path d="M5 15V5a2 2 0 0 1 2-2h10" />
                             </svg>复制
+                          </el-dropdown-item>
+                          <el-dropdown-item command="move" divided>
+                            <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round">
+                              <path
+                                d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-7l-2-2H5a2 2 0 0 0-2 2Z" />
+                            </svg>移动到目录
                           </el-dropdown-item>
                           <el-dropdown-item command="timer">
                             <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -176,7 +182,7 @@
               </el-table-column>
               <el-table-column label="报告类型" min-width="120">
                 <template #default="{ row }">
-                  <span class="tp-pill" :class="typeCls(row.type)">{{ row.type || '-' }}</span>
+                  <el-tag :type="typeType(row.type)" round>{{ row.type || '-' }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="计划名称" min-width="180">
@@ -186,7 +192,7 @@
               </el-table-column>
               <el-table-column label="执行结果" min-width="100">
                 <template #default="{ row }">
-                  <span class="tp-pill" :class="resultCls(row.result)">{{ row.result || '未执行' }}</span>
+                  <el-tag :type="resultType(row.result)" round>{{ row.result || '未执行' }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="通过率" min-width="130">
@@ -201,7 +207,7 @@
               </el-table-column>
               <el-table-column label="触发方式" min-width="140">
                 <template #default="{ row }">
-                  <span class="tp-pill" :class="trgCls(row.trigger)">{{ row.trigger || '-' }}</span>
+                  <el-tag :type="trgType(row.trigger)" round>{{ row.trigger || '-' }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="创建人" min-width="150">
@@ -246,6 +252,11 @@
             <el-input v-model="form.name" maxlength="60" placeholder="请输入计划名称" style="width:100%" />
             <div v-if="err.name" class="err">{{ err.name }}</div>
           </div>
+          <div class="tp-row"><el-text>所在目录</el-text>
+            <el-select v-model="form.folderId" style="width:100%" clearable placeholder="未分类">
+              <el-option v-for="f in folders" :key="f.id" :label="f.name" :value="f.id" />
+            </el-select>
+          </div>
           <div class="tp-row"><el-text>所属模块</el-text>
             <el-select v-model="form.group" style="width:100%">
               <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
@@ -273,10 +284,13 @@
           <div class="tp-modal-foot">
             <el-button @click="modalVisible = false">取消</el-button>
             <el-button type="primary" :disabled="saving" @click="saveModal">{{ saving ? '保存中…' : '保存'
-              }}</el-button>
+            }}</el-button>
           </div>
         </template>
       </el-dialog>
+      <!-- 移动到目录弹窗 -->
+      <MoveFolderDialog v-model="moveVisible" :folders="folders" :current="movingPlan?.folderId"
+        @confirm="confirmMove" />
     </div>
   </div>
 </template>
@@ -288,26 +302,37 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import * as XLSX from "xlsx";
 import { fetchPlans, createPlan, updatePlan, deletePlan, copyPlan } from "@/api/testPlan";
 import { rptList, rptDel } from "@/api/testPlan";
+import { useFolders } from "@/composables/useFolders";
+import { useCollectionsStore } from "@/stores/collections";
+import MoveFolderDialog from "@/layouts/components/MoveFolderDialog.vue";
 import type { TestPlan } from "@/types/models";
 
 const router = useRouter();
 const route = useRoute();
+const collectionsStore = useCollectionsStore();
+
+// 目录数据（供新建弹窗选择 + 移动目录）与目录过滤
+const { folders, loadFolders, folderFilter } = useFolders("test-plan");
+watch(folderFilter, () => {
+  if (!isReport.value) load();
+});
 
 // 常量
 const STATUSES = [{ v: "DRAFT", t: "未开始" }, { v: "RUNNING", t: "进行中" }, { v: "DONE", t: "已完成" }];
-const STATUS_CLS: Record<string, string> = { DRAFT: "st-draft", RUNNING: "st-run", DONE: "st-done" };
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const STATUS_TYPE: Record<string, TagType> = { DRAFT: "info", RUNNING: "primary", DONE: "success" };
 function statusLabel(s: string) { return STATUSES.find(x => x.v === s)?.t ?? "未开始"; }
-function statusCls(s: string) { return STATUS_CLS[s] || "st-draft"; }
+function statusType(s: string): TagType { return STATUS_TYPE[s] || "info"; }
 
 const MODULES = ["订单中心", "支付中台", "用户中心", "商品模块", "营销活动", "权限中心"];
-const RESULT_CLS: Record<string, string> = { "通过": "rs-pass", "部分通过": "rs-part", "失败": "rs-fail", "未执行": "rs-none" };
-function resultCls(r: string) { return RESULT_CLS[r] || "rs-none"; }
+const RESULT_TYPE: Record<string, TagType> = { "通过": "success", "部分通过": "warning", "失败": "danger", "未执行": "info" };
+function resultType(r: string): TagType { return RESULT_TYPE[r] || "info"; }
 
-const TYPE_CLS: Record<string, string> = { "测试计划报告": "ty-plan", "接口测试报告": "ty-api", "任务报告": "ty-task" };
-function typeCls(t: string) { return TYPE_CLS[t] || "rs-none"; }
+const TYPE_TYPE: Record<string, TagType> = { "测试计划报告": "primary", "接口测试报告": "warning", "任务报告": "success" };
+function typeType(t: string): TagType { return TYPE_TYPE[t] || "info"; }
 
-const TRG_CLS: Record<string, string> = { "手动执行": "trg-manual", "定时任务": "trg-timer", "API 触发": "trg-api" };
-function trgCls(t: string) { return TRG_CLS[t] || "rs-none"; }
+const TRG_TYPE: Record<string, TagType> = { "手动执行": "info", "定时任务": "warning", "API 触发": "primary" };
+function trgType(t: string): TagType { return TRG_TYPE[t] || "info"; }
 
 function rateClass(v: number) {
   const n = Math.max(0, Math.min(100, v || 0));
@@ -346,6 +371,7 @@ async function load() {
       pageNum: st.pageNum, pageSize: st.pageSize,
       keyword: flt.keyword || undefined, status: flt.status || undefined,
       group: flt.group || undefined,
+      folderId: folderFilter.value || undefined,
     } as any);
     st.list = (res as any).list ?? [];
     st.total = (res as any).total ?? 0;
@@ -382,8 +408,24 @@ function onExecute(row: TestPlan) {
 // 更多菜单
 function handleCommand(cmd: string, plan: any) {
   if (cmd === "copy") onCopy(plan);
+  else if (cmd === "move") onMove(plan);
   else if (cmd === "timer") onCreateTimer();
   else if (cmd === "delete") onDelete(plan);
+}
+
+// 移动到目录
+const moveVisible = ref(false);
+const movingPlan = ref<any>(null);
+function onMove(plan: any) {
+  movingPlan.value = plan;
+  moveVisible.value = true;
+}
+async function confirmMove(folderId: string) {
+  if (!movingPlan.value) return;
+  await updatePlan(movingPlan.value.id, { folderId: folderId || undefined } as any);
+  ElMessage.success("已移动");
+  collectionsStore.notifyChange();
+  load();
 }
 
 async function onCopy(plan: any) {
@@ -437,7 +479,7 @@ function onExportReport(r: any) {
 const modalVisible = ref(false);
 const editingId = ref("");
 const saving = ref(false);
-const form = reactive({ name: "", group: MODULES[0], owner: "", startTime: "", endTime: "", status: "DRAFT" });
+const form = reactive({ name: "", folderId: "", group: MODULES[0], owner: "", startTime: "", endTime: "", status: "DRAFT" });
 const err = reactive({ name: "", owner: "" });
 
 function openModal(plan: any) {
@@ -475,11 +517,13 @@ async function saveModal() {
     }
     ElMessage.success(editingId.value ? "已保存" : "已创建");
     modalVisible.value = false;
+    collectionsStore.notifyChange();
     load();
   } finally { saving.value = false; }
 }
 
 onMounted(() => {
+  loadFolders();
   if (isReport.value) {
     reportLoaded.value = true;
     loadReports();
@@ -496,6 +540,8 @@ onMounted(() => {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 12px;
+  /* 拉满整行宽度：向左扩展到目录侧边栏左缘（侧栏 200 + 间距 16） */
+  margin-left: -216px;
 }
 
 .tp-bar {
@@ -559,42 +605,13 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.tp-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  line-height: 1;
-}
-
 .tp-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   flex: none;
-}
-
-.st-draft {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-regular, #606266);
-}
-
-.st-run {
-  background: #e8f3ff;
-  color: #1d7afb;
-}
-
-.st-run .tp-dot {
-  background: #1d7afb;
+  background: currentColor;
   animation: tp-pulse 1.6s infinite;
-}
-
-.st-done {
-  background: #e8f7ee;
-  color: #18a058;
 }
 
 @keyframes tp-pulse {
@@ -607,26 +624,6 @@ onMounted(() => {
   50% {
     opacity: 0.3;
   }
-}
-
-.rs-pass {
-  background: #e8f7ee;
-  color: #18a058;
-}
-
-.rs-part {
-  background: #fdf3e7;
-  color: #d67f1b;
-}
-
-.rs-fail {
-  background: #fdecec;
-  color: #d93838;
-}
-
-.rs-none {
-  background: var(--el-fill-color, #f0f2f5);
-  color: var(--el-text-color-secondary, #909399);
 }
 
 .tp-user {

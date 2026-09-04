@@ -35,7 +35,7 @@
           <span>功能用例</span>
           <el-tag type="info" effect="plain" class="tab-count">{{
             rows.length
-          }}</el-tag>
+            }}</el-tag>
         </template>
       </el-tab-pane>
       <el-tab-pane name="bug">
@@ -84,7 +84,7 @@
             <template #default="{ row }">
               <span v-if="!row.tags.length">-</span>
               <el-tag v-for="tag in row.tags.slice(0, 2)" :key="tag" effect="plain" class="case-tag">{{ tag
-              }}</el-tag>
+                }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" min-width="150" fixed="right">
@@ -105,12 +105,12 @@
           <el-table-column prop="title" label="缺陷标题" min-width="240" />
           <el-table-column label="严重程度" min-width="110">
             <template #default="{ row }">
-              <span class="bg-pill" :class="severityCls(row.severity)">{{ severityLabel(row.severity) }}</span>
+              <el-tag :type="severityType(row.severity)" round>{{ severityLabel(row.severity) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="状态" min-width="100">
             <template #default="{ row }">
-              <span class="bg-pill" :class="statusCls(row.status)">{{ statusLabel(row.status) }}</span>
+              <el-tag :type="statusType(row.status)" round>{{ statusLabel(row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="assignee" label="受理人" min-width="120">
@@ -132,7 +132,7 @@
           <el-table-column type="index" label="序号" width="60" />
           <el-table-column label="执行结果" min-width="100">
             <template #default="{ row }">
-              <span class="bg-pill" :class="resultCls(row.result)">{{ resultLabel(row.result) }}</span>
+              <el-tag :type="resultType(row.result)" round>{{ resultLabel(row.result) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="actual" label="实际结果/备注" min-width="260">
@@ -190,7 +190,7 @@
         <div class="tp-modal-foot">
           <el-button @click="editVisible = false">取消</el-button>
           <el-button type="primary" :disabled="editSaving" @click="savePlanEdit">{{ editSaving ? '保存中…' : '保存'
-            }}</el-button>
+          }}</el-button>
         </div>
       </template>
     </el-dialog>
@@ -406,25 +406,26 @@ async function unlinkCase(row: CaseRow) {
 const severityLabelMap: Record<BugSeverity, string> = {
   BLOCKER: "阻塞", CRITICAL: "严重", MAJOR: "主要", MINOR: "次要", TRIVIAL: "轻微",
 };
-const severityClsMap: Record<BugSeverity, string> = {
-  BLOCKER: "sv-blocker", CRITICAL: "sv-critical", MAJOR: "sv-major", MINOR: "sv-minor", TRIVIAL: "sv-trivial",
+type TagType = "primary" | "success" | "warning" | "danger" | "info";
+const severityTypeMap: Record<BugSeverity, TagType> = {
+  BLOCKER: "danger", CRITICAL: "danger", MAJOR: "warning", MINOR: "primary", TRIVIAL: "info",
 };
 function severityLabel(s: BugSeverity) { return severityLabelMap[s] ?? s; }
-function severityCls(s: BugSeverity) { return severityClsMap[s] ?? "sv-minor"; }
+function severityType(s: BugSeverity): TagType { return severityTypeMap[s] ?? "info"; }
 
 const statusLabelMap: Record<BugStatus, string> = {
   NEW: "新建", ASSIGNED: "已指派", FIXING: "修复中", FIXED: "已解决", CLOSED: "已关闭", REOPEN: "重新打开",
 };
-const statusClsMap: Record<BugStatus, string> = {
-  NEW: "st-new", ASSIGNED: "st-assigned", FIXING: "st-fixing", FIXED: "st-fixed", CLOSED: "st-closed", REOPEN: "st-reopen",
+const statusTypeMap: Record<BugStatus, TagType> = {
+  NEW: "info", ASSIGNED: "primary", FIXING: "warning", FIXED: "success", CLOSED: "info", REOPEN: "danger",
 };
 function statusLabel(s: BugStatus) { return statusLabelMap[s] ?? s; }
-function statusCls(s: BugStatus) { return statusClsMap[s] ?? "st-new"; }
+function statusType(s: BugStatus): TagType { return statusTypeMap[s] ?? "info"; }
 
 const resultLabelMap: Record<string, string> = { PASS: "成功", FAIL: "失败", BLOCK: "阻塞", SKIP: "跳过" };
-const resultClsMap: Record<string, string> = { PASS: "rs-pass", FAIL: "rs-fail", BLOCK: "rs-block", SKIP: "rs-none" };
+const resultTypeMap: Record<string, TagType> = { PASS: "success", FAIL: "danger", BLOCK: "warning", SKIP: "info" };
 function resultLabel(r: ExecuteResult) { return resultLabelMap[r] ?? r; }
-function resultCls(r: ExecuteResult) { return resultClsMap[r] ?? "rs-none"; }
+function resultType(r: ExecuteResult): TagType { return resultTypeMap[r] ?? "info"; }
 
 onMounted(() => {
   loadPlan();
@@ -577,91 +578,6 @@ onMounted(() => {
   padding: 40px 0;
   text-align: center;
   color: var(--text-3);
-}
-
-.bg-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 11px;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.rs-pass {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.rs-fail {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.rs-block {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.rs-none {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.sv-blocker {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.sv-critical {
-  background: #fff1f2;
-  color: #be123c;
-}
-
-.sv-major {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.sv-minor {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.sv-trivial {
-  background: #f3f4f6;
-  color: #4b5563;
-}
-
-.st-new {
-  background: #eff6ff;
-  color: #1e40af;
-}
-
-.st-assigned {
-  background: #f3e8ff;
-  color: #6b21a8;
-}
-
-.st-fixing {
-  background: #fffbeb;
-  color: #92400e;
-}
-
-.st-fixed {
-  background: #ecfdf5;
-  color: #065f46;
-}
-
-.st-closed {
-  background: #f3f4f6;
-  color: #4b5563;
-}
-
-.st-reopen {
-  background: #fef2f2;
-  color: #991b1b;
 }
 
 .tp-form {

@@ -36,6 +36,9 @@ export function fetchReviews(): Promise<Review[]> {
 export function createReview(data: Partial<Review>): Promise<Review> {
   return request({ url: '/api/test-case/reviews', method: 'post', data })
 }
+export function updateReview(id: string, data: Partial<Review>): Promise<Review | null> {
+  return request({ url: `/api/test-case/reviews/${id}`, method: 'put', data })
+}
 export function fetchReviewDetail(id: string): Promise<ReviewDetail | null> {
   return request({ url: `/api/test-case/reviews/${id}`, method: 'get' })
 }
