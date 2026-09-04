@@ -1,18 +1,4 @@
 // src/types/models.ts
-export interface Organization {
-  id: string;
-  name: string;
-  description?: string;
-}
-export interface Project {
-  id: string;
-  orgId: string;
-  name: string;
-  description: string;
-  createTime: string;
-  members: number;
-  caseCount: number;
-}
 export interface ModuleNode {
   id: string;
   name: string;
@@ -38,12 +24,17 @@ export interface TestCase {
   follow: boolean;
   remark?: string;
   attachments?: string[];
-  purpose?: string
-  preCaseIds?: string[]; postCaseIds?: string[]
-  relatedCaseIds?: string[]
-  bugIds?: string[]
+  purpose?: string;
+  preCaseIds?: string[];
+  postCaseIds?: string[];
+  relatedCaseIds?: string[];
+  bugIds?: string[];
 }
-export interface CaseStep { id: string; description: string; expected: string }
+export interface CaseStep {
+  id: string;
+  description: string;
+  expected: string;
+}
 
 export type BugSeverity =
   | "BLOCKER"
@@ -126,26 +117,10 @@ export interface TestPlan {
   passRate: number;
   group: string;
 }
-export interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  content: string;
-  read: boolean;
-  createTime: string;
-  targetUrl: string;
-}
 export interface TrendPoint {
   date: string;
   cases: number;
   apis: number;
-}
-export interface FollowItem {
-  id: string;
-  type: string;
-  name: string;
-  owner: string;
-  updateTime: string;
 }
 export interface Review {
   id: string;
@@ -252,48 +227,6 @@ export interface PlanReport {
   shareUrl: string;
   expireAt: string;
 }
-export interface ProjectMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  groupId: string;
-}
-export interface UserGroup {
-  id: string;
-  name: string;
-  builtin: boolean;
-  scope: "internal" | "project" | "global";
-  memberCount: number;
-  permissions: string[];
-}
-export interface GroupMember {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  adminFlag?: boolean;
-}
-export interface PermissionNode {
-  id: string;
-  name: string;
-  children?: PermissionNode[];
-}
-export interface Environment {
-  id: string;
-  projectId: string;
-  name: string;
-  domain: string;
-  variables: KeyValue[];
-  hosts: KeyValue[];
-  headers: KeyValue[];
-}
-export interface MessageConfig {
-  id: string;
-  type: string;
-  enabled: boolean;
-  receivers: string[];
-}
 export interface OperationLog {
   id: string;
   scope: string;
@@ -301,59 +234,4 @@ export interface OperationLog {
   action: string;
   user: string;
   time: string;
-}
-export interface FileItem {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  repo: string;
-  time: string;
-}
-export interface ProjectTemplate {
-  id: string;
-  name: string;
-  kind: "用例" | "缺陷";
-  fields: TemplateField[];
-}
-export interface TemplateField {
-  id: string;
-  key: string;
-  label: string;
-  required: boolean;
-  type: "text" | "select" | "textarea";
-}
-export interface Script {
-  id: string;
-  name: string;
-  content: string;
-  updateTime: string;
-}
-export interface SysUser {
-  id: string;
-  username: string;
-  name: string;
-  email: string;
-  role: string;
-  enabled: boolean;
-}
-export interface SysParam {
-  id: string;
-  key: string;
-  value: string;
-  description: string;
-}
-export interface Plugin {
-  id: string;
-  name: string;
-  type: "协议" | "缺陷";
-  version: string;
-  enabled: boolean;
-}
-export interface Integration {
-  id: string;
-  name: string;
-  type: "Jira" | "禅道" | "TAPD";
-  enabled: boolean;
-  description: string;
 }

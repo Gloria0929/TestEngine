@@ -18,13 +18,13 @@
         <template #default="{ row }">{{ row.startTime }} ~ {{ row.endTime }}</template>
       </el-table-column>
       <el-table-column label="操作" min-width="100" fixed="right">
-        <template #default="{ row }"><el-button link type="primary" @click="openDrawer(row)">评审</el-button></template>
+        <template #default="{ row }"><el-button link type="primary" @click="openReview(row)">评审</el-button></template>
       </el-table-column>
     </el-table>
 
     <ReviewDialog v-model="dialogVisible" @saved="load" />
 
-    <el-drawer v-model="drawerVisible" :title="current?.name" size="640px">
+    <el-dialog v-model="reviewVisible" :title="current?.name" width="720px" class="review-dialog">
       <div v-loading="detailLoading">
         <template v-if="detail">
           <div v-for="c in detail.cases" :key="c.id" class="case-row">
@@ -44,10 +44,10 @@
         <el-empty v-else-if="!detailLoading" description="暂无关联用例" />
       </div>
       <template #footer>
-        <el-button @click="drawerVisible = false">取消</el-button>
+        <el-button @click="reviewVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitting" @click="onSubmit">提交评审</el-button>
       </template>
-    </el-drawer>
+    </el-dialog>
   </div>
 </template>
 
@@ -64,7 +64,7 @@ interface CaseResult { passed: boolean; comment: string }
 const rows = ref<Review[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
-const drawerVisible = ref(false)
+const reviewVisible = ref(false)
 const detailLoading = ref(false)
 const submitting = ref(false)
 const current = ref<Review | null>(null)
@@ -85,9 +85,9 @@ async function load() {
     loading.value = false
   }
 }
-async function openDrawer(row: Review) {
+async function openReview(row: Review) {
   current.value = row
-  drawerVisible.value = true
+  reviewVisible.value = true
   detailLoading.value = true
   detail.value = null
   Object.keys(results).forEach((k) => delete results[k])
@@ -105,7 +105,7 @@ async function onSubmit() {
   await submitReviewResult(current.value.id, list)
   ElMessage.success('评审已提交')
   submitting.value = false
-  drawerVisible.value = false
+  reviewVisible.value = false
   load()
 }
 onMounted(load)

@@ -103,40 +103,4 @@ onMounted(() => appStore.applyTheme());
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.06);
 }
-
-/* 水平菜单样式 */
-:deep(.topnav.el-menu--horizontal) {
-  border-bottom: none;
-  background: transparent;
-  height: 44px;
-  min-width: 0;
-  width: 100%;
-  flex: 0 0 auto;
-}
-
-:deep(.topnav .el-menu-item) {
-  height: 44px;
-  line-height: 44px;
-  border-bottom: 2px solid transparent;
-  font-size: 14px;
-  color: var(--text-1);
-  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
-}
-
-:deep(.topnav .el-menu-item:hover) {
-  color: var(--accent);
-  background: transparent;
-}
-
-:deep(.topnav .el-menu-item.is-active) {
-  color: var(--accent);
-  border-bottom: 2px solid var(--accent);
-  font-weight: 600;
-  background: transparent;
-}
-
-:deep(.topnav .el-menu-item .el-icon) {
-  margin-right: 4px;
-  vertical-align: middle;
-}
 </style>

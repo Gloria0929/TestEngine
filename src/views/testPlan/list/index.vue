@@ -4,7 +4,7 @@
       <!-- 头部 -->
       <div class="tp-head">
         <div></div>
-        <el-button type="primary" @click="openModal(null)">
+        <el-button v-if="!isReport" type="primary" @click="openModal(null)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round">
             <path d="M12 5v14M5 12h14" />
@@ -13,238 +13,229 @@
         </el-button>
       </div>
 
-      <!-- 标签页 -->
-      <el-tabs v-model="tab" @tab-change="onTabChange">
-        <el-tab-pane label="测试计划" name="plan">
-          <div class="tp-bar">
-            <div class="tp-field"><el-text class="tp-lab">关键词</el-text>
-              <el-input style="width:240px" v-model="flt.keyword" placeholder="搜索 ID 或计划名称" @keyup.enter="search" />
-            </div>
-            <div class="tp-field"><el-text class="tp-lab">状态</el-text>
-              <el-select style="width:130px" v-model="flt.status" @change="search">
-                <el-option label="全部" value="" />
-                <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
-              </el-select>
-            </div>
-            <div class="tp-field"><el-text class="tp-lab">所属模块</el-text>
-              <el-select style="width:140px" v-model="flt.group" @change="search">
-                <el-option label="全部" value="" />
-                <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
-              </el-select>
-            </div>
-            <div class="tp-spacer" />
-            <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
-              <el-button type="primary" @click="search">查询</el-button>
-            </div>
-            <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
-              <el-button @click="reset">重置</el-button>
-            </div>
+      <template v-if="!isReport">
+        <div class="tp-bar">
+          <div class="tp-field"><el-text class="tp-lab">关键词</el-text>
+            <el-input style="width:240px" v-model="flt.keyword" placeholder="搜索 ID 或计划名称" @keyup.enter="search" />
           </div>
+          <div class="tp-field"><el-text class="tp-lab">状态</el-text>
+            <el-select style="width:130px" v-model="flt.status" @change="search">
+              <el-option label="全部" value="" />
+              <el-option v-for="s in STATUSES" :key="s.v" :label="s.t" :value="s.v" />
+            </el-select>
+          </div>
+          <div class="tp-field"><el-text class="tp-lab">所属模块</el-text>
+            <el-select style="width:140px" v-model="flt.group" @change="search">
+              <el-option label="全部" value="" />
+              <el-option v-for="m in MODULES" :key="m" :label="m" :value="m" />
+            </el-select>
+          </div>
+          <div class="tp-spacer" />
+          <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
+            <el-button type="primary" @click="search">查询</el-button>
+          </div>
+          <div class="tp-field"><el-text class="tp-lab">&nbsp;</el-text>
+            <el-button @click="reset">重置</el-button>
+          </div>
+        </div>
 
-          <div class="tp-card" :class="{ 'tp-loading': st.loading }" data-card>
-            <div class="tp-scroll">
-              <div v-if="st.loading && !st.list.length" class="tp-state">加载中…</div>
-              <div v-else-if="!st.list.length" class="tp-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <rect x="3" y="4" width="18" height="17" rx="2" />
-                  <path d="M8 2v4M16 2v4M3 10h18" />
-                </svg>
-                <div>暂无符合条件的测试计划</div>
-              </div>
-              <el-table v-else :data="st.list" style="width:100%">
-                <el-table-column label="ID" min-width="180">
-                  <template #default="{ row }">
-                    <span class="tp-id">{{ row.id }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="测试计划名称" min-width="180">
-                  <template #default="{ row }">
-                    <span class="tp-name" @click="onExecute(row)">{{ row.name }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="状态" min-width="100">
-                  <template #default="{ row }">
-                    <span class="tp-pill" :class="statusCls(row.status)">
-                      <i v-if="row.status === 'RUNNING'" class="tp-dot" />
-                      {{ statusLabel(row.status) }}
-                    </span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="创建人" min-width="180">
-                  <template #default="{ row }">
-                    <div class="tp-user">
-                      <span class="tp-avatar" :style="{ background: avatarColor(row.owner || '?') }">{{ (row.owner ||
-                        '?').slice(0, 1) }}</span>
-                      <span>{{ row.owner }}</span>
-                    </div>
-                  </template>
-                </el-table-column>
-                <el-table-column label="通过率" min-width="220">
-                  <template #default="{ row }">
-                    <template v-if="row.status === 'DRAFT'">
-                      <span style="color:var(--el-text-color-placeholder,#a8abb2)">—</span>
-                    </template>
-                    <div v-else class="tp-rate" :class="rateClass(row.passRate)">
-                      <div class="tp-ratebar"><i
-                          :style="{ width: Math.max(0, Math.min(100, row.passRate || 0)) + '%' }" /></div>
-                      <span>{{ row.passRate || 0 }}%</span>
-                    </div>
-                  </template>
-                </el-table-column>
-                <el-table-column label="执行结果" min-width="120">
-                  <template #default="{ row }">
-                    <span class="tp-pill" :class="resultCls((row as any).result)">{{ (row as any).result || '未执行'
-                      }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="所属模块" min-width="110">
-                  <template #default="{ row }">
-                    <span class="tp-mod">{{ row.group }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="创建时间" min-width="220">
-                  <template #default="{ row }">
-                    <span class="tp-time">{{ row.createTime }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="操作" min-width="180">
-                  <template #default="{ row }">
-                    <div class="tp-ops">
-                      <el-button type="success" link @click="onExecute(row)">执行</el-button>
-                      <el-button type="primary" link @click="openModal(row)">编辑</el-button>
-                      <el-dropdown @command="handleCommand($event, row)">
-                        <el-button link class="tp-more">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                            <circle cx="5" cy="12" r="1.6" />
-                            <circle cx="12" cy="12" r="1.6" />
-                            <circle cx="19" cy="12" r="1.6" />
-                          </svg>
-                        </el-button>
-                        <template #dropdown>
-                          <el-dropdown-menu>
-                            <el-dropdown-item command="copy">
-                              <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="12" height="12" rx="2" />
-                                <path d="M5 15V5a2 2 0 0 1 2-2h10" />
-                              </svg>复制
-                            </el-dropdown-item>
-                            <el-dropdown-item command="archive">
-                              <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4" />
-                              </svg>归档
-                            </el-dropdown-item>
-                            <el-dropdown-item command="timer">
-                              <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="9" />
-                                <path d="M12 7v5l3 3" />
-                              </svg>创建定时任务
-                            </el-dropdown-item>
-                            <el-dropdown-item command="delete">
-                              <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
-                              </svg>删除
-                            </el-dropdown-item>
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
+        <div class="tp-card" :class="{ 'tp-loading': st.loading }" data-card>
+          <div class="tp-scroll">
+            <div v-if="st.loading && !st.list.length" class="tp-state">加载中…</div>
+            <div v-else-if="!st.list.length" class="tp-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <rect x="3" y="4" width="18" height="17" rx="2" />
+                <path d="M8 2v4M16 2v4M3 10h18" />
+              </svg>
+              <div>暂无符合条件的测试计划</div>
             </div>
-            <div class="tp-foot">
-              <div class="tp-total">共 {{ st.total }} 个计划，第 {{ st.pageNum }} / {{ st.pages }} 页</div>
-              <el-pagination v-model:current-page="st.pageNum" v-model:page-size="st.pageSize" :total="st.total"
-                :page-sizes="[10, 20, 50]" layout="sizes, prev, pager, next" @current-change="goPage"
-                @size-change="onPageSize" />
-            </div>
+            <el-table v-else :data="st.list" style="width:100%">
+              <el-table-column label="ID" min-width="180">
+                <template #default="{ row }">
+                  <span class="tp-id">{{ row.id }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="测试计划名称" min-width="180">
+                <template #default="{ row }">
+                  <span class="tp-name" @click="onExecute(row)">{{ row.name }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" min-width="100">
+                <template #default="{ row }">
+                  <span class="tp-pill" :class="statusCls(row.status)">
+                    <i v-if="row.status === 'RUNNING'" class="tp-dot" />
+                    {{ statusLabel(row.status) }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建人" min-width="180">
+                <template #default="{ row }">
+                  <div class="tp-user">
+                    <span class="tp-avatar" :style="{ background: avatarColor(row.owner || '?') }">{{ (row.owner ||
+                      '?').slice(0, 1) }}</span>
+                    <span>{{ row.owner }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="通过率" min-width="220">
+                <template #default="{ row }">
+                  <template v-if="row.status === 'DRAFT'">
+                    <span style="color:var(--el-text-color-placeholder,#a8abb2)">—</span>
+                  </template>
+                  <div v-else class="tp-rate" :class="rateClass(row.passRate)">
+                    <div class="tp-ratebar"><i
+                        :style="{ width: Math.max(0, Math.min(100, row.passRate || 0)) + '%' }" /></div>
+                    <span>{{ row.passRate || 0 }}%</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="执行结果" min-width="120">
+                <template #default="{ row }">
+                  <span class="tp-pill" :class="resultCls((row as any).result)">{{ (row as any).result || '未执行'
+                  }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="所属模块" min-width="110">
+                <template #default="{ row }">
+                  <span class="tp-mod">{{ row.group }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建时间" min-width="220">
+                <template #default="{ row }">
+                  <span class="tp-time">{{ row.createTime }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" min-width="180">
+                <template #default="{ row }">
+                  <div class="tp-ops">
+                    <el-button type="success" link @click="onExecute(row)">执行</el-button>
+                    <el-button type="primary" link @click="openModal(row)">编辑</el-button>
+                    <el-dropdown @command="handleCommand($event, row)">
+                      <el-button link class="tp-more">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                          <circle cx="5" cy="12" r="1.6" />
+                          <circle cx="12" cy="12" r="1.6" />
+                          <circle cx="19" cy="12" r="1.6" />
+                        </svg>
+                      </el-button>
+                      <template #dropdown>
+                        <el-dropdown-menu>
+                          <el-dropdown-item command="copy">
+                            <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="9" y="9" width="12" height="12" rx="2" />
+                              <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                            </svg>复制
+                          </el-dropdown-item>
+                          <el-dropdown-item command="timer">
+                            <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="12" cy="12" r="9" />
+                              <path d="M12 7v5l3 3" />
+                            </svg>创建定时任务
+                          </el-dropdown-item>
+                          <el-dropdown-item command="delete">
+                            <svg class="m-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+                            </svg>删除
+                          </el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
-        </el-tab-pane>
+          <div class="tp-foot">
+            <div class="tp-total">共 {{ st.total }} 个计划，第 {{ st.pageNum }} / {{ st.pages }} 页</div>
+            <el-pagination v-model:current-page="st.pageNum" v-model:page-size="st.pageSize" :total="st.total"
+              :page-sizes="[10, 20, 50]" layout="sizes, prev, pager, next" @current-change="goPage"
+              @size-change="onPageSize" />
+          </div>
+        </div>
+      </template>
 
-        <el-tab-pane label="报告" name="report">
-          <div class="tp-card" :class="{ 'tp-loading': rst.loading }">
-            <div class="tp-scroll">
-              <div v-if="rst.loading && !rst.list.length" class="tp-state">加载中…</div>
-              <div v-else-if="!rst.list.length" class="tp-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <rect x="4" y="2" width="16" height="20" rx="2" />
-                  <path d="M8 7h8M8 11h8M8 15h5" />
-                </svg>
-                <div>暂无测试报告</div>
-              </div>
-              <el-table v-else :data="rst.list" style="width:100%">
-                <el-table-column label="报告名称" min-width="240">
-                  <template #default="{ row }">
-                    <span class="tp-rname" :title="row.name">{{ row.name }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="报告类型" min-width="120">
-                  <template #default="{ row }">
-                    <span class="tp-pill" :class="typeCls(row.type)">{{ row.type || '-' }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="计划名称" min-width="180">
-                  <template #default="{ row }">
-                    <span class="tp-rplan" :title="row.planName">{{ row.planName || '-' }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="执行结果" min-width="100">
-                  <template #default="{ row }">
-                    <span class="tp-pill" :class="resultCls(row.result)">{{ row.result || '未执行' }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="通过率" min-width="130">
-                  <template #default="{ row }">
-                    <div class="tp-rate" :class="rateClass(row.passRate)">
-                      <div class="tp-ratebar"><i
-                          :style="{ width: Math.max(0, Math.min(100, row.passRate || 0)) + '%' }" />
-                      </div>
-                      <span>{{ row.passRate || 0 }}%</span>
-                    </div>
-                  </template>
-                </el-table-column>
-                <el-table-column label="触发方式" min-width="140">
-                  <template #default="{ row }">
-                    <span class="tp-pill" :class="trgCls(row.trigger)">{{ row.trigger || '-' }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="创建人" min-width="150">
-                  <template #default="{ row }">
-                    <div class="tp-user">
-                      <span class="tp-avatar" :style="{ background: avatarColor(row.owner || '?') }">{{ (row.owner ||
-                        '?').slice(0, 1) }}</span>
-                      <span>{{ row.owner }}</span>
-                    </div>
-                  </template>
-                </el-table-column>
-                <el-table-column label="创建时间" min-width="160">
-                  <template #default="{ row }">
-                    <span class="tp-time">{{ row.createTime }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="操作" min-width="110">
-                  <template #default="{ row }">
-                    <div class="tp-ops">
-                      <el-button type="primary" link @click="onExportReport(row)">导出</el-button>
-                      <el-button type="danger" link @click="onDeleteReport(row)">删除</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
+      <template v-else>
+        <div class="tp-card" :class="{ 'tp-loading': rst.loading }">
+          <div class="tp-scroll">
+            <div v-if="rst.loading && !rst.list.length" class="tp-state">加载中…</div>
+            <div v-else-if="!rst.list.length" class="tp-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <rect x="4" y="2" width="16" height="20" rx="2" />
+                <path d="M8 7h8M8 11h8M8 15h5" />
+              </svg>
+              <div>暂无测试报告</div>
             </div>
-            <div class="tp-foot">
-              <div class="tp-total">共 {{ rst.total }} 份报告，第 {{ rst.pageNum }} / {{ rst.pages }} 页</div>
-              <el-pagination v-model:current-page="rst.pageNum" v-model:page-size="rst.pageSize" :total="rst.total"
-                :page-sizes="[10, 20, 50]" layout="sizes, prev, pager, next" @current-change="goRPage"
-                @size-change="onRPageSize" />
-            </div>
+            <el-table v-else :data="rst.list" style="width:100%">
+              <el-table-column label="报告名称" min-width="240">
+                <template #default="{ row }">
+                  <span class="tp-rname" :title="row.name">{{ row.name }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="报告类型" min-width="120">
+                <template #default="{ row }">
+                  <span class="tp-pill" :class="typeCls(row.type)">{{ row.type || '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="计划名称" min-width="180">
+                <template #default="{ row }">
+                  <span class="tp-rplan" :title="row.planName">{{ row.planName || '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="执行结果" min-width="100">
+                <template #default="{ row }">
+                  <span class="tp-pill" :class="resultCls(row.result)">{{ row.result || '未执行' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="通过率" min-width="130">
+                <template #default="{ row }">
+                  <div class="tp-rate" :class="rateClass(row.passRate)">
+                    <div class="tp-ratebar"><i
+                        :style="{ width: Math.max(0, Math.min(100, row.passRate || 0)) + '%' }" />
+                    </div>
+                    <span>{{ row.passRate || 0 }}%</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="触发方式" min-width="140">
+                <template #default="{ row }">
+                  <span class="tp-pill" :class="trgCls(row.trigger)">{{ row.trigger || '-' }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建人" min-width="150">
+                <template #default="{ row }">
+                  <div class="tp-user">
+                    <span class="tp-avatar" :style="{ background: avatarColor(row.owner || '?') }">{{ (row.owner ||
+                      '?').slice(0, 1) }}</span>
+                    <span>{{ row.owner }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建时间" min-width="160">
+                <template #default="{ row }">
+                  <span class="tp-time">{{ row.createTime }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" min-width="110">
+                <template #default="{ row }">
+                  <div class="tp-ops">
+                    <el-button type="primary" link @click="onExportReport(row)">导出</el-button>
+                    <el-button type="danger" link @click="onDeleteReport(row)">删除</el-button>
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
-        </el-tab-pane>
-      </el-tabs>
+          <div class="tp-foot">
+            <div class="tp-total">共 {{ rst.total }} 份报告，第 {{ rst.pageNum }} / {{ rst.pages }} 页</div>
+            <el-pagination v-model:current-page="rst.pageNum" v-model:page-size="rst.pageSize" :total="rst.total"
+              :page-sizes="[10, 20, 50]" layout="sizes, prev, pager, next" @current-change="goRPage"
+              @size-change="onRPageSize" />
+          </div>
+        </div>
+      </template>
       <!-- 编辑弹窗 -->
       <el-dialog v-model="modalVisible" width="520px" :close-on-click-modal="false">
         <template #header>
@@ -291,8 +282,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as XLSX from "xlsx";
 import { fetchPlans, createPlan, updatePlan, deletePlan, copyPlan } from "@/api/testPlan";
@@ -300,6 +291,7 @@ import { rptList, rptDel } from "@/api/testPlan";
 import type { TestPlan } from "@/types/models";
 
 const router = useRouter();
+const route = useRoute();
 
 // 常量
 const STATUSES = [{ v: "DRAFT", t: "未开始" }, { v: "RUNNING", t: "进行中" }, { v: "DONE", t: "已完成" }];
@@ -329,16 +321,16 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-// 标签页
-const tab = ref("plan");
+// 按路由区分：/test-plan/list 计划列表，/test-plan/reports 测试报告
+const isReport = computed(() => route.path.endsWith("/reports"));
 const reportLoaded = ref(false);
-function onTabChange(name: string) {
-  tab.value = name;
-  if (name === "report" && !reportLoaded.value) {
+// 通过二级菜单切换时按需加载报告数据
+watch(isReport, (v) => {
+  if (v && !reportLoaded.value) {
     reportLoaded.value = true;
     loadReports();
   }
-}
+});
 
 // 计划列表状态
 const st = reactive({ pageNum: 1, pageSize: 10, total: 0, list: [] as any[], loading: false, pages: 1 });
@@ -390,7 +382,6 @@ function onExecute(row: TestPlan) {
 // 更多菜单
 function handleCommand(cmd: string, plan: any) {
   if (cmd === "copy") onCopy(plan);
-  else if (cmd === "archive") onArchive(plan);
   else if (cmd === "timer") onCreateTimer();
   else if (cmd === "delete") onDelete(plan);
 }
@@ -398,12 +389,6 @@ function handleCommand(cmd: string, plan: any) {
 async function onCopy(plan: any) {
   await copyPlan(plan.id);
   ElMessage.success("已复制");
-  load();
-}
-
-async function onArchive(plan: any) {
-  await updatePlan(plan.id, { archived: true } as any);
-  ElMessage.success("已归档");
   load();
 }
 
@@ -495,7 +480,12 @@ async function saveModal() {
 }
 
 onMounted(() => {
-  load();
+  if (isReport.value) {
+    reportLoaded.value = true;
+    loadReports();
+  } else {
+    load();
+  }
 });
 </script>
 
@@ -505,6 +495,7 @@ onMounted(() => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 12px;
 }
 
 .tp-bar {

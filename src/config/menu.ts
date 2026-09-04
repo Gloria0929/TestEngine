@@ -14,12 +14,46 @@ export const menuTree: MenuItem[] = [
     label: "测试计划",
     icon: "Calendar",
     path: "/test-plan/list",
+    children: [
+      {
+        key: "plan-list",
+        label: "计划列表",
+        path: "/test-plan/list",
+        permission: "testPlan:view",
+      },
+      {
+        key: "plan-report",
+        label: "测试报告",
+        path: "/test-plan/reports",
+        permission: "testPlan:view",
+      },
+    ],
   },
   {
     key: "testcase",
     label: "测试用例",
     icon: "Tickets",
     path: "/test-case/list",
+    children: [
+      {
+        key: "case-list",
+        label: "用例列表",
+        path: "/test-case/list",
+        permission: "testCase:view",
+      },
+      {
+        key: "case-review",
+        label: "用例评审",
+        path: "/test-case/review",
+        permission: "testCase:view",
+      },
+      {
+        key: "case-recycle",
+        label: "用例回收站",
+        path: "/test-case/recycle",
+        permission: "testCase:view",
+      },
+    ],
   },
   {
     key: "bug",
@@ -61,8 +95,8 @@ export const menuTree: MenuItem[] = [
     ],
   },
   {
-    key: "log",
-    label: "日志",
+    key: "project",
+    label: "操作日志",
     icon: "Document",
     path: "/project/log",
     permission: "project:view",

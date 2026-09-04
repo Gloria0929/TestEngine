@@ -165,9 +165,16 @@
 }
 
 // 菜单
-.el-menu {
+.el-menu,
+.el-menu--horizontal.el-menu {
   border-right: none !important;
+  border-bottom: none !important;
   background: transparent !important;
+}
+/* 去除横向菜单项底部边框（含激活态），避免切换时闪现 */
+.el-menu--horizontal>.el-menu-item {
+  border-bottom: none !important;
+  transition: color 0.15s, background-color 0.15s !important;
 }
 .el-menu .el-sub-menu__title,
 .el-menu .el-menu-item {

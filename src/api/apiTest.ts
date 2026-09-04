@@ -91,21 +91,6 @@ export function executeScenario(id: string): Promise<Record<string, unknown>> {
 export function deleteScenario(id: string): Promise<null> {
   return request({ url: `/api/api-test/scenarios/${id}`, method: "delete" });
 }
-export function fetchScenarioRecycle(): Promise<Scenario[]> {
-  return request({ url: "/api/api-test/scenarios/recycle", method: "get" });
-}
-export function restoreScenario(id: string): Promise<null> {
-  return request({
-    url: `/api/api-test/scenarios/recycle/${id}/restore`,
-    method: "post",
-  });
-}
-export function purgeScenario(id: string): Promise<null> {
-  return request({
-    url: `/api/api-test/scenarios/recycle/${id}`,
-    method: "delete",
-  });
-}
 export interface ReportPageQuery {
   pageNum: number;
   pageSize: number;

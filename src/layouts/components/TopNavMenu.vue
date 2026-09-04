@@ -98,11 +98,16 @@ function isSubActive(path: string) {
   width: 100%;
 }
 
+/* 菜单项背景之间留出间隙 */
+.topnav {
+  gap: 4px;
+}
+
 .subnav {
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 38px;
+  height: 50px;
   padding: 0 4px;
   border-top: 1px solid var(--border);
 }

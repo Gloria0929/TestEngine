@@ -104,9 +104,10 @@
             </template>
           </el-table-column>
           <el-table-column prop="updateTime" label="更新时间" min-width="160" class-name="bg-time" />
-          <el-table-column label="操作" min-width="110">
+          <el-table-column label="操作" min-width="150">
             <template #default="{ row }">
               <div class="bg-ops">
+                <el-button link type="success" @click="onExecute(row)">执行</el-button>
                 <el-button link type="primary" @click="openModal(row)">编辑</el-button>
                 <el-button link type="danger" @click="onDelete(row)">删除</el-button>
               </div>
@@ -184,9 +185,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { fetchApiDefinitionPage, createApiDefinition, updateApiDefinition, deleteApiDefinition } from '@/api/apiTest';
 import type { ApiDefinition, HttpMethod, DefinitionStatus } from '@/types/models';
+
+const router = useRouter();
 
 const methods: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD', 'CONNECT'];
 const statuses: DefinitionStatus[] = ['未规划', '进行中', '已完成', '已归档'];
@@ -240,6 +244,14 @@ async function load() {
 function search() {
   pageNum.value = 1;
   load();
+}
+
+/** 执行：跳转接口调试页并预填该方法与地址 */
+function onExecute(row: ApiDefinition) {
+  router.push({
+    path: '/api-test/debug',
+    query: { definitionId: row.id, name: row.name, method: row.method, path: row.path },
+  });
 }
 function reset() {
   filter.keyword = ''; filter.method = ''; filter.status = '';

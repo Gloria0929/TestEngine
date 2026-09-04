@@ -155,11 +155,14 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { executeRequest, fetchDebugRequests } from "@/api/apiTest";
 import { ElMessage } from "element-plus";
 import { Close, Plus } from "@element-plus/icons-vue";
 import type { HttpMethod, BodyType, DebugRequest } from "@/types/models";
 import BodyEditor from "./components/BodyEditor.vue";
+
+const route = useRoute();
 
 interface KvRow {
   key: string;
@@ -442,7 +445,19 @@ onMounted(() => {
       }
       activeTabIdx.value = 0;
     }
-  }).catch(() => { });
+  }).catch(() => { }).finally(() => {
+    // 从接口定义页“执行”跳转：预填一个新 Tab（放在保存请求加载之后，避免被覆盖）
+    const defId = route.query.definitionId as string | undefined;
+    if (defId) {
+      const tab = createEmptyTab();
+      tab.id = "";
+      tab.name = (route.query.name as string) || "接口执行";
+      tab.method = ((route.query.method as string) || "GET") as HttpMethod;
+      tab.url = (route.query.path as string) || "";
+      tabs.value.push(tab);
+      activeTabIdx.value = tabs.value.length - 1;
+    }
+  });
 });
 </script>
 
