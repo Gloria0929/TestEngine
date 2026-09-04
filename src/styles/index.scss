@@ -56,3 +56,24 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(var(--accent-rgb), 0.2);
   color: var(--text-1);
 }
+
+/* 主题切换平滑过渡：仅在切换瞬间启用（由 app store 挂载/移除 .theme-switching） */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition:
+    background-color 0.3s var(--ease),
+    color 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    fill 0.3s var(--ease),
+    stroke 0.3s var(--ease),
+    box-shadow 0.3s var(--ease) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition: none !important;
+  }
+}

@@ -2,7 +2,7 @@
   <el-container class="layout">
     <el-header class="topbar" height="auto">
       <div class="brand-row">
-        <div class="brand" @click="handleClick" style="cursor: pointer;">TestEngine</div>
+        <router-link class="brand" to="/workstation/home">TestEngine</router-link>
       </div>
       <div class="nav-row">
         <TopNavMenu />
@@ -25,12 +25,6 @@ import { onMounted } from "vue";
 import { Moon, Sunny } from "@element-plus/icons-vue";
 import { useAppStore } from "@/stores/app";
 import TopNavMenu from "./components/TopNavMenu.vue";
-
-import router from '@/router';
-
-const handleClick = () => {
-  router.push('/workstation/home')
-};
 
 const appStore = useAppStore();
 onMounted(() => appStore.applyTheme());
@@ -70,6 +64,7 @@ onMounted(() => appStore.applyTheme());
   color: var(--accent);
   white-space: nowrap;
   letter-spacing: 0.5px;
+  text-decoration: none;
   transition: opacity 0.18s var(--ease);
 }
 

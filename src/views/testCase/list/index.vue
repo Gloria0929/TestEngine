@@ -88,7 +88,7 @@
                   </el-table-column>
                   <el-table-column label="用例名称" min-width="220">
                     <template #default="{ row }">
-                      <span class="tc-cname" :title="row.name" style="cursor: pointer"
+                      <span class="tc-cname tc-clink" :title="row.name"
                         @click="router.push('/test-case/detail/' + row.id)">{{ row.name }}</span>
                     </template>
                   </el-table-column>
@@ -919,6 +919,16 @@ onMounted(loadCases);
 
 .tc-cname {
   font-weight: 500;
+}
+
+/* 可点击标题的超链接样式，与测试计划列表 .tp-name 对齐 */
+.tc-clink {
+  color: var(--el-color-primary, #409eff);
+  cursor: pointer;
+}
+
+.tc-clink:hover {
+  text-decoration: underline;
 }
 
 .tc-pill {

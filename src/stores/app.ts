@@ -9,12 +9,19 @@ export const useAppStore = defineStore("app", () => {
     storage.get("sidebarCollapsed") ?? false,
   );
 
+  let themeTimer: ReturnType<typeof setTimeout> | undefined;
+
   function applyTheme() {
     document.documentElement.classList.toggle("dark", theme.value === "dark");
   }
   function toggleTheme() {
     theme.value = theme.value === "light" ? "dark" : "light";
     storage.set("theme", theme.value);
+    // 切换瞬间启用全元素颜色过渡，实现平滑变色
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
+    clearTimeout(themeTimer);
+    themeTimer = setTimeout(() => root.classList.remove("theme-switching"), 350);
     applyTheme();
   }
   function toggleSidebar() {
